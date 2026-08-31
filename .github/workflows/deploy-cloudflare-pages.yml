@@ -63,13 +63,19 @@ jobs:
           grep -q 'roya-voice-safari-upload-v11' index.html
           grep -q 'SAFARI_FETCH_FAILED' index.html
           if grep -q "'x-roya-diag':diagId" index.html; then exit 1; fi
+      - name: Apply premium trusted payment UI v2
+        run: |
+          python3 scripts/payment_ui_v2.py
+          grep -q 'roya-payment-ui-v2' index.html
+          grep -q 'أكمل طلبك بثقة' index.html
+          grep -q 'بوابة ميسر' index.html
       - name: Persist patched index
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
           if ! git diff --cached --quiet; then
-            git commit -m 'Fix Safari voice upload v11'
+            git commit -m 'Apply premium trusted payment UI v2'
             git push
           fi
       - name: Deploy to Cloudflare Pages
