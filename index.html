@@ -402,6 +402,13 @@ let royaVoiceTimer=null;
 let royaVoiceStartedAt=0;
 let royaVoiceBusy=false;
 
+async let royaMediaRecorder=null;
+let royaVoiceStream=null;
+let royaVoiceChunks=[];
+let royaVoiceTimer=null;
+let royaVoiceStartedAt=0;
+let royaVoiceBusy=false;
+
 async function voice(){
   if(royaVoiceBusy)return;
   if(royaMediaRecorder&&royaMediaRecorder.state==='recording'){
