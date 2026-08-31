@@ -193,6 +193,10 @@ nav{position:fixed;z-index:10;bottom:18px;left:50%;transform:translateX(-50%);wi
 .royaVoiceActions{display:grid;grid-template-columns:1fr 1fr;gap:9px;width:100%;margin-top:2px}.royaVoiceStart,.royaVoiceStop{min-height:48px;border-radius:15px}.royaVoiceStop:disabled,.royaVoiceStart:disabled{opacity:.55;cursor:default}.royaVoiceCancel{width:100%;margin-top:9px;min-height:42px;border:0;background:transparent;color:#9299b8;font-weight:700}.royaVoiceMicIdle{animation:none!important;box-shadow:0 0 0 8px rgba(119,101,218,.035)!important;opacity:.82}.royaVoiceMicRecording{animation:royaVoicePulse 1.2s ease-in-out infinite!important}.royaVoiceMicRecording:after{content:'';position:absolute;width:10px;height:10px;border-radius:50%;background:#ff6b6b;transform:translate(24px,-24px);box-shadow:0 0 0 4px rgba(255,107,107,.12)}.royaVoiceMic{position:relative}
 @media(max-width:380px){.royaVoiceActions{grid-template-columns:1fr}.royaVoiceCancel{margin-top:5px}}
 
+
+/* roya-voice-input-v9 */
+.royaVoiceActions{grid-template-columns:1fr 1fr}.royaVoiceStart:not(:disabled){box-shadow:0 8px 22px rgba(207,165,67,.14)}.royaVoiceStop:not(:disabled){border-color:rgba(255,107,107,.28);color:#ffd0d0}.royaVoiceSheet p{max-width:420px}
+
 </style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="https://cdn.moyasar.com/mpf/1.15.0/moyasar.css">
 <script src="https://cdn.moyasar.com/mpf/1.15.0/moyasar.js"></script>
@@ -513,8 +517,19 @@ async function transcribeRoyaVoice(blob){
     const form=new FormData();
     const ext=(blob.type||'').includes('mp4')?'m4a':(blob.type||'').includes('ogg')?'ogg':'webm';
     form.append('audio',blob,'roya-voice.'+ext);
-    const {data,error}=await sb.functions.invoke('transcribe-voice',{body:form});
-    if(error)throw error;
+    const {data:sessionData}=await sb.auth.getSession();
+    const token=sessionData?.session?.access_token;
+    if(!token)throw new Error('AUTH_SESSION_MISSING');
+    const response=await fetch(SUPABASE_URL+'/functions/v1/transcribe-voice',{
+      method:'POST',
+      headers:{Authorization:'Bearer '+token,apikey:SUPABASE_PUBLISHABLE_KEY},
+      body:form
+    });
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok){
+      const detail=String(data?.details||data?.error||'TRANSCRIPTION_FAILED');
+      throw new Error(detail);
+    }
     const text=String(data?.text||'').trim();
     if(!text)throw new Error('empty transcription');
     const target=document.getElementById('dream');
@@ -523,7 +538,11 @@ async function transcribeRoyaVoice(blob){
     showRoyaNotice('✓','تم تحويل التسجيل','تمت إضافة كلامك إلى خانة الرؤيا بنجاح.');
   }catch(e){
     console.error('voice transcription',e);
-    finishVoiceRecordingError('تعذر تحويل التسجيل إلى نص. أعد المحاولة بتسجيل أقصر وواضح.');
+    const raw=String(e?.message||'');
+    let msg='تعذر تحويل التسجيل إلى نص. حاول مرة أخرى.';
+    if(raw.includes('AUTH_SESSION_MISSING')||raw.toLowerCase().includes('jwt')) msg='انتهت جلسة الدخول. سجّل الدخول من جديد ثم حاول مرة أخرى.';
+    else if(raw.toLowerCase().includes('format')||raw.toLowerCase().includes('codec')||raw.toLowerCase().includes('audio')) msg='لم يتمكن النظام من قراءة صيغة التسجيل. اضغط «إعادة التسجيل» وحاول مرة أخرى.';
+    finishVoiceRecordingError(msg);
   }
 }
 
