@@ -13,6 +13,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Apply safe logout success UI
+        run: |
+          python3 scripts/logout_success_ui_v2.py
+          grep -q 'roya-logout-toast-v2' index.html
+          grep -q 'showLogoutSuccessToast()' index.html
+          if grep -q "alert('تم تسجيل الخروج')" index.html; then exit 1; fi
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
