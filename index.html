@@ -184,6 +184,10 @@ nav{position:fixed;z-index:10;bottom:18px;left:50%;transform:translateX(-50%);wi
 /* roya-voice-input-v6 */
 .royaVoiceOverlay{position:fixed;inset:0;z-index:12500;display:flex;align-items:flex-end;justify-content:center;background:rgba(3,5,15,.56);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}.royaVoiceSheet{width:min(500px,100%);padding:12px 20px calc(18px + env(safe-area-inset-bottom));text-align:center;border-radius:28px 28px 0 0;background:linear-gradient(180deg,#171b36,#0d1128);border:1px solid rgba(255,255,255,.07);border-bottom:0;box-shadow:0 -18px 60px rgba(0,0,0,.36)}.royaVoiceHandle{width:38px;height:4px;border-radius:99px;background:rgba(255,255,255,.17);margin:0 auto 18px}.royaVoiceMic{width:68px;height:68px;margin:0 auto 13px;border-radius:50%;display:grid;place-items:center;background:rgba(119,101,218,.15);box-shadow:0 0 0 10px rgba(119,101,218,.055);animation:royaVoicePulse 1.5s ease-in-out infinite}.royaVoiceMic span{font-size:29px}.royaVoiceSheet h3{margin:0 0 8px;font-size:20px}.royaVoiceSheet p{min-height:44px;margin:0 auto 17px;max-width:390px;color:#aeb5cc;line-height:1.7;font-size:13px}.royaVoiceStop{width:100%;min-height:48px;border-radius:15px}@keyframes royaVoicePulse{0%,100%{transform:scale(1);box-shadow:0 0 0 8px rgba(119,101,218,.05)}50%{transform:scale(1.04);box-shadow:0 0 0 15px rgba(119,101,218,.025)}}
 
+
+/* roya-voice-input-v7 */
+.royaVoiceTime{display:inline-flex;align-items:center;justify-content:center;min-width:74px;height:34px;margin:0 auto 15px;padding:0 12px;border-radius:999px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.06);color:#d9dcef;font-variant-numeric:tabular-nums;font-size:13px;font-weight:750;letter-spacing:.6px}.royaVoiceStop:disabled{opacity:.72;cursor:wait}.royaVoiceMic{animation:royaVoicePulse 1.35s ease-in-out infinite}
+
 </style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="https://cdn.moyasar.com/mpf/1.15.0/moyasar.css">
 <script src="https://cdn.moyasar.com/mpf/1.15.0/moyasar.js"></script>
@@ -391,68 +395,107 @@ async function skipAllQuestions(){
   await showResult();
 }
 
-let royaSpeechRecognition=null;
-let royaSpeechListening=false;
-let royaSpeechRecognition=null;
-let royaSpeechListening=false;
-function voice(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){
-    showRoyaNotice('🎙️','التسجيل الصوتي','متصفحك لا يدعم التحويل الصوتي المباشر حاليًا. جرّب أحدث إصدار من Safari أو Chrome.');
+let royaMediaRecorder=null;
+let royaVoiceStream=null;
+let royaVoiceChunks=[];
+let royaVoiceTimer=null;
+let royaVoiceStartedAt=0;
+let royaVoiceBusy=false;
+
+async function voice(){
+  if(royaVoiceBusy)return;
+  if(royaMediaRecorder&&royaMediaRecorder.state==='recording'){
+    stopVoiceInput();
     return;
   }
-  if(royaSpeechListening&&royaSpeechRecognition){
-    royaSpeechRecognition.stop();
+  if(!currentUser){
+    showRoyaNotice('🔐','سجّل الدخول أولًا','التسجيل الصوتي مرتبط بحسابك حتى يتم تحويل الصوت إلى نص بأمان.');
+    setTimeout(()=>openAuth(),350);
     return;
   }
-  const target=document.getElementById('dream');
-  if(!target)return;
-  const recognition=new SR();
-  royaSpeechRecognition=recognition;
-  recognition.lang='ar-SA';
-  recognition.continuous=true;
-  recognition.interimResults=true;
-  let committed='';
-  const original=target.value.trim();
-  recognition.onstart=()=>{
-    royaSpeechListening=true;
-    showVoiceRecorder();
-  };
-  recognition.onresult=(event)=>{
-    let interim='';
-    for(let i=event.resultIndex;i<event.results.length;i++){
-      const t=event.results[i][0]?.transcript||'';
-      if(event.results[i].isFinal) committed+=(committed?' ':'')+t.trim();
-      else interim+=(interim?' ':'')+t.trim();
+  if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){
+    showRoyaNotice('🎙️','التسجيل غير مدعوم','حدّث Safari إلى أحدث إصدار ثم حاول مرة أخرى.');
+    return;
+  }
+  try{
+    royaVoiceBusy=true;
+    const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:false});
+    royaVoiceStream=stream;
+    let mime='';
+    for(const candidate of ['audio/mp4','audio/webm;codecs=opus','audio/webm']){
+      if(MediaRecorder.isTypeSupported?.(candidate)){mime=candidate;break}
     }
-    const joined=[original,committed,interim].filter(Boolean).join(original?' ':'');
-    target.value=joined.trim();
-    target.dispatchEvent(new Event('input',{bubbles:true}));
-    const live=document.getElementById('royaVoiceLive');
-    if(live) live.textContent=interim||committed||'أستمع الآن…';
-  };
-  recognition.onerror=(e)=>{
-    royaSpeechListening=false;
-    closeVoiceRecorder();
-    const msg=e.error==='not-allowed'?'اسمح للموقع باستخدام الميكروفون من إعدادات المتصفح ثم حاول مرة أخرى.':e.error==='no-speech'?'لم أسمع صوتًا واضحًا. حاول التحدث مرة أخرى.':'تعذر بدء التسجيل الصوتي الآن.';
-    showRoyaNotice('🎙️','تعذر التسجيل',msg);
-  };
-  recognition.onend=()=>{
-    royaSpeechListening=false;
-    royaSpeechRecognition=null;
-    closeVoiceRecorder();
-  };
-  try{recognition.start()}catch(e){console.error(e)}
+    const recorder=mime?new MediaRecorder(stream,{mimeType:mime}):new MediaRecorder(stream);
+    royaMediaRecorder=recorder;
+    royaVoiceChunks=[];
+    recorder.ondataavailable=e=>{if(e.data?.size)royaVoiceChunks.push(e.data)};
+    recorder.onerror=e=>{console.error('voice recorder error',e);finishVoiceRecordingError('تعذر تسجيل الصوت من الميكروفون.');};
+    recorder.onstop=async()=>{
+      clearInterval(royaVoiceTimer);royaVoiceTimer=null;
+      royaVoiceStream?.getTracks().forEach(t=>t.stop());royaVoiceStream=null;
+      const blob=new Blob(royaVoiceChunks,{type:recorder.mimeType||mime||'audio/webm'});
+      royaVoiceChunks=[];royaMediaRecorder=null;
+      if(blob.size<1000){finishVoiceRecordingError('لم يتم التقاط صوت واضح. حاول مرة أخرى.');return}
+      await transcribeRoyaVoice(blob);
+    };
+    recorder.start(500);
+    royaVoiceStartedAt=Date.now();
+    showVoiceRecorder();
+    updateVoiceTimer();
+    royaVoiceTimer=setInterval(updateVoiceTimer,1000);
+    setTimeout(()=>{if(royaMediaRecorder?.state==='recording')stopVoiceInput()},90000);
+  }catch(e){
+    console.error('microphone permission',e);
+    const denied=e?.name==='NotAllowedError'||e?.name==='SecurityError';
+    showRoyaNotice('🎙️','تعذر فتح الميكروفون',denied?'اسمح لموقع رؤيا باستخدام الميكروفون من إعدادات Safari ثم حاول مرة أخرى.':'تعذر بدء التسجيل الصوتي الآن.');
+  }finally{
+    royaVoiceBusy=false;
+  }
 }
+
 function showVoiceRecorder(){
   document.getElementById('royaVoiceOverlay')?.remove();
   const overlay=document.createElement('div');
-  overlay.id='royaVoiceOverlay';
-  overlay.className='royaVoiceOverlay show';
-  overlay.innerHTML=`<div class="royaVoiceSheet"><div class="royaVoiceHandle"></div><div class="royaVoiceMic"><span>🎙️</span></div><h3>أستمع إلى رؤياك</h3><p id="royaVoiceLive">ابدأ بالتحدث… وسيظهر النص مباشرة.</p><button class="primary royaVoiceStop" onclick="stopVoiceInput()">إيقاف التسجيل</button></div>`;
+  overlay.id='royaVoiceOverlay';overlay.className='royaVoiceOverlay show';
+  overlay.innerHTML=`<div class="royaVoiceSheet"><div class="royaVoiceHandle"></div><div class="royaVoiceMic"><span>🎙️</span></div><h3>أسجّل رؤياك الآن</h3><p id="royaVoiceLive">تحدث بوضوح، ثم اضغط «إنهاء وتحويل للنص».</p><div id="royaVoiceTime" class="royaVoiceTime">00:00</div><button class="primary royaVoiceStop" onclick="stopVoiceInput()">إنهاء وتحويل للنص</button></div>`;
   document.body.appendChild(overlay);
 }
-function stopVoiceInput(){if(royaSpeechRecognition)royaSpeechRecognition.stop()}
+function updateVoiceTimer(){
+  const el=document.getElementById('royaVoiceTime');if(!el)return;
+  const sec=Math.floor((Date.now()-royaVoiceStartedAt)/1000);
+  el.textContent=String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0');
+}
+function stopVoiceInput(){
+  if(royaMediaRecorder?.state==='recording'){
+    const btn=document.querySelector('.royaVoiceStop');if(btn){btn.disabled=true;btn.textContent='جارٍ تجهيز الصوت…'}
+    royaMediaRecorder.stop();
+  }
+}
+async function transcribeRoyaVoice(blob){
+  const live=document.getElementById('royaVoiceLive');if(live)live.textContent='جارٍ تحويل صوتك إلى نص…';
+  const btn=document.querySelector('.royaVoiceStop');if(btn){btn.disabled=true;btn.textContent='جارٍ التحويل…'}
+  try{
+    const form=new FormData();
+    const ext=(blob.type||'').includes('mp4')?'m4a':(blob.type||'').includes('ogg')?'ogg':'webm';
+    form.append('audio',blob,'roya-voice.'+ext);
+    const {data,error}=await sb.functions.invoke('transcribe-voice',{body:form});
+    if(error)throw error;
+    const text=String(data?.text||'').trim();
+    if(!text)throw new Error('empty transcription');
+    const target=document.getElementById('dream');
+    if(target){target.value=[target.value.trim(),text].filter(Boolean).join(target.value.trim()?' ':'');target.dispatchEvent(new Event('input',{bubbles:true}));target.focus();}
+    closeVoiceRecorder();
+    showRoyaNotice('✓','تم تحويل التسجيل','تمت إضافة كلامك إلى خانة الرؤيا بنجاح.');
+  }catch(e){
+    console.error('voice transcription',e);
+    finishVoiceRecordingError('تعذر تحويل التسجيل إلى نص. حاول مرة أخرى بعد لحظات.');
+  }
+}
+function finishVoiceRecordingError(message){
+  clearInterval(royaVoiceTimer);royaVoiceTimer=null;
+  royaVoiceStream?.getTracks().forEach(t=>t.stop());royaVoiceStream=null;royaMediaRecorder=null;
+  closeVoiceRecorder();showRoyaNotice('🎙️','تعذر التسجيل',message);
+}
 function closeVoiceRecorder(){document.getElementById('royaVoiceOverlay')?.remove()}
 function showRoyaNotice(icon,title,message){
   document.getElementById('royaNoticeOverlay')?.remove();
