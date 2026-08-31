@@ -1027,6 +1027,150 @@ async function handleMoyasarReturn(){
   ws(`<div class="paymentResultCard"><div class="paymentResultIcon">✓</div><div class="kicker">تم الدفع بنجاح</div><h2>${added>0?`تمت إضافة ${added} تفسيرًا إلى رصيدك`:'تم التحقق من العملية'}</h2><p>رصيدك الحالي: <b>${balance} تفسيرًا</b>. يمكنك استخدامه وقتما تريد.</p><button class="primary" onclick="showAccount()">عرض رصيدي</button></div>`);
 }
 
+
+async function logoutAllDevices(){
+  if(!currentUser)return;
+  if(!confirm('تسجيل الخروج من جميع الأجهزة المرتبطة بهذا الحساب؟'))return;
+  const {error}=await sb.auth.signOut({scope:'global'});
+  if(error){
+    alert('تعذر تسجيل الخروج من جميع الأجهزة.');
+    console.error(error);
+    return;
+  }
+  currentUser=null;
+  currentDreamId=null;
+  libraryDreams=[];
+  await refreshUser();
+  home();
+  alert('تم إنهاء جلسات الحساب. ستحتاج لتسجيل الدخول من جديد.');
+}
+
+async function deleteAllRoyaData(){
+  if(!currentUser)return;
+  const phrase=prompt('سيتم حذف جميع رؤاك وأسئلتك ومحادثاتك نهائيًا مع إبقاء الحساب.\nللتأكيد اكتب: حذف البيانات');
+  if(phrase!=='حذف البيانات')return;
+
+  const {data,error}=await sb.functions.invoke('account-management',{body:{action:'delete_data'}});
+  if(error||!data?.ok){
+    alert('تعذر حذف البيانات. لم يتم تنفيذ الحذف الكامل.');
+    console.error(error||data);
+    return;
+  }
+
+  currentDreamId=null;
+  libraryDreams=[];
+  dream.value='';
+  counter.textContent='0 حرف';
+  alert('تم حذف جميع بيانات «رؤيا» المرتبطة بحسابك.');
+  await showAccount();
+}
+
+async function deleteAccountPermanent(){
+  if(!currentUser)return;
+  const phrase=prompt('هذا الإجراء نهائي ولا يمكن التراجع عنه.\nللتأكيد اكتب: حذف الحساب');
+  if(phrase!=='حذف الحساب')return;
+
+  const {data,error}=await sb.functions.invoke('account-management',{body:{action:'delete_account'}});
+  if(error||!data?.ok){
+    alert('تعذر حذف الحساب. لم يكتمل الإجراء.');
+    console.error(error||data);
+    return;
+  }
+
+  try{await sb.auth.signOut({scope:'local'});}catch(e){}
+  currentUser=null;
+  currentDreamId=null;
+  libraryDreams=[];
+  dream.value='';
+  counter.textContent='0 حرف';
+  await refreshUser();
+  home();
+  alert('تم حذف الحساب وجميع بيانات «رؤيا» المرتبطة به نهائيًا.');
+}
+
+
+const SUPABASE_URL='https://oajqczrxzurwvxjkbseq.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_9LTupYVJR3kKTL4xqj3pdw_vA67W-o4';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+let currentUser=null;
+let currentDreamId=null;
+let libraryDreams=[];
+let libraryFilter='all';
+let libraryQuery='';
+const authModal=document.getElementById('authModal');
+function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function openAuth(){authModal.classList.add('show')}
+async function refreshUser(){const {data}=await sb.auth.getUser();currentUser=data?.user||null;const b=document.getElementById('authBtn');if(b)b.textContent=currentUser?'تسجيل الخروج':'تسجيل الدخول'}
+async function signIn(){const email=document.getElementById('authEmail').value.trim(),password=document.getElementById('authPassword').value;const m=document.getElementById('authMsg');m.textContent='جارٍ تسجيل الدخول…';const {error}=await sb.auth.signInWithPassword({email,password});if(error){m.textContent=error.message;return}m.textContent='تم تسجيل الدخول بنجاح';authModal.classList.remove('show');await refreshUser()}
+async function signUp(){const email=document.getElementById('authEmail').value.trim(),password=document.getElementById('authPassword').value;const m=document.getElementById('authMsg');m.textContent='جارٍ إنشاء الحساب…';const {error}=await sb.auth.signUp({email,password});m.textContent=error?error.message:'تم إنشاء الحساب. إذا كان تأكيد البريد مفعّلًا، افتح رسالة التأكيد ثم سجّل الدخول.'}
+async function requestPasswordReset(){
+  const email=document.getElementById('authEmail').value.trim();
+  const m=document.getElementById('authMsg');
+  if(!email){m.textContent='اكتب بريدك الإلكتروني أولًا.';document.getElementById('authEmail').focus();return}
+  m.textContent='جارٍ إرسال رابط الاستعادة…';
+  const redirectTo='https://roya-web.pages.dev/';
+  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo});
+  m.textContent=error?error.message:'تم إرسال رابط استعادة كلمة المرور إلى بريدك. افتح الرسالة واضغط الرابط.';
+}
+async function updateRecoveredPassword(){
+  const password=document.getElementById('resetNewPassword').value;
+  const m=document.getElementById('resetPasswordMsg');
+  if(password.length<8){m.textContent='يجب أن تكون كلمة المرور 8 أحرف على الأقل.';return}
+  m.textContent='جارٍ حفظ كلمة المرور الجديدة…';
+  const {error}=await sb.auth.updateUser({password});
+  if(error){m.textContent=error.message;return}
+  m.textContent='تم تحديث كلمة المرور بنجاح.';
+  setTimeout(()=>{document.getElementById('resetPasswordModal').classList.remove('show');history.replaceState({},'',location.pathname);},700);
+}
+function openPasswordRecovery(){
+  const modal=document.getElementById('resetPasswordModal');
+  if(modal){document.getElementById('resetPasswordMsg').textContent='';document.getElementById('resetNewPassword').value='';modal.classList.add('show');setTimeout(()=>document.getElementById('resetNewPassword').focus(),80)}
+}
+
+document.getElementById('authBtn').addEventListener('click',async(e)=>{if(currentUser){e.stopImmediatePropagation();await sb.auth.signOut();await refreshUser();showLogoutSuccessToast();}});
+sb.auth.onAuthStateChange((event)=>{setTimeout(refreshUser,0);if(event==='PASSWORD_RECOVERY')setTimeout(openPasswordRecovery,50)});refreshUser();
+
+async function openSavedDream(id){
+const {data,error}=await sb.from('dreams')
+  .select('id,title,dream_text,interpretation,interpretation_data,context_clarity,is_favorite,created_at')
+  .eq('id',id).single();
+if(error||!data){alert('تعذر فتح الرؤيا');return}
+currentDreamId=data.id;
+dream.value=data.dream_text||'';
+counter.textContent=dream.value.length+' حرف';
+const dreamActions=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 16px">
+  <button class="secondary" onclick="toggleFavoriteFromDetail('${data.id}',${!data.is_favorite})">${data.is_favorite?'★ إزالة من المفضلة':'☆ إضافة للمفضلة'}</button>
+  <button class="secondary" onclick="deleteDreamFromDetail('${data.id}')">حذف الرؤيا</button>
+  <button class="secondary" onclick="showDreams()">العودة إلى رؤياي</button>
+</div>`;
+if(data.interpretation){
+  const report=(data.interpretation_data&&typeof data.interpretation_data==='object')
+    ? data.interpretation_data
+    : {title:data.title,summary:'',symbols:[],contextual_reading:data.interpretation,psychological_reading:'',conclusion:data.interpretation,interpretation:data.interpretation,context_clarity:data.context_clarity};
+  ws(`<div class="kicker">رؤيا محفوظة</div>${dreamActions}<p style="color:#a9aec8;line-height:1.9">${escapeHtml(data.dream_text||'')}</p>`+resultReportHtml(report,false));
+}else{
+  ws(`<div class="kicker">رؤيا محفوظة</div>${dreamActions}<h2>${escapeHtml(data.title||'رؤيا')}</h2><p style="color:#a9aec8;line-height:1.9">${escapeHtml(data.dream_text||'')}</p><button class="primary" onclick="openQuestions()">استكمال الأسئلة الذكية</button>`);
+}
+}
+
+async function toggleFavoriteFromDetail(id,nextValue){
+  const {error}=await sb.from('dreams').update({is_favorite:!!nextValue,updated_at:new Date().toISOString()}).eq('id',id);
+  if(error){alert('تعذر تحديث المفضلة.');console.error(error);return}
+  const row=libraryDreams.find(x=>x.id===id);
+  if(row)row.is_favorite=!!nextValue;
+  await openSavedDream(id);
+}
+
+async function deleteDreamFromDetail(id){
+  if(!confirm('هل تريد حذف هذه الرؤيا نهائيًا؟ سيتم حذف الأسئلة والمحادثات المرتبطة بها أيضًا.'))return;
+  const {error}=await sb.from('dreams').delete().eq('id',id);
+  if(error){alert('تعذر حذف الرؤيا.');console.error(error);return}
+  libraryDreams=libraryDreams.filter(x=>x.id!==id);
+  currentDreamId=null;
+  await showDreams();
+}
+
+
 window.addEventListener('load', async ()=>{
   try{
     await refreshUser();
