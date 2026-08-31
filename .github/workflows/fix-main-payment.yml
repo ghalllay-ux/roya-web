@@ -1,0 +1,44 @@
+name: Fix Main Payment Buttons
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-main-payment.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Connect pricing buttons to Moyasar checkout
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          changes={
+            '<button class="secondary">اختيار الشهري</button>':'<button class="secondary" onclick="startPremiumCheckout(\'monthly\')">اختيار الشهري</button>',
+            '<button class="primary">اختيار السنوي</button>':'<button class="primary" onclick="startPremiumCheckout(\'annual\')">اختيار السنوي</button>',
+            '<button class="secondary">اختيار مدى الحياة</button>':'<button class="secondary" onclick="startPremiumCheckout(\'lifetime\')">اختيار مدى الحياة</button>',
+          }
+          for old,new in changes.items():
+              if old not in s:
+                  raise SystemExit('Expected pricing button not found: '+old)
+              s=s.replace(old,new,1)
+          p.write_text(s)
+          PY
+          grep -q "startPremiumCheckout('monthly')" index.html
+          grep -q "startPremiumCheckout('annual')" index.html
+          grep -q "startPremiumCheckout('lifetime')" index.html
+      - name: Commit fixed main site
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'Connect homepage pricing buttons to Moyasar'
+          git push
