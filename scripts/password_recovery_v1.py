@@ -33,7 +33,7 @@ async function requestPasswordReset(){
   const m=document.getElementById('authMsg');
   if(!email){m.textContent='اكتب بريدك الإلكتروني أولًا.';document.getElementById('authEmail').focus();return}
   m.textContent='جارٍ إرسال رابط الاستعادة…';
-  const redirectTo=location.origin+'/';
+  const redirectTo='https://roya-web.pages.dev/';
   const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo});
   m.textContent=error?error.message:'تم إرسال رابط استعادة كلمة المرور إلى بريدك. افتح الرسالة واضغط الرابط.';
 }
@@ -56,6 +56,9 @@ if 'async function requestPasswordReset()' not in s:
     if needle not in s:
         raise SystemExit('signUp function anchor not found')
     s = s.replace(needle, needle + functions, 1)
+
+# Keep the already-installed recovery flow pinned to the Cloudflare production URL.
+s = s.replace("const redirectTo=location.origin+'/';", "const redirectTo='https://roya-web.pages.dev/';")
 
 # 4) React to Supabase PASSWORD_RECOVERY while preserving normal auth refresh.
 old_listener = "sb.auth.onAuthStateChange(()=>setTimeout(refreshUser,0));refreshUser();"
