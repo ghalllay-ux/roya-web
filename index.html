@@ -625,7 +625,10 @@ async function startPremiumCheckout(planId){
     console.error(cfgError||cfg);
     return;
   }
-
+const cfg={
+  publishable_key:'pk_test_rkBnvVzFvzJiEuZN53iJUuh2Rmg7a7dSdT9Awhkf',
+  mode:'test'
+};
   localStorage.setItem('roya_pending_plan',planId);
 
   const existing=document.getElementById('paymentOverlay');
