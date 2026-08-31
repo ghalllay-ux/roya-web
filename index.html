@@ -198,6 +198,7 @@ nav{position:fixed;z-index:10;bottom:18px;left:50%;transform:translateX(-50%);wi
 .royaVoiceActions{grid-template-columns:1fr 1fr}.royaVoiceStart:not(:disabled){box-shadow:0 8px 22px rgba(207,165,67,.14)}.royaVoiceStop:not(:disabled){border-color:rgba(255,107,107,.28);color:#ffd0d0}.royaVoiceSheet p{max-width:420px}
 
 /* roya-voice-diagnostics-v10 */
+/* roya-voice-safari-upload-v11 */
 </style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="https://cdn.moyasar.com/mpf/1.15.0/moyasar.css">
 <script src="https://cdn.moyasar.com/mpf/1.15.0/moyasar.js"></script>
@@ -522,11 +523,22 @@ async function transcribeRoyaVoice(blob){
     const token=sessionData?.session?.access_token;
     if(!token)throw new Error('AUTH_SESSION_MISSING');
     const diagId='RV-'+Date.now().toString(36).slice(-6).toUpperCase();
-    const response=await fetch(SUPABASE_URL+'/functions/v1/transcribe-voice',{
-      method:'POST',
-      headers:{Authorization:'Bearer '+token,apikey:SUPABASE_PUBLISHABLE_KEY,'x-roya-diag':diagId},
-      body:form
-    });
+    const endpoint=SUPABASE_URL+'/functions/v1/transcribe-voice';
+    // Safari-safe request: keep headers limited to those explicitly allowed by the Edge Function CORS policy.
+    // The diagnostic id remains client-side and is shown if the request fails before POST reaches Supabase.
+    let response;
+    try{
+      response=await fetch(endpoint,{
+        method:'POST',
+        mode:'cors',
+        credentials:'omit',
+        cache:'no-store',
+        headers:{Authorization:'Bearer '+token,apikey:SUPABASE_PUBLISHABLE_KEY},
+        body:form
+      });
+    }catch(fetchErr){
+      throw new Error('ROYA_DIAG|'+diagId+'|NETWORK|SAFARI_FETCH_FAILED');
+    }
     const sbCode=response.headers.get('sb-error-code')||'';
     const rawBody=await response.text();
     let data={};
