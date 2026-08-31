@@ -71,6 +71,18 @@ nav{position:fixed;z-index:10;bottom:18px;left:50%;transform:translateX(-50%);wi
 .offerBadge70{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#f2d58a,#d6ad5b);color:#21172a;border-radius:999px;padding:4px 8px;font-size:10px;font-weight:900;box-shadow:0 5px 14px rgba(214,173,91,.18)}
 .oldPrice{display:inline-block;color:#777f9f;text-decoration:line-through;text-decoration-thickness:1.5px;font-size:13px;margin-inline-start:6px;font-weight:600}.offerLine{min-height:23px;display:flex;justify-content:center;align-items:center;gap:5px;flex-wrap:wrap;margin:5px 0 -3px}.price .amount{margin:8px 0}.priceOfferNote{font-size:10px;color:#d7c18c;margin-top:2px}
 
+
+/* payment-balanced-compact-ui-v5 */
+.paymentOverlay{padding:12px!important;align-items:center!important}
+.paymentPanel{width:min(430px,calc(100vw - 24px))!important;max-height:89vh!important;border-radius:21px!important;box-shadow:0 28px 75px rgba(0,0,0,.58)!important}
+.paymentPanel:before{height:90px!important;opacity:.72!important}
+.paymentHead{padding:14px 15px 12px!important}.paymentHeadRow{gap:9px!important}.paymentBrand{gap:9px!important}.paymentBrandIcon{width:35px!important;height:35px!important;border-radius:11px!important;font-size:17px!important}.paymentEyebrow{font-size:9px!important;margin-bottom:2px!important}.paymentTitle{font-size:18px!important;line-height:1.24!important}.paymentMeta{gap:5px!important;margin-top:4px!important;font-size:10px!important}.paymentMeta strong{font-size:14px!important}.paymentPill{padding:3px 6px!important;font-size:8.5px!important}.paymentClose{width:32px!important;height:32px!important;border-radius:10px!important;font-size:15px!important}
+.paymentBody{padding:12px 15px 16px!important}.paymentStatus{gap:7px!important;margin-bottom:10px!important;padding:8px 9px!important;border-radius:11px!important;font-size:10px!important;line-height:1.5!important}.paymentStatusIcon{width:22px!important;height:22px!important;min-width:22px!important;border-radius:7px!important;font-size:11px!important}.paymentStatus b{font-size:10px!important}
+.paymentSecureRow{gap:5px!important;margin-bottom:10px!important}.paymentSecureItem{padding:5px 4px!important;border-radius:9px!important;font-size:8px!important;line-height:1.3!important}.paymentSecureItem b{font-size:9px!important;margin-bottom:1px!important}
+.paymentPanel .mysr-form{font-size:11px!important}.paymentPanel .mysr-form input,.paymentPanel .mysr-form select{min-height:40px!important;border-radius:11px!important;font-size:12px!important}.paymentPanel .mysr-form label{font-size:10px!important}.paymentPanel .mysr-form button,.paymentPanel .mysr-form .mysr-form-button{min-height:41px!important;border-radius:11px!important;font-size:12px!important}.paymentFoot{margin-top:8px!important;font-size:8px!important;line-height:1.4!important}
+.paymentResultCard{max-width:440px!important;margin:9px auto!important;padding:18px 17px!important;border-radius:20px!important}.paymentResultIcon{width:46px!important;height:46px!important;margin-bottom:8px!important;border-radius:15px!important;font-size:21px!important}.paymentResultCard h2{font-size:20px!important;margin:5px 0!important}.paymentResultCard p{max-width:370px!important;margin:5px auto 12px!important;font-size:12px!important;line-height:1.65!important}.paymentResultCard button{padding:9px 14px!important;font-size:12px!important}
+@media(max-width:640px){.paymentOverlay{padding:8px!important}.paymentPanel{width:min(410px,calc(100vw - 16px))!important;max-height:90vh!important;border-radius:20px!important}.paymentHead{padding:12px 13px 10px!important}.paymentBody{padding:11px 13px 13px!important}.paymentBrandIcon{width:33px!important;height:33px!important}.paymentTitle{font-size:17px!important}.paymentSecureItem{font-size:7.5px!important}.paymentSecureItem b{font-size:8.5px!important}.paymentResultCard{max-width:390px!important;padding:16px 14px!important}}
+
 </style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="https://cdn.moyasar.com/mpf/1.15.0/moyasar.css">
 <script src="https://cdn.moyasar.com/mpf/1.15.0/moyasar.js"></script>
@@ -99,10 +111,10 @@ nav{position:fixed;z-index:10;bottom:18px;left:50%;transform:translateX(-50%);wi
 <div class="card"><div class="icon">◉</div><h3>رؤياي</h3><p>سجل شخصي للرؤى المحفوظة، المفضلة، والرموز المتكررة مع بحث سريع.</p></div>
 <div class="card"><div class="icon">☏</div><h3>اسأل المفسر</h3><p>محادثة متابعة تحتفظ بسياق الرؤيا وإجاباتك السابقة.</p></div>
 </div></section>
-<section class="section"><div class="sectionTitle"><h2>رؤيا Premium</h2><span>أسعار الإطلاق</span></div><div class="pricing">
-<div class="card price"><h3>شهري</h3><div class="amount">5 <small>ر.س / شهر</small></div><button class="secondary" onclick="startPremiumCheckout('monthly')">اختيار الشهري</button></div>
-<div class="card price pop"><span class="badge">الأكثر اختيارًا</span><h3>سنوي</h3><div class="amount">30 <small>ر.س / سنة</small></div><button class="primary" onclick="startPremiumCheckout('annual')">اختيار السنوي</button></div>
-<div class="card price"><h3>مدى الحياة</h3><div class="amount">70 <small>ر.س / مرة واحدة</small></div><button class="secondary" onclick="startPremiumCheckout('lifetime')">اختيار مدى الحياة</button></div>
+<section class="section"><div class="sectionTitle"><h2>رؤيا Premium</h2><span>عرض خصم 70%</span></div><div class="pricing">
+<div class="card price"><h3>شهري</h3><div class="offerLine"><span class="offerBadge70">خصم 70%</span><span class="oldPrice">16.67 ر.س</span></div><div class="amount">5 <small>ر.س / شهر</small></div><div class="priceOfferNote">سعر العرض الحالي</div><button class="secondary" onclick="startPremiumCheckout('monthly')">اختيار الشهري</button></div>
+<div class="card price pop"><span class="badge">الأكثر اختيارًا</span><h3>سنوي</h3><div class="offerLine"><span class="offerBadge70">خصم 70%</span><span class="oldPrice">96.67 ر.س</span></div><div class="amount">29 <small>ر.س / سنة</small></div><div class="priceOfferNote">سعر العرض الحالي</div><button class="primary" onclick="startPremiumCheckout('annual')">اختيار السنوي</button></div>
+<div class="card price"><h3>مدى الحياة</h3><div class="offerLine"><span class="offerBadge70">خصم 70%</span><span class="oldPrice">163.33 ر.س</span></div><div class="amount">49 <small>ر.س / مرة واحدة</small></div><div class="priceOfferNote">سعر العرض الحالي</div><button class="secondary" onclick="startPremiumCheckout('lifetime')">اختيار مدى الحياة</button></div>
 </div></section>
 
 <section class="section" id="demoFlow">
