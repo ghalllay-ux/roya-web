@@ -57,14 +57,19 @@ jobs:
           python3 scripts/voice_diagnostics_v10.py
           grep -q 'roya-voice-diagnostics-v10' index.html
           grep -q 'ROYA_DIAG' index.html
-          grep -q 'x-roya-diag' index.html
+      - name: Apply Safari voice upload v11
+        run: |
+          python3 scripts/voice_safari_upload_v11.py
+          grep -q 'roya-voice-safari-upload-v11' index.html
+          grep -q 'SAFARI_FETCH_FAILED' index.html
+          if grep -q "'x-roya-diag':diagId" index.html; then exit 1; fi
       - name: Persist patched index
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
           if ! git diff --cached --quiet; then
-            git commit -m 'Add voice request diagnostics v10'
+            git commit -m 'Fix Safari voice upload v11'
             git push
           fi
       - name: Deploy to Cloudflare Pages
