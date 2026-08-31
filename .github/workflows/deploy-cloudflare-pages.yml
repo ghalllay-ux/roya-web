@@ -25,13 +25,17 @@ jobs:
         run: |
           python3 scripts/mobile_app_ui_v2.py
           grep -q 'roya-mobile-app-v2' index.html
+      - name: Apply native-like mobile UI v3
+        run: |
+          python3 scripts/mobile_app_ui_v3.py
+          grep -q 'roya-mobile-native-v3' index.html
       - name: Persist patched index
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
           if ! git diff --cached --quiet; then
-            git commit -m 'Upgrade Roya mobile experience v2'
+            git commit -m 'Make Roya mobile experience native-like v3'
             git push
           fi
       - name: Deploy to Cloudflare Pages
