@@ -52,13 +52,19 @@ jobs:
           grep -q 'roya-voice-input-v9' index.html
           grep -q "functions/v1/transcribe-voice" index.html
           grep -q 'AUTH_SESSION_MISSING' index.html
+      - name: Apply voice diagnostics v10
+        run: |
+          python3 scripts/voice_diagnostics_v10.py
+          grep -q 'roya-voice-diagnostics-v10' index.html
+          grep -q 'ROYA_DIAG' index.html
+          grep -q 'x-roya-diag' index.html
       - name: Persist patched index
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
           if ! git diff --cached --quiet; then
-            git commit -m 'Fix iPhone voice upload and transcription v9'
+            git commit -m 'Add voice request diagnostics v10'
             git push
           fi
       - name: Deploy to Cloudflare Pages
