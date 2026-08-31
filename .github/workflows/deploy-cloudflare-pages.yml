@@ -63,6 +63,11 @@ jobs:
           grep -q 'roya-voice-safari-upload-v11' index.html
           grep -q 'SAFARI_FETCH_FAILED' index.html
           if grep -q "'x-roya-diag':diagId" index.html; then exit 1; fi
+      - name: Apply Apple Pay checkout
+        run: |
+          python3 scripts/payment_page_v1.py
+          grep -q "methods:\['creditcard','applepay'\]" index.html
+          grep -q "validate_merchant_url:'https://api.moyasar.com/v1/applepay/initiate'" index.html
       - name: Apply premium trusted payment UI v2
         run: |
           python3 scripts/payment_ui_v2.py
@@ -75,7 +80,7 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
           if ! git diff --cached --quiet; then
-            git commit -m 'Apply premium trusted payment UI v2'
+            git commit -m 'Enable Apple Pay checkout'
             git push
           fi
       - name: Deploy to Cloudflare Pages
