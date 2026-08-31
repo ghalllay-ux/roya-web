@@ -3,23 +3,22 @@ from pathlib import Path
 p = Path('index.html')
 s = p.read_text(encoding='utf-8')
 
-marker = '/* payment-compact-ui-v3 */'
+marker = '/* payment-ultra-compact-ui-v4 */'
 css = r'''
-/* payment-compact-ui-v3 */
-.paymentOverlay{padding:14px;background:radial-gradient(circle at 50% 5%,rgba(123,97,255,.12),transparent 30%),rgba(2,5,18,.86);backdrop-filter:blur(16px) saturate(120%);-webkit-backdrop-filter:blur(16px) saturate(120%)}
-.paymentPanel{width:min(470px,100%);max-height:90vh;border-radius:24px;border-color:rgba(242,213,138,.18);box-shadow:0 30px 90px rgba(0,0,0,.58),0 0 0 1px rgba(255,255,255,.025) inset}
-.paymentPanel:before{height:105px;opacity:.8}
-.paymentHead{padding:17px 18px 14px}.paymentHeadRow{gap:10px;align-items:center}.paymentBrand{gap:10px}.paymentBrandIcon{width:38px;height:38px;border-radius:12px;font-size:18px;box-shadow:0 7px 18px rgba(0,0,0,.22)}
-.paymentEyebrow{font-size:10px;margin-bottom:2px}.paymentTitle{font-size:19px;line-height:1.25}.paymentMeta{gap:6px;margin-top:5px;font-size:11px}.paymentMeta strong{font-size:15px!important}.paymentPill{padding:3px 7px;font-size:9px}
-.paymentClose{width:34px;height:34px;border-radius:11px;font-size:16px}.paymentBody{padding:15px 18px 18px}.paymentStatus{gap:8px;margin-bottom:11px;padding:9px 10px;border-radius:13px;font-size:11px;line-height:1.55}.paymentStatusIcon{width:24px;height:24px;min-width:24px;border-radius:8px;font-size:12px}.paymentStatus b{font-size:11px}
-.paymentSecureRow{grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:11px}.paymentSecureItem{padding:6px 5px;border-radius:10px;font-size:9px;line-height:1.35}.paymentSecureItem b{font-size:10px;margin-bottom:1px;white-space:nowrap}
-.paymentPanel .mysr-form{font-size:12px!important}.paymentPanel .mysr-form input,.paymentPanel .mysr-form select{min-height:43px!important;border-radius:12px!important;font-size:13px!important}.paymentPanel .mysr-form label{font-size:11px!important}.paymentPanel .mysr-form button,.paymentPanel .mysr-form .mysr-form-button{min-height:44px!important;border-radius:12px!important;font-size:13px!important;box-shadow:0 9px 22px rgba(214,173,91,.14)!important}
-.paymentFoot{margin-top:10px;font-size:9px;line-height:1.5}.paymentResultCard{max-width:520px;margin:10px auto;padding:22px 20px;border-radius:22px;box-shadow:0 20px 55px rgba(0,0,0,.24)}.paymentResultIcon{width:52px;height:52px;margin-bottom:10px;border-radius:17px;font-size:23px}.paymentResultCard h2{font-size:22px;margin:6px 0}.paymentResultCard p{max-width:430px;margin:6px auto 14px;font-size:13px;line-height:1.75}
-@media(max-width:640px){.paymentOverlay{padding:8px;align-items:center}.paymentPanel{width:min(440px,100%);max-height:92vh;border-radius:22px}.paymentHead{padding:14px 15px 12px}.paymentBody{padding:13px 15px 16px}.paymentBrandIcon{width:35px;height:35px;border-radius:11px}.paymentTitle{font-size:17px}.paymentSecureRow{grid-template-columns:repeat(3,1fr);gap:5px}.paymentSecureItem{padding:6px 3px;font-size:8px}.paymentSecureItem b{font-size:9px}.paymentResultCard{padding:19px 15px;border-radius:20px}.paymentResultIcon{width:48px;height:48px;border-radius:15px}}
+/* payment-ultra-compact-ui-v4 */
+.paymentOverlay{padding:10px!important;align-items:center!important}
+.paymentPanel{width:min(390px,calc(100vw - 20px))!important;max-height:86vh!important;border-radius:19px!important;box-shadow:0 24px 65px rgba(0,0,0,.56)!important}
+.paymentPanel:before{height:78px!important;opacity:.65!important}
+.paymentHead{padding:12px 13px 10px!important}.paymentHeadRow{gap:8px!important}.paymentBrand{gap:8px!important}.paymentBrandIcon{width:31px!important;height:31px!important;border-radius:10px!important;font-size:15px!important}.paymentEyebrow{font-size:8px!important;margin-bottom:1px!important}.paymentTitle{font-size:16px!important;line-height:1.2!important}.paymentMeta{gap:4px!important;margin-top:3px!important;font-size:9px!important}.paymentMeta strong{font-size:13px!important}.paymentPill{padding:2px 5px!important;font-size:8px!important}.paymentClose{width:29px!important;height:29px!important;border-radius:9px!important;font-size:14px!important}
+.paymentBody{padding:10px 13px 13px!important}.paymentStatus{gap:6px!important;margin-bottom:8px!important;padding:7px 8px!important;border-radius:10px!important;font-size:9px!important;line-height:1.4!important}.paymentStatusIcon{width:20px!important;height:20px!important;min-width:20px!important;border-radius:6px!important;font-size:10px!important}.paymentStatus b{font-size:9px!important}
+.paymentSecureRow{gap:4px!important;margin-bottom:8px!important}.paymentSecureItem{padding:4px 3px!important;border-radius:8px!important;font-size:7px!important;line-height:1.25!important}.paymentSecureItem b{font-size:8px!important;margin-bottom:0!important}
+.paymentPanel .mysr-form{font-size:10px!important}.paymentPanel .mysr-form input,.paymentPanel .mysr-form select{min-height:37px!important;border-radius:10px!important;font-size:11px!important}.paymentPanel .mysr-form label{font-size:9px!important}.paymentPanel .mysr-form button,.paymentPanel .mysr-form .mysr-form-button{min-height:38px!important;border-radius:10px!important;font-size:11px!important}.paymentFoot{margin-top:7px!important;font-size:7px!important;line-height:1.35!important}
+.paymentResultCard{max-width:400px!important;margin:8px auto!important;padding:16px 15px!important;border-radius:18px!important}.paymentResultIcon{width:42px!important;height:42px!important;margin-bottom:7px!important;border-radius:13px!important;font-size:19px!important}.paymentResultCard h2{font-size:18px!important;margin:4px 0!important}.paymentResultCard p{max-width:340px!important;margin:4px auto 10px!important;font-size:11px!important;line-height:1.6!important}.paymentResultCard button{padding:8px 13px!important;font-size:11px!important}
+@media(max-width:640px){.paymentOverlay{padding:7px!important}.paymentPanel{width:min(370px,calc(100vw - 14px))!important;max-height:88vh!important;border-radius:18px!important}.paymentHead{padding:10px 11px 8px!important}.paymentBody{padding:9px 11px 11px!important}.paymentBrandIcon{width:29px!important;height:29px!important}.paymentTitle{font-size:15px!important}.paymentSecureItem{font-size:6.5px!important}.paymentSecureItem b{font-size:7.5px!important}.paymentResultCard{max-width:360px!important;padding:14px 12px!important}}
 '''
 
 if marker not in s:
     s = s.replace('</style>', css + '\n</style>', 1)
 
 p.write_text(s, encoding='utf-8')
-print('Compact premium payment UI v3 applied')
+print('Ultra compact payment UI v4 applied')
