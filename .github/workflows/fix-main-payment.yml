@@ -26,7 +26,7 @@ jobs:
         run: python3 scripts/pricing_offer_v1.py
       - name: Apply premium mobile app experience
         run: python3 scripts/mobile_app_ui_v1.py
-      - name: Route checkout to dedicated payment page
+      - name: Apply dedicated checkout page route
         run: python3 scripts/payment_page_v1.py
       - name: Verify payment pricing and mobile UI
         run: |
@@ -34,13 +34,14 @@ jobs:
           grep -q 'roya-pricing-offer-70-v1' index.html
           grep -q 'offerBadge70' index.html
           grep -q 'roya-mobile-app-v1' index.html
-          grep -q "new URL('payment.html'" index.html
-          grep -q 'Moyasar.init' payment.html
+          grep -q 'royaCheckoutPage' index.html
+          grep -q 'leaveCheckoutPage' index.html
+          grep -q 'Moyasar.init' index.html
       - name: Commit upgraded UI
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html payment.html
+          git add index.html
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'Move Roya checkout to dedicated payment page'
+          git commit -m 'Render Roya checkout as dedicated in-app page'
           git push
