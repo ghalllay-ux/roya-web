@@ -38,13 +38,19 @@ jobs:
           python3 scripts/mobile_native_notice_v5.py
           grep -q 'roya-mobile-native-notice-v5' index.html
           if grep -q "function voice(){alert(" index.html; then exit 1; fi
+      - name: Enable Arabic voice input
+        run: |
+          python3 scripts/voice_input_v6.py
+          grep -q 'roya-voice-input-v6' index.html
+          grep -q 'webkitSpeechRecognition' index.html
+          grep -q "recognition.lang='ar-SA'" index.html
       - name: Persist patched index
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
           if ! git diff --cached --quiet; then
-            git commit -m 'Replace voice browser alert with native mobile notice v5'
+            git commit -m 'Enable Arabic voice input v6'
             git push
           fi
       - name: Deploy to Cloudflare Pages
