@@ -180,6 +180,10 @@ nav{position:fixed;z-index:10;bottom:18px;left:50%;transform:translateX(-50%);wi
 .royaNoticeOverlay{position:fixed;inset:0;z-index:12000;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(3,5,15,.58);opacity:0;transition:opacity .18s ease;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}.royaNoticeOverlay.show{opacity:1}.royaNoticeSheet{width:min(390px,100%);padding:22px 20px 18px;text-align:center;border-radius:25px;background:linear-gradient(160deg,#181d39,#0e122a);border:1px solid rgba(255,255,255,.08);box-shadow:0 28px 80px rgba(0,0,0,.48);transform:translateY(10px) scale(.985);transition:transform .2s ease}.royaNoticeOverlay.show .royaNoticeSheet{transform:none}.royaNoticeHandle{display:none}.royaNoticeIcon{width:48px;height:48px;margin:0 auto 11px;display:grid;place-items:center;border-radius:16px;background:rgba(119,101,218,.12);font-size:22px}.royaNoticeSheet h3{margin:0 0 7px;font-size:19px}.royaNoticeSheet p{margin:0 auto 17px;max-width:310px;color:#aeb5cc;line-height:1.75;font-size:13px}.royaNoticeBtn{width:100%;min-height:45px}
 @media(max-width:800px){.royaNoticeOverlay{align-items:flex-end;padding:0}.royaNoticeSheet{width:100%;max-width:500px;border-radius:27px 27px 0 0;padding:12px 18px calc(17px + env(safe-area-inset-bottom));transform:translateY(35px);box-shadow:0 -18px 60px rgba(0,0,0,.38)}.royaNoticeHandle{display:block;width:38px;height:4px;border-radius:99px;background:rgba(255,255,255,.17);margin:0 auto 14px}.royaNoticeIcon{width:46px;height:46px;border-radius:15px}.royaNoticeSheet h3{font-size:18px}.royaNoticeSheet p{font-size:13px;margin-bottom:15px}.royaNoticeBtn{min-height:47px;border-radius:15px}}
 
+
+/* roya-voice-input-v6 */
+.royaVoiceOverlay{position:fixed;inset:0;z-index:12500;display:flex;align-items:flex-end;justify-content:center;background:rgba(3,5,15,.56);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}.royaVoiceSheet{width:min(500px,100%);padding:12px 20px calc(18px + env(safe-area-inset-bottom));text-align:center;border-radius:28px 28px 0 0;background:linear-gradient(180deg,#171b36,#0d1128);border:1px solid rgba(255,255,255,.07);border-bottom:0;box-shadow:0 -18px 60px rgba(0,0,0,.36)}.royaVoiceHandle{width:38px;height:4px;border-radius:99px;background:rgba(255,255,255,.17);margin:0 auto 18px}.royaVoiceMic{width:68px;height:68px;margin:0 auto 13px;border-radius:50%;display:grid;place-items:center;background:rgba(119,101,218,.15);box-shadow:0 0 0 10px rgba(119,101,218,.055);animation:royaVoicePulse 1.5s ease-in-out infinite}.royaVoiceMic span{font-size:29px}.royaVoiceSheet h3{margin:0 0 8px;font-size:20px}.royaVoiceSheet p{min-height:44px;margin:0 auto 17px;max-width:390px;color:#aeb5cc;line-height:1.7;font-size:13px}.royaVoiceStop{width:100%;min-height:48px;border-radius:15px}@keyframes royaVoicePulse{0%,100%{transform:scale(1);box-shadow:0 0 0 8px rgba(119,101,218,.05)}50%{transform:scale(1.04);box-shadow:0 0 0 15px rgba(119,101,218,.025)}}
+
 </style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="https://cdn.moyasar.com/mpf/1.15.0/moyasar.css">
 <script src="https://cdn.moyasar.com/mpf/1.15.0/moyasar.js"></script>
@@ -387,9 +391,67 @@ async function skipAllQuestions(){
   await showResult();
 }
 
+let royaSpeechRecognition=null;
+let royaSpeechListening=false;
 function voice(){
-  showRoyaNotice('🎙️','التسجيل الصوتي','سيُفعّل قريبًا عند ربط خدمة تحويل الصوت إلى نص.');
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){
+    showRoyaNotice('🎙️','التسجيل الصوتي','متصفحك لا يدعم التحويل الصوتي المباشر حاليًا. جرّب أحدث إصدار من Safari أو Chrome.');
+    return;
+  }
+  if(royaSpeechListening&&royaSpeechRecognition){
+    royaSpeechRecognition.stop();
+    return;
+  }
+  const target=document.getElementById('dream');
+  if(!target)return;
+  const recognition=new SR();
+  royaSpeechRecognition=recognition;
+  recognition.lang='ar-SA';
+  recognition.continuous=true;
+  recognition.interimResults=true;
+  let committed='';
+  const original=target.value.trim();
+  recognition.onstart=()=>{
+    royaSpeechListening=true;
+    showVoiceRecorder();
+  };
+  recognition.onresult=(event)=>{
+    let interim='';
+    for(let i=event.resultIndex;i<event.results.length;i++){
+      const t=event.results[i][0]?.transcript||'';
+      if(event.results[i].isFinal) committed+=(committed?' ':'')+t.trim();
+      else interim+=(interim?' ':'')+t.trim();
+    }
+    const joined=[original,committed,interim].filter(Boolean).join(original?' ':'');
+    target.value=joined.trim();
+    target.dispatchEvent(new Event('input',{bubbles:true}));
+    const live=document.getElementById('royaVoiceLive');
+    if(live) live.textContent=interim||committed||'أستمع الآن…';
+  };
+  recognition.onerror=(e)=>{
+    royaSpeechListening=false;
+    closeVoiceRecorder();
+    const msg=e.error==='not-allowed'?'اسمح للموقع باستخدام الميكروفون من إعدادات المتصفح ثم حاول مرة أخرى.':e.error==='no-speech'?'لم أسمع صوتًا واضحًا. حاول التحدث مرة أخرى.':'تعذر بدء التسجيل الصوتي الآن.';
+    showRoyaNotice('🎙️','تعذر التسجيل',msg);
+  };
+  recognition.onend=()=>{
+    royaSpeechListening=false;
+    royaSpeechRecognition=null;
+    closeVoiceRecorder();
+  };
+  try{recognition.start()}catch(e){console.error(e)}
 }
+function showVoiceRecorder(){
+  document.getElementById('royaVoiceOverlay')?.remove();
+  const overlay=document.createElement('div');
+  overlay.id='royaVoiceOverlay';
+  overlay.className='royaVoiceOverlay show';
+  overlay.innerHTML=`<div class="royaVoiceSheet"><div class="royaVoiceHandle"></div><div class="royaVoiceMic"><span>🎙️</span></div><h3>أستمع إلى رؤياك</h3><p id="royaVoiceLive">ابدأ بالتحدث… وسيظهر النص مباشرة.</p><button class="primary royaVoiceStop" onclick="stopVoiceInput()">إيقاف التسجيل</button></div>`;
+  document.body.appendChild(overlay);
+}
+function stopVoiceInput(){if(royaSpeechRecognition)royaSpeechRecognition.stop()}
+function closeVoiceRecorder(){document.getElementById('royaVoiceOverlay')?.remove()}
 function showRoyaNotice(icon,title,message){
   document.getElementById('royaNoticeOverlay')?.remove();
   const overlay=document.createElement('div');
