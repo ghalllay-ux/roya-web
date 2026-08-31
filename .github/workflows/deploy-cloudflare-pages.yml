@@ -48,13 +48,20 @@ jobs:
           grep -q 'roya-voice-input-v7' index.html
           grep -q 'MediaRecorder' index.html
           grep -q "transcribe-voice" index.html
+      - name: Apply explicit voice controls v8
+        run: |
+          python3 scripts/voice_input_v8.py
+          grep -q 'roya-voice-input-v8' index.html
+          grep -q 'بدء التسجيل' index.html
+          grep -q 'إيقاف التسجيل' index.html
+          grep -q 'startRoyaVoiceRecording' index.html
       - name: Persist patched index
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
           if ! git diff --cached --quiet; then
-            git commit -m 'Use MediaRecorder voice transcription v7'
+            git commit -m 'Add explicit voice start and stop controls v8'
             git push
           fi
       - name: Deploy to Cloudflare Pages
