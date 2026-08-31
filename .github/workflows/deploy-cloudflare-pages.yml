@@ -93,6 +93,23 @@ jobs:
           python3 scripts/card_fields_ui_v4.py
           grep -q 'roya-card-fields-premium-v4' payment.html
           grep -q 'بيانات البطاقة' payment.html
+      - name: Validate inline JavaScript
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          for page in ['index.html','payment.html']:
+              text=Path(page).read_text(encoding='utf-8')
+              scripts=re.findall(r'<script(?:\s[^>]*)?>([\s\S]*?)</script>', text, re.I)
+              for i,js in enumerate(scripts,1):
+                  out=Path(f'/tmp/{page}.{i}.js')
+                  out.write_text(js,encoding='utf-8')
+                  print(out)
+          PY
+          for f in /tmp/index.html.*.js /tmp/payment.html.*.js; do
+            [ -f "$f" ] || continue
+            node --check "$f"
+          done
       - name: Persist patched site
         run: |
           git config user.name 'github-actions[bot]'
