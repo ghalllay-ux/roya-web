@@ -239,6 +239,29 @@ nav{position:fixed;z-index:10;bottom:18px;left:50%;transform:translateX(-50%);wi
 #royaCheckoutPage .roya-pay-foot{text-align:center;color:#737c98;font-size:10px;line-height:1.75;margin-top:14px}
 @media(max-width:760px){#royaCheckoutPage{padding-left:12px!important;padding-right:12px!important}#royaCheckoutPage .roya-pay-shell{grid-template-columns:1fr}#royaCheckoutPage .roya-pay-summary{position:static;order:-1}#royaCheckoutPage .roya-pay-main,#royaCheckoutPage .roya-pay-summary{border-radius:22px}#royaCheckoutPage .roya-pay-head{padding:20px 18px 16px}#royaCheckoutPage .roya-pay-title{font-size:23px}#royaCheckoutPage .roya-pay-trust{padding:12px 18px;gap:7px}#royaCheckoutPage .roya-pay-trust div{display:block;text-align:center;padding:9px 5px;font-size:9px}#royaCheckoutPage .roya-pay-trust span{display:block;font-size:16px;margin-bottom:3px}#royaCheckoutPage .roya-pay-form{padding:18px}#royaCheckoutPage .roya-pay-summary{padding:16px}#royaCheckoutPage .roya-plan-price{font-size:28px}}
 </style>
+
+<style id="roya-auth-modal-center-v6">
+@media(max-width:800px){
+  #authModal.modal.show,#resetPasswordModal.modal.show{
+    display:grid!important;
+    place-items:center!important;
+    align-items:center!important;
+    justify-items:center!important;
+    padding:18px!important;
+  }
+  #authModal .modalbox,#resetPasswordModal .modalbox{
+    width:min(460px,100%)!important;
+    max-height:calc(100dvh - 36px)!important;
+    margin:auto!important;
+    border-radius:27px!important;
+    border:1px solid #3b4268!important;
+    padding:22px 18px!important;
+    animation:royaAuthCenterV6 .24s cubic-bezier(.2,.8,.2,1)!important;
+  }
+  #authModal .modalbox:before,#resetPasswordModal .modalbox:before{display:none!important}
+}
+@keyframes royaAuthCenterV6{from{opacity:0;transform:translateY(8px) scale(.975)}to{opacity:1;transform:none}}
+</style>
 </head>
 <body>
 <div class="shell">
