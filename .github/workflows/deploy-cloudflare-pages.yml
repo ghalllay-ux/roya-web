@@ -33,13 +33,18 @@ jobs:
         run: |
           python3 scripts/mobile_visual_comfort_v4.py
           grep -q 'roya-mobile-visual-comfort-v4' index.html
+      - name: Replace voice browser alert
+        run: |
+          python3 scripts/mobile_native_notice_v5.py
+          grep -q 'roya-mobile-native-notice-v5' index.html
+          if grep -q "function voice(){alert(" index.html; then exit 1; fi
       - name: Persist patched index
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
           if ! git diff --cached --quiet; then
-            git commit -m 'Refine Roya mobile visual comfort v4'
+            git commit -m 'Replace voice browser alert with native mobile notice v5'
             git push
           fi
       - name: Deploy to Cloudflare Pages
