@@ -29,13 +29,17 @@ jobs:
         run: |
           python3 scripts/mobile_app_ui_v3.py
           grep -q 'roya-mobile-native-v3' index.html
+      - name: Apply visual comfort mobile UI v4
+        run: |
+          python3 scripts/mobile_visual_comfort_v4.py
+          grep -q 'roya-mobile-visual-comfort-v4' index.html
       - name: Persist patched index
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
           if ! git diff --cached --quiet; then
-            git commit -m 'Make Roya mobile experience native-like v3'
+            git commit -m 'Refine Roya mobile visual comfort v4'
             git push
           fi
       - name: Deploy to Cloudflare Pages
