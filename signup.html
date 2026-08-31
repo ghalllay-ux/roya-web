@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>إنشاء حساب | رؤيا</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#070b24;--card:#101632;--gold:#d6ad5b;--gold2:#f2d58a;--text:#f8f7fb;--muted:#a9aec8;--line:#30375e}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;background:radial-gradient(circle at 80% -10%,#312060 0,transparent 34%),linear-gradient(145deg,#070b24,#11103c);color:var(--text);min-height:100vh;display:grid;place-items:center;padding:20px}.card{width:min(520px,100%);background:#0e1430;border:1px solid #3b4268;border-radius:26px;padding:26px;box-shadow:0 30px 90px #0008}.kicker{color:var(--gold2);font-weight:800}.field{margin-top:14px;background:#090e25;border:1px solid var(--line);border-radius:18px;padding:4px 14px}.field input{width:100%;background:transparent;border:0;outline:0;color:white;padding:14px 4px;font:inherit}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.primary,.secondary{border-radius:15px;padding:13px 18px;font:inherit;cursor:pointer}.primary{border:0;background:linear-gradient(135deg,#b98b3d,#f0d083);color:#18111c;font-weight:800}.secondary{border:1px solid #4a4772;background:#17183a;color:#eee}.msg{margin-top:16px;color:var(--muted);line-height:1.8;min-height:28px}.ok{color:#9ee2bd}.err{color:#ffb3b3}
+</style>
+</head>
+<body>
+<div class="card">
+<div class="kicker">حساب رؤيا</div>
+<h1>إنشاء حساب</h1>
+<p style="color:#a9aec8;line-height:1.8">أنشئ حسابك بالبريد الإلكتروني وكلمة مرور من 6 أحرف على الأقل.</p>
+<div class="field"><input id="email" type="email" autocomplete="email" inputmode="email" placeholder="البريد الإلكتروني"></div>
+<div class="field"><input id="password" type="password" autocomplete="new-password" minlength="6" placeholder="كلمة المرور"></div>
+<div class="actions"><button class="primary" id="createBtn">إنشاء الحساب</button><button class="secondary" id="loginBtn">لدي حساب</button></div>
+<div id="msg" class="msg"></div>
+</div>
+<script>
+const SUPABASE_URL='https://oajqczrxzurwvxjkbseq.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_9LTupYVJR3kKTL4xqj3pdw_vA67W-o4';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+const emailEl=document.getElementById('email'),passEl=document.getElementById('password'),msg=document.getElementById('msg');
+function setMsg(t,ok=false){msg.textContent=t;msg.className='msg '+(ok?'ok':'err')}
+async function createAccount(){
+ const email=emailEl.value.trim(),password=passEl.value;
+ if(!email){setMsg('اكتب البريد الإلكتروني أولًا.');emailEl.focus();return}
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){setMsg('البريد الإلكتروني غير صحيح.');emailEl.focus();return}
+ if(password.length<6){setMsg('كلمة المرور يجب أن تكون 6 أحرف على الأقل.');passEl.focus();return}
+ setMsg('جارٍ إنشاء الحساب…',true);
+ const {data,error}=await sb.auth.signUp({email,password});
+ if(error){setMsg(error.message);return}
+ if(data?.session){setMsg('تم إنشاء الحساب وتسجيل الدخول ✓',true);setTimeout(()=>location.href='./index.html',800)}
+ else setMsg('تم إنشاء الحساب. افتح رسالة التأكيد في بريدك، ثم ارجع وسجّل الدخول.',true);
+}
+async function login(){
+ const email=emailEl.value.trim(),password=passEl.value;
+ if(!email||!password){setMsg('أدخل البريد وكلمة المرور.');return}
+ setMsg('جارٍ تسجيل الدخول…',true);
+ const {error}=await sb.auth.signInWithPassword({email,password});
+ if(error){setMsg(error.message);return}
+ setMsg('تم تسجيل الدخول ✓',true);setTimeout(()=>location.href='./index.html',700);
+}
+document.getElementById('createBtn').onclick=createAccount;
+document.getElementById('loginBtn').onclick=login;
+</script>
+</body></html>
