@@ -155,8 +155,14 @@ nav{position:fixed;z-index:10;bottom:18px;left:50%;transform:translateX(-50%);wi
 <div class="kicker">حساب رؤيا</div><h2 id="authTitle">تسجيل الدخول</h2>
 <div class="dreambox"><input id="authEmail" type="email" style="width:100%;background:transparent;border:0;outline:0;color:white;padding:10px" placeholder="البريد الإلكتروني"></div>
 <div class="dreambox" style="margin-top:10px"><input id="authPassword" type="password" style="width:100%;background:transparent;border:0;outline:0;color:white;padding:10px" placeholder="كلمة المرور"></div>
-<div class="actions" style="margin-top:16px"><button class="primary" onclick="signIn()">دخول</button><button class="secondary" onclick="signUp()">إنشاء حساب</button></div>
+<div class="actions" style="margin-top:16px"><button class="primary" onclick="signIn()">دخول</button><button class="secondary" onclick="signUp()">إنشاء حساب</button><button class="secondary" onclick="requestPasswordReset()">نسيت كلمة المرور؟</button></div>
 <p id="authMsg" style="color:#a9aec8;font-size:13px;line-height:1.7"></p></div></div>
+<div class="modal" id="resetPasswordModal"><div class="modalbox"><button class="close" onclick="resetPasswordModal.classList.remove('show')">×</button>
+<div class="kicker">أمان الحساب</div><h2>تعيين كلمة مرور جديدة</h2>
+<p style="color:#a9aec8;line-height:1.8">اكتب كلمة مرور جديدة لحسابك.</p>
+<div class="dreambox"><input id="resetNewPassword" type="password" minlength="8" autocomplete="new-password" style="width:100%;background:transparent;border:0;outline:0;color:white;padding:10px" placeholder="كلمة المرور الجديدة"></div>
+<div class="actions" style="margin-top:16px"><button class="primary" onclick="updateRecoveredPassword()">حفظ كلمة المرور</button></div>
+<p id="resetPasswordMsg" style="color:#a9aec8;font-size:13px;line-height:1.7"></p></div></div>
 <div class="modal" id="modal"><div class="modalbox"><button class="close" onclick="skipAllQuestions()">×</button><div id="qMeta" style="color:#aab0ca;font-size:13px">الأسئلة الذكية</div><h2 id="qTitle">جارٍ تجهيز السؤال المناسب…</h2><p id="qHint" style="color:#aab0ca;line-height:1.8">نقرأ الرؤيا أولًا حتى لا نسألك عن معلومات ذكرتها بالفعل.</p><div class="progress"><i id="qProgress" style="width:12%"></i></div><div id="qOptions" class="options"></div><div id="qTextWrap" class="dreambox" style="display:none;margin-top:8px"><textarea id="qText" maxlength="1500" placeholder="اكتب إجابتك هنا…" style="min-height:100px"></textarea></div><div class="actions" style="margin-top:20px"><button id="qNextBtn" class="primary" onclick="nextSmartQuestion()">التالي ←</button><button class="secondary" onclick="skipSmartQuestion()">تخطي السؤال</button></div></div></div>
 <script>
 const dream=document.getElementById('dream'),counter=document.getElementById('counter'),modal=document.getElementById('modal');
@@ -867,8 +873,32 @@ function openAuth(){authModal.classList.add('show')}
 async function refreshUser(){const {data}=await sb.auth.getUser();currentUser=data?.user||null;const b=document.getElementById('authBtn');if(b)b.textContent=currentUser?'تسجيل الخروج':'تسجيل الدخول'}
 async function signIn(){const email=document.getElementById('authEmail').value.trim(),password=document.getElementById('authPassword').value;const m=document.getElementById('authMsg');m.textContent='جارٍ تسجيل الدخول…';const {error}=await sb.auth.signInWithPassword({email,password});if(error){m.textContent=error.message;return}m.textContent='تم تسجيل الدخول بنجاح';authModal.classList.remove('show');await refreshUser()}
 async function signUp(){const email=document.getElementById('authEmail').value.trim(),password=document.getElementById('authPassword').value;const m=document.getElementById('authMsg');m.textContent='جارٍ إنشاء الحساب…';const {error}=await sb.auth.signUp({email,password});m.textContent=error?error.message:'تم إنشاء الحساب. إذا كان تأكيد البريد مفعّلًا، افتح رسالة التأكيد ثم سجّل الدخول.'}
+async function requestPasswordReset(){
+  const email=document.getElementById('authEmail').value.trim();
+  const m=document.getElementById('authMsg');
+  if(!email){m.textContent='اكتب بريدك الإلكتروني أولًا.';document.getElementById('authEmail').focus();return}
+  m.textContent='جارٍ إرسال رابط الاستعادة…';
+  const redirectTo=location.origin+'/';
+  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo});
+  m.textContent=error?error.message:'تم إرسال رابط استعادة كلمة المرور إلى بريدك. افتح الرسالة واضغط الرابط.';
+}
+async function updateRecoveredPassword(){
+  const password=document.getElementById('resetNewPassword').value;
+  const m=document.getElementById('resetPasswordMsg');
+  if(password.length<8){m.textContent='يجب أن تكون كلمة المرور 8 أحرف على الأقل.';return}
+  m.textContent='جارٍ حفظ كلمة المرور الجديدة…';
+  const {error}=await sb.auth.updateUser({password});
+  if(error){m.textContent=error.message;return}
+  m.textContent='تم تحديث كلمة المرور بنجاح.';
+  setTimeout(()=>{document.getElementById('resetPasswordModal').classList.remove('show');history.replaceState({},'',location.pathname);},700);
+}
+function openPasswordRecovery(){
+  const modal=document.getElementById('resetPasswordModal');
+  if(modal){document.getElementById('resetPasswordMsg').textContent='';document.getElementById('resetNewPassword').value='';modal.classList.add('show');setTimeout(()=>document.getElementById('resetNewPassword').focus(),80)}
+}
+
 document.getElementById('authBtn').addEventListener('click',async(e)=>{if(currentUser){e.stopImmediatePropagation();await sb.auth.signOut();await refreshUser();alert('تم تسجيل الخروج');}});
-sb.auth.onAuthStateChange(()=>setTimeout(refreshUser,0));refreshUser();
+sb.auth.onAuthStateChange((event)=>{setTimeout(refreshUser,0);if(event==='PASSWORD_RECOVERY')setTimeout(openPasswordRecovery,50)});refreshUser();
 
 async function openSavedDream(id){
 const {data,error}=await sb.from('dreams')
