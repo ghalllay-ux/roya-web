@@ -1015,7 +1015,7 @@ ws(`<div class="kicker">الحساب</div>
 async function startPremiumCheckout(planId){
   if(!currentUser){openAuth();return}
   if(!/^https?:$/.test(location.protocol)){
-    alert('الدفع التجريبي يحتاج فتح الموقع من رابط ويب http/https حتى يستطيع ميسر الرجوع إلى صفحة النتيجة بعد 3D Secure.');
+    alert('الدفع يحتاج فتح الموقع من رابط ويب آمن.');
     return;
   }
 
@@ -1026,14 +1026,12 @@ async function startPremiumCheckout(planId){
 
   localStorage.setItem('roya_pending_plan',planId);
   history.pushState({royaCheckout:true},'',`${location.pathname}?checkout=${encodeURIComponent(planId)}`);
-
   document.querySelector('.shell')?.style.setProperty('display','none');
   document.querySelector('nav')?.style.setProperty('display','none');
   document.getElementById('royaCheckoutPage')?.remove();
 
   const page=document.createElement('main');
-  page.id='royaCheckoutPage';
-  page.setAttribute('dir','rtl');
+  page.id='royaCheckoutPage'; page.setAttribute('dir','rtl');
   page.style.cssText='min-height:100vh';
   page.innerHTML=`<div class="roya-pay-wrap">
     <div class="roya-pay-top">
@@ -1074,39 +1072,25 @@ async function startPremiumCheckout(planId){
     </div>
   </div>`
   document.body.appendChild(page);
-
-  const callback=new URL(location.origin+location.pathname);
-  callback.searchParams.set('payment_return','1');
-
+  const callback=new URL(location.origin+location.pathname); callback.searchParams.set('payment_return','1');
   try{
     Moyasar.init({
       element:'#royaCheckoutPage .mysr-form',
-      amount:Math.round(Number(plan.price_sar)*100),
-      currency:'SAR',
-      description:`اشتراك رؤيا - ${plan.name_ar}`,
+      amount:Math.round(Number(plan.price_sar)*100), currency:'SAR',
+      description:`رؤيا - ${plan.name_ar}`,
       publishable_api_key:'pk_test_rkBnvVzFvzJiEuZN53iJUuh2Rmg7a7dSdT9Awhkf',
-      callback_url:callback.toString(),
-      language:'ar',
-      methods:['creditcard'],
+      callback_url:callback.toString(), language:'ar',
+      methods:['creditcard','applepay'],
       supported_networks:['mada','visa','mastercard'],
+      apple_pay:{country:'SA',label:'رؤيا',validate_merchant_url:'https://api.moyasar.com/v1/applepay/initiate'},
       fixed_width:false,
       metadata:{user_id:currentUser.id,plan_id:plan.id},
       on_completed:function(payment){if(payment?.id)localStorage.setItem('roya_pending_payment',payment.id)},
       on_failure:function(error){console.error('Moyasar payment error',error)}
     });
-  }catch(e){
-    console.error(e);
-    page.querySelector('.mysr-form').innerHTML='<div style="padding:18px;text-align:center;color:#a9aec8">تعذر تشغيل نموذج الدفع. حاول مرة أخرى.</div>';
-  }
+  }catch(e){console.error(e);page.querySelector('.mysr-form').innerHTML='<div style="padding:18px;text-align:center;color:#a9aec8">تعذر تشغيل نموذج الدفع. حاول مرة أخرى.</div>'}
 }
-
-function leaveCheckoutPage(){
-  document.getElementById('royaCheckoutPage')?.remove();
-  document.querySelector('.shell')?.style.removeProperty('display');
-  document.querySelector('nav')?.style.removeProperty('display');
-  history.replaceState({},'',location.pathname);
-}
-
+function leaveCheckoutPage(){document.getElementById('royaCheckoutPage')?.remove();document.querySelector('.shell')?.style.removeProperty('display');document.querySelector('nav')?.style.removeProperty('display');history.replaceState({},'',location.pathname)}
 function closePaymentModal(){leaveCheckoutPage()}
 
 async function handleMoyasarReturn(){
