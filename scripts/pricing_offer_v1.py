@@ -12,6 +12,21 @@ css=r'''
 if marker not in s:
     s=s.replace('</style>',css+'\n</style>',1)
 
+static_old='''<section class="section"><div class="sectionTitle"><h2>رؤيا Premium</h2><span>أسعار الإطلاق</span></div><div class="pricing">
+<div class="card price"><h3>شهري</h3><div class="amount">5 <small>ر.س / شهر</small></div><button class="secondary" onclick="startPremiumCheckout('monthly')">اختيار الشهري</button></div>
+<div class="card price pop"><span class="badge">الأكثر اختيارًا</span><h3>سنوي</h3><div class="amount">30 <small>ر.س / سنة</small></div><button class="primary" onclick="startPremiumCheckout('annual')">اختيار السنوي</button></div>
+<div class="card price"><h3>مدى الحياة</h3><div class="amount">70 <small>ر.س / مرة واحدة</small></div><button class="secondary" onclick="startPremiumCheckout('lifetime')">اختيار مدى الحياة</button></div>
+</div></section>'''
+static_new='''<section class="section"><div class="sectionTitle"><h2>رؤيا Premium</h2><span>عرض خصم 70%</span></div><div class="pricing">
+<div class="card price"><h3>شهري</h3><div class="offerLine"><span class="offerBadge70">خصم 70%</span><span class="oldPrice">16.67 ر.س</span></div><div class="amount">5 <small>ر.س / شهر</small></div><div class="priceOfferNote">سعر العرض الحالي</div><button class="secondary" onclick="startPremiumCheckout('monthly')">اختيار الشهري</button></div>
+<div class="card price pop"><span class="badge">الأكثر اختيارًا</span><h3>سنوي</h3><div class="offerLine"><span class="offerBadge70">خصم 70%</span><span class="oldPrice">96.67 ر.س</span></div><div class="amount">29 <small>ر.س / سنة</small></div><div class="priceOfferNote">سعر العرض الحالي</div><button class="primary" onclick="startPremiumCheckout('annual')">اختيار السنوي</button></div>
+<div class="card price"><h3>مدى الحياة</h3><div class="offerLine"><span class="offerBadge70">خصم 70%</span><span class="oldPrice">163.33 ر.س</span></div><div class="amount">49 <small>ر.س / مرة واحدة</small></div><div class="priceOfferNote">سعر العرض الحالي</div><button class="secondary" onclick="startPremiumCheckout('lifetime')">اختيار مدى الحياة</button></div>
+</div></section>'''
+if static_old in s:
+    s=s.replace(static_old,static_new,1)
+elif '<div class="amount">30 <small>ر.س / سنة</small></div>' in s or '<div class="amount">70 <small>ر.س / مرة واحدة</small></div>' in s:
+    raise SystemExit('Homepage pricing section changed unexpectedly; manual review needed')
+
 old="""const plans=(plansRes.data||[]);
 const planCards=plans.map(p=>{
   const active=isPremium&&activePlan?.id===p.id;
@@ -40,8 +55,8 @@ const planCards=plans.map(p=>{
     ${active?'<button class=\"primary\" disabled>خطتك الحالية ✓</button>':`<button class=\"${p.id==='annual'?'primary':'secondary'}\" onclick=\"startPremiumCheckout('${p.id}')\">اختيار الخطة</button>`}
   </div>`;
 }).join('');"""
-if old not in s:
-    raise SystemExit('pricing block not found')
-s=s.replace(old,new,1)
+if old in s:
+    s=s.replace(old,new,1)
+
 p.write_text(s,encoding='utf-8')
-print('70% pricing offer UI applied')
+print('Homepage and account pricing offer UI applied')
