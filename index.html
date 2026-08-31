@@ -1,1 +1,853 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>رؤيا</title></head><body style="margin:0;background:#070b24;color:white;font-family:system-ui"><div id="loading" style="min-height:100vh;display:grid;place-items:center"><div>جارٍ تحميل رؤيا…</div></div><script>(async()=>{try{const u='https://raw.githubusercontent.com/ghalllay-ux/roya-web/95e88c06219a6bf44791a530e24ddc532b64fc48^/index.html';let s=await(await fetch(u,{cache:'no-store'})).text();if(!s||s.startsWith('404:'))throw new Error('restore source unavailable');const old=`  const {data:cfg,error:cfgError}=await sb.functions.invoke('moyasar-public-config',{body:{}});\n  if(cfgError||!cfg?.publishable_key){\n    alert('تعذر تحميل إعدادات ميسر التجريبية.');\n    console.error(cfgError||cfg);\n    return;\n  }\n`;const replacement=`  const cfg={publishable_key:'pk_test_rkBnvVzFvzJiEuZN53iJUuh2Rmg7a7dSdT9Awhkf',mode:'test'};\n`;if(!s.includes(old))throw new Error('payment block unavailable');s=s.replace(old,replacement);document.open();document.write(s);document.close()}catch(e){console.error(e);document.getElementById('loading').innerHTML='<div style="padding:24px;text-align:center">تعذر تحميل رؤيا مؤقتًا. حدّث الصفحة بعد قليل.</div>'}})();</script></body></html>
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>رؤيا | تفسير الأحلام الذكي</title>
+<style>
+:root{--bg:#070b24;--bg2:#11103c;--card:#101632cc;--card2:#161b3f;--gold:#d6ad5b;--gold2:#f2d58a;--text:#f8f7fb;--muted:#a9aec8;--line:#2a3158;--purple:#7b61ff;--ok:#7bd3a8}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;background:radial-gradient(circle at 80% -10%,#312060 0,transparent 34%),linear-gradient(145deg,var(--bg),var(--bg2));color:var(--text);min-height:100vh}
+button,input,textarea{font:inherit}.shell{max-width:1180px;margin:auto;min-height:100vh;padding:24px 24px 100px}
+header{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:34px}.brand{display:flex;align-items:center;gap:12px}.mark{width:44px;height:44px;border-radius:15px;background:linear-gradient(145deg,#2a235d,#11183b);border:1px solid #4d467c;display:grid;place-items:center;color:var(--gold2);font-size:24px;box-shadow:0 10px 35px #0007}.brand b{font-size:25px}.brand small{display:block;color:var(--muted);margin-top:2px}.ghost{border:1px solid var(--line);background:#11163299;color:#ddd;border-radius:14px;padding:10px 15px;cursor:pointer}
+.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:22px}.panel{background:linear-gradient(145deg,#111731d9,#0c1129d9);border:1px solid var(--line);border-radius:26px;padding:28px;box-shadow:0 20px 55px #0005;backdrop-filter:blur(14px)}
+.kicker{color:var(--gold2);font-weight:700}.hero h1{font-size:clamp(34px,5vw,62px);line-height:1.1;margin:10px 0 14px}.hero p{color:var(--muted);line-height:1.9;font-size:17px;max-width:700px}
+.dreambox{margin-top:24px;background:#090e25;border:1px solid #30375e;border-radius:22px;padding:18px}textarea{width:100%;min-height:150px;resize:vertical;background:transparent;border:0;outline:0;color:#fff;line-height:1.9}.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.primary{border:0;border-radius:15px;padding:13px 20px;background:linear-gradient(135deg,#b98b3d,#f0d083);color:#18111c;font-weight:800;cursor:pointer;box-shadow:0 8px 30px #d6ad5b22}.secondary{border:1px solid #4a4772;background:#17183a;color:#eee;border-radius:15px;padding:12px 18px;cursor:pointer}
+.side h3{margin-top:0}.steps{display:grid;gap:13px;margin-top:20px}.step{display:flex;gap:13px;padding:14px;border:1px solid var(--line);border-radius:18px;background:#101632}.num{min-width:34px;height:34px;border-radius:12px;background:#2b2458;color:var(--gold2);display:grid;place-items:center;font-weight:800}.step span{color:var(--muted);font-size:14px;display:block;margin-top:3px}
+.section{margin-top:25px}.sectionTitle{display:flex;justify-content:space-between;align-items:end;margin-bottom:13px}.sectionTitle h2{margin:0}.sectionTitle span{color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card{padding:20px;border-radius:21px;background:#101632cc;border:1px solid var(--line)}.card .icon{font-size:25px}.card h3{margin:12px 0 6px}.card p{margin:0;color:var(--muted);line-height:1.7;font-size:14px}
+.pricing{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.price{position:relative;text-align:center;padding:24px}.price.pop{border-color:#92703e;box-shadow:inset 0 0 0 1px #7c6039,0 20px 45px #0004}.badge{position:absolute;top:12px;left:12px;background:#e2bf70;color:#21172a;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:800}.amount{font-size:36px;font-weight:900;color:var(--gold2);margin:13px 0}.amount small{font-size:14px;color:var(--muted);font-weight:500}.privacy{margin-top:20px;display:flex;gap:13px;align-items:flex-start;padding:17px;border-radius:18px;background:#0e1731;border:1px solid #26355a}.privacy b{color:#d9e4ff}.privacy p{margin:4px 0 0;color:var(--muted);font-size:13px;line-height:1.7}
+nav{position:fixed;z-index:10;bottom:18px;left:50%;transform:translateX(-50%);width:min(650px,calc(100% - 28px));background:#0c112be8;border:1px solid #30365a;border-radius:22px;padding:9px;display:grid;grid-template-columns:repeat(4,1fr);backdrop-filter:blur(18px);box-shadow:0 15px 50px #0008}nav button{border:0;background:transparent;color:#9299b8;padding:9px;border-radius:15px;cursor:pointer}nav button.active{background:#25224a;color:var(--gold2)}
+.modal{display:none;position:fixed;inset:0;z-index:20;background:#030615cc;place-items:center;padding:18px}.modal.show{display:grid}.modalbox{width:min(620px,100%);max-height:90vh;overflow:auto;background:#0e1430;border:1px solid #3b4268;border-radius:26px;padding:25px;box-shadow:0 30px 90px #000}.progress{height:7px;background:#22284a;border-radius:999px;overflow:hidden;margin:14px 0 24px}.progress i{display:block;width:28%;height:100%;background:linear-gradient(90deg,var(--purple),var(--gold))}.options{display:grid;gap:10px}.option{padding:15px;border:1px solid #353c62;border-radius:16px;background:#111735;color:#eee;text-align:right;cursor:pointer}.option:hover,.option.sel{border-color:#b99657;background:#24203e}.close{float:left;border:0;background:#232847;color:#ddd;width:36px;height:36px;border-radius:12px;cursor:pointer}
+@media(max-width:800px){.shell{padding:17px 15px 95px}.hero{grid-template-columns:1fr}.cards,.pricing{grid-template-columns:1fr}.panel{padding:20px;border-radius:22px}.hero h1{font-size:39px}header{margin-bottom:20px}.brand small{display:none}}
+
+.paymentOverlay{position:fixed;inset:0;background:rgba(3,6,18,.78);backdrop-filter:blur(10px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:18px}
+.paymentPanel{width:min(560px,100%);max-height:92vh;overflow:auto;background:#0d1226;border:1px solid rgba(214,173,91,.28);border-radius:24px;padding:22px;box-shadow:0 30px 90px rgba(0,0,0,.45)}
+.paymentPanel .mysr-form{max-width:none!important;width:100%!important}
+.paymentStatus{padding:12px 14px;border-radius:14px;background:rgba(214,173,91,.08);border:1px solid rgba(214,173,91,.18);color:#d9ddf0;line-height:1.7}
+</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="https://cdn.moyasar.com/mpf/1.15.0/moyasar.css">
+<script src="https://cdn.moyasar.com/mpf/1.15.0/moyasar.js"></script>
+</head>
+<body>
+<div class="shell">
+<header><div class="brand"><div class="mark">◐</div><div><b>رؤيا</b><small>تفسير ذكي، متوازن، وخصوصي</small></div></div><button class="ghost" id="authBtn" onclick="openAuth()">تسجيل الدخول</button></header>
+<main>
+<section class="hero">
+<div class="panel">
+<div class="kicker">✦ مفسّر الرؤى الذكي</div>
+<h1>احكِ رؤياك…<br>ودعنا نفهم تفاصيلها.</h1>
+<p>اكتب ما تتذكره كما حدث، وسنسألك أسئلة قصيرة تساعد على فهم السياق قبل تقديم قراءة متوازنة للرؤيا.</p>
+<div class="dreambox"><textarea id="dream" placeholder="مثال: رأيت أنني في منزل قديم، ثم فُتح أمامي باب واسع وشعرت بالراحة…"></textarea><div class="actions"><button class="primary" onclick="start()">ابدأ التفسير ←</button><button class="secondary" onclick="voice()">🎙 تسجيل صوتي</button><span id="counter" style="margin-right:auto;color:#737b9d;font-size:12px">0 حرف</span></div></div>
+<div class="privacy"><div>🔒</div><div><b>رؤياك خاصة</b><p>لا يتم نشر الرؤى للعامة. ويمكن حذف الرؤى أو الحساب والبيانات المرتبطة به من إعدادات الخصوصية.</p></div></div>
+</div>
+<aside class="panel side"><h3>كيف يعمل؟</h3><div class="steps">
+<div class="step"><div class="num">1</div><div><b>احكِ الرؤيا</b><span>بالكتابة أو التسجيل الصوتي.</span></div></div>
+<div class="step"><div class="num">2</div><div><b>أسئلة ذكية</b><span>أسئلة تتغير حسب تفاصيل رؤياك.</span></div></div>
+<div class="step"><div class="num">3</div><div><b>قراءة متوازنة</b><span>سياقية، تراثية موثقة، ونفسية عامة.</span></div></div>
+<div class="step"><div class="num">4</div><div><b>اسأل المفسر</b><span>تابع الحوار حول نفس الرؤيا.</span></div></div>
+</div></aside>
+</section>
+<section class="section"><div class="sectionTitle"><h2>تجربة مصممة حول رؤياك</h2><span>النسخة التجريبية</span></div><div class="cards">
+<div class="card"><div class="icon">✦</div><h3>تفسير بالسياق</h3><p>لا نعتمد على معنى رمز واحد؛ بل نربط الأشخاص والمكان والمشاعر وتسلسل الأحداث.</p></div>
+<div class="card"><div class="icon">◉</div><h3>رؤياي</h3><p>سجل شخصي للرؤى المحفوظة، المفضلة، والرموز المتكررة مع بحث سريع.</p></div>
+<div class="card"><div class="icon">☏</div><h3>اسأل المفسر</h3><p>محادثة متابعة تحتفظ بسياق الرؤيا وإجاباتك السابقة.</p></div>
+</div></section>
+<section class="section"><div class="sectionTitle"><h2>رؤيا Premium</h2><span>أسعار الإطلاق</span></div><div class="pricing">
+<div class="card price"><h3>شهري</h3><div class="amount">5 <small>ر.س / شهر</small></div><button class="secondary" onclick="startPremiumCheckout('monthly')">اختيار الشهري</button></div>
+<div class="card price pop"><span class="badge">الأكثر اختيارًا</span><h3>سنوي</h3><div class="amount">30 <small>ر.س / سنة</small></div><button class="primary" onclick="startPremiumCheckout('annual')">اختيار السنوي</button></div>
+<div class="card price"><h3>مدى الحياة</h3><div class="amount">70 <small>ر.س / مرة واحدة</small></div><button class="secondary" onclick="startPremiumCheckout('lifetime')">اختيار مدى الحياة</button></div>
+</div></section>
+
+<section class="section" id="demoFlow">
+<div class="sectionTitle"><h2>تجربة المسار الكامل</h2><span>واجهة تفاعلية أولية</span></div>
+<div class="cards">
+<div class="card"><div class="icon">❓</div><h3>الأسئلة الذكية</h3><p>أسئلة قصيرة تتدرج حسب المكان والشعور والأشخاص وتكرار الرؤيا.</p><button class="secondary" style="margin-top:14px" onclick="openQuestions()">جرّب الأسئلة</button></div>
+<div class="card"><div class="icon">✦</div><h3>نتيجة التفسير</h3><p>ملخص، رموز، قراءة سياقية، وتأويل احتمالي دون ادعاء اليقين.</p><button class="secondary" style="margin-top:14px" onclick="showResult()">عرض نموذج النتيجة</button></div>
+<div class="card"><div class="icon">☏</div><h3>اسأل المفسر</h3><p>متابعة الحوار حول نفس الرؤيا مع الاحتفاظ بالسياق.</p><button class="secondary" style="margin-top:14px" onclick="showChat()">فتح المحادثة</button></div>
+</div>
+<div id="workspace" class="panel" style="margin-top:14px;display:none"></div>
+</section>
+</main></div>
+<nav><button class="active" onclick="goHome(this)">⌂<br><small>الرئيسية</small></button><button onclick="showDreams(this)">◉<br><small>رؤياي</small></button><button onclick="showChat(this)">✦<br><small>المفسر</small></button><button onclick="showAccount(this)">♙<br><small>الحساب</small></button></nav>
+
+<div class="modal" id="authModal"><div class="modalbox"><button class="close" onclick="authModal.classList.remove('show')">×</button>
+<div class="kicker">حساب رؤيا</div><h2 id="authTitle">تسجيل الدخول</h2>
+<div class="dreambox"><input id="authEmail" type="email" style="width:100%;background:transparent;border:0;outline:0;color:white;padding:10px" placeholder="البريد الإلكتروني"></div>
+<div class="dreambox" style="margin-top:10px"><input id="authPassword" type="password" style="width:100%;background:transparent;border:0;outline:0;color:white;padding:10px" placeholder="كلمة المرور"></div>
+<div class="actions" style="margin-top:16px"><button class="primary" onclick="signIn()">دخول</button><button class="secondary" onclick="signUp()">إنشاء حساب</button></div>
+<p id="authMsg" style="color:#a9aec8;font-size:13px;line-height:1.7"></p></div></div>
+<div class="modal" id="modal"><div class="modalbox"><button class="close" onclick="skipAllQuestions()">×</button><div id="qMeta" style="color:#aab0ca;font-size:13px">الأسئلة الذكية</div><h2 id="qTitle">جارٍ تجهيز السؤال المناسب…</h2><p id="qHint" style="color:#aab0ca;line-height:1.8">نقرأ الرؤيا أولًا حتى لا نسألك عن معلومات ذكرتها بالفعل.</p><div class="progress"><i id="qProgress" style="width:12%"></i></div><div id="qOptions" class="options"></div><div id="qTextWrap" class="dreambox" style="display:none;margin-top:8px"><textarea id="qText" maxlength="1500" placeholder="اكتب إجابتك هنا…" style="min-height:100px"></textarea></div><div class="actions" style="margin-top:20px"><button id="qNextBtn" class="primary" onclick="nextSmartQuestion()">التالي ←</button><button class="secondary" onclick="skipSmartQuestion()">تخطي السؤال</button></div></div></div>
+<script>
+const dream=document.getElementById('dream'),counter=document.getElementById('counter'),modal=document.getElementById('modal');
+dream.addEventListener('input',()=>counter.textContent=dream.value.length+' حرف');
+let smartQuestions=[];
+let smartAnswers=[];
+let smartIndex=0;
+let selectedSmartAnswer='';
+
+async function start(){
+  if(dream.value.trim().length<10){
+    dream.focus();
+    alert('اكتب تفاصيل أكثر قليلًا حتى نبدأ الأسئلة الذكية.');
+    return;
+  }
+  if(!currentUser){openAuth();return}
+  const text=dream.value.trim();
+  const {data,error}=await sb.from('dreams')
+    .insert({user_id:currentUser.id,title:text.slice(0,45),dream_text:text})
+    .select('id').single();
+  if(error){
+    console.error(error);
+    alert('تعذر حفظ الرؤيا. حاول مرة أخرى.');
+    return;
+  }
+  currentDreamId=data.id;
+  await generateSmartQuestions();
+}
+
+async function generateSmartQuestions(){
+  const text=dream.value.trim();
+  modal.classList.add('show');
+  document.getElementById('qMeta').textContent='الأسئلة الذكية';
+  document.getElementById('qTitle').textContent='جارٍ تحليل الرؤيا…';
+  document.getElementById('qHint').textContent='نحدد فقط المعلومات التي قد تغيّر فهم السياق.';
+  document.getElementById('qOptions').innerHTML='';
+  document.getElementById('qTextWrap').style.display='none';
+  document.getElementById('qNextBtn').disabled=true;
+  document.getElementById('qProgress').style.width='12%';
+
+  const {data,error}=await sb.functions.invoke('generate-dream-questions',{body:{dream:text,dream_id:currentDreamId}});
+  if(error){
+    console.error(error);
+    modal.classList.remove('show');
+    const proceed=confirm('تعذر توليد الأسئلة الذكية الآن. هل تريد الانتقال مباشرة إلى التفسير؟');
+    if(proceed) await showResult();
+    return;
+  }
+
+  smartQuestions=Array.isArray(data?.questions)?data.questions.slice(0,4):[];
+  smartAnswers=[];
+  smartIndex=0;
+  selectedSmartAnswer='';
+
+  if(!smartQuestions.length){
+    modal.classList.remove('show');
+    await showResult();
+    return;
+  }
+  renderSmartQuestion();
+}
+
+function renderSmartQuestion(){
+  const q=smartQuestions[smartIndex];
+  if(!q){
+    modal.classList.remove('show');
+    showResult();
+    return;
+  }
+  selectedSmartAnswer='';
+  document.getElementById('qMeta').textContent=`الأسئلة الذكية • ${smartIndex+1} من ${smartQuestions.length}`;
+  document.getElementById('qTitle').textContent=q.question||'سؤال توضيحي';
+  document.getElementById('qHint').textContent=q.hint||'هذه المعلومة تساعد على فهم سياق الرؤيا.';
+  document.getElementById('qProgress').style.width=`${Math.max(14,Math.round(((smartIndex+1)/smartQuestions.length)*100))}%`;
+  const opts=document.getElementById('qOptions');
+  const wrap=document.getElementById('qTextWrap');
+  const text=document.getElementById('qText');
+  text.value='';
+  opts.innerHTML='';
+
+  const options=Array.isArray(q.options)?q.options.filter(Boolean):[];
+  if(options.length){
+    wrap.style.display='none';
+    opts.innerHTML=options.map((o,i)=>`<button class="option" onclick="pickSmartOption(this,${i})">${escapeHtml(o)}</button>`).join('');
+  }else{
+    wrap.style.display='block';
+    opts.innerHTML='';
+    setTimeout(()=>text.focus(),50);
+  }
+  document.getElementById('qNextBtn').disabled=false;
+  document.getElementById('qNextBtn').textContent=smartIndex===smartQuestions.length-1?'ابدأ التفسير ←':'التالي ←';
+}
+
+function pickSmartOption(el,index){
+  document.querySelectorAll('#qOptions .option').forEach(x=>x.classList.remove('sel'));
+  el.classList.add('sel');
+  selectedSmartAnswer=String(smartQuestions[smartIndex]?.options?.[index]??'');
+}
+
+async function saveSmartAnswer(answer){
+  const q=smartQuestions[smartIndex];
+  if(!q||!answer||!currentDreamId||!currentUser)return;
+  const row={
+    dream_id:currentDreamId,
+    user_id:currentUser.id,
+    question_key:String(q.key||`q_${smartIndex+1}`).slice(0,100),
+    question_text:String(q.question||'').slice(0,1000),
+    answer_text:String(answer).slice(0,1500)
+  };
+  const {error}=await sb.from('dream_answers').insert(row);
+  if(error) console.error('Could not save dream answer',error);
+}
+
+async function nextSmartQuestion(){
+  const q=smartQuestions[smartIndex];
+  if(!q)return;
+  const options=Array.isArray(q.options)?q.options.filter(Boolean):[];
+  let answer=options.length?selectedSmartAnswer:document.getElementById('qText').value.trim();
+  if(!answer){
+    const ok=confirm('لم تُدخل إجابة. هل تريد تخطي هذا السؤال؟');
+    if(!ok)return;
+  }else{
+    await saveSmartAnswer(answer);
+    smartAnswers.push({key:q.key||`q_${smartIndex+1}`,question:q.question||'',answer});
+  }
+  smartIndex++;
+  if(smartIndex>=smartQuestions.length){
+    modal.classList.remove('show');
+    await showResult();
+    return;
+  }
+  renderSmartQuestion();
+}
+
+async function skipSmartQuestion(){
+  smartIndex++;
+  if(smartIndex>=smartQuestions.length){
+    modal.classList.remove('show');
+    await showResult();
+    return;
+  }
+  renderSmartQuestion();
+}
+
+async function skipAllQuestions(){
+  modal.classList.remove('show');
+  await showResult();
+}
+
+function voice(){alert('التسجيل الصوتي سيُفعّل عند ربط خدمة تحويل الصوت إلى نص.')}
+
+function activate(btn){document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));if(btn&&btn.tagName==='BUTTON')btn.classList.add('active')}
+function ws(html){const w=document.getElementById('workspace');w.style.display='block';w.innerHTML=html;w.scrollIntoView({behavior:'smooth',block:'center'})}
+function goHome(btn){activate(btn);window.scrollTo({top:0,behavior:'smooth'})}
+async function openQuestions(){if(!currentUser){openAuth();return} if(!currentDreamId&&dream.value.trim().length>=10){await start();return} await generateSmartQuestions()}
+
+function resultReportHtml(r, includeUsage=true){
+  const symbols=Array.isArray(r?.symbols)?r.symbols:[];
+  const symbolCards=symbols.length
+    ? `<div class="sectionTitle" style="margin-top:22px"><h2 style="font-size:19px">الرموز الرئيسية</h2><span>${symbols.length} رموز</span></div>
+       <div class="cards">${symbols.map(x=>`<div class="card"><div class="icon">✦</div><h3>${escapeHtml(x?.symbol||'رمز')}</h3><p>${escapeHtml(x?.meaning||'')}</p></div>`).join('')}</div>`
+    : '';
+
+  return `<div class="kicker">نتيجة التفسير</div>
+    <h2>${escapeHtml(r?.title||'قراءة رؤياك')}</h2>
+    <div class="card" style="margin-top:14px">
+      <small style="color:#d6ad5b">ملخص الرؤيا</small>
+      <p style="line-height:1.9;margin-top:8px">${escapeHtml(r?.summary||'')}</p>
+    </div>
+    ${symbolCards}
+    <div class="card" style="margin-top:14px">
+      <h3>القراءة السياقية</h3>
+      <p style="line-height:1.9">${escapeHtml(r?.contextual_reading||r?.interpretation||'')}</p>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <h3>القراءة النفسية العامة</h3>
+      <p style="line-height:1.9">${escapeHtml(r?.psychological_reading||'هذه القراءة عامة وغير تشخيصية.')}</p>
+    </div>
+    <div class="card" style="margin-top:14px;border-color:#92703e">
+      <h3>الخلاصة</h3>
+      <p style="line-height:1.9">${escapeHtml(r?.conclusion||r?.interpretation||'')}</p>
+    </div>
+    <div class="privacy"><div>ⓘ</div><div>
+      <b>درجة وضوح السياق: ${Number(r?.context_clarity||0)}%</b>
+      <p>هذا المؤشر يقيس اكتمال معلومات الرؤيا فقط، ولا يمثل نسبة صحة التفسير أو توقع المستقبل.</p>
+    </div></div>
+    ${includeUsage?`<div class="privacy"><div>🎁</div><div><b>${r?.usage?.premium?'استخدام Premium':'الاستخدام المجاني'}</b><p>استخدمت ${r?.usage?.used??'-'} من ${r?.usage?.limit??3} تفسيرًا هذا الشهر${r?.usage?.premium?' ضمن سياسة الاستخدام العادل':''}.</p></div></div>`:''}
+    <div class="privacy"><div>⚖️</div><div><b>تنبيه مهم</b><p>التفسير اجتهادي واحتمالي، ولا ينبغي بناء القرارات المصيرية أو الطبية أو المالية أو القانونية عليه.</p></div></div>
+    <button class="primary" style="margin-top:16px" onclick="showChat()">اسأل المفسر عن هذه الرؤيا</button>`;
+}
+
+async function showResult(btn){activate(btn);if(!currentUser){ws(`<div class="kicker">التفسير الذكي</div><h2>سجّل الدخول أولًا</h2><p style="color:#a9aec8">التفسير الحقيقي مرتبط بحسابك حتى نحفظ الرؤيا والنتيجة بأمان.</p><button class="primary" onclick="openAuth()">تسجيل الدخول</button>`);return}
+const text=dream.value.trim();if(text.length<10){ws(`<h2>اكتب رؤياك أولًا</h2><p style="color:#a9aec8">ارجع إلى أعلى الصفحة وأدخل تفاصيل الرؤيا.</p>`);return}
+ws(`<div class="kicker">التفسير الذكي</div><h2>جارٍ تحليل الرؤيا…</h2><p style="color:#a9aec8">نربط الرموز بالسياق والمشاعر، دون تقديم تنبؤات قطعية.</p>`);
+const {data,error}=await sb.functions.invoke('interpret-dream',{body:{dream:text,dream_id:currentDreamId,answers:smartAnswers}});
+if(error){
+let msg='تعذر إكمال التفسير.';
+if(String(error.message||'').includes('429')) msg='لقد استخدمت 3 تفسيرات مجانية لهذا الشهر.';
+ws(`<div class="kicker">التفسير الذكي</div><h2>${msg}</h2><p style="color:#a9aec8;line-height:1.8">إذا انتهى الحد المجاني يمكنك اختيار Premium، وإذا لم ينتهِ فراجع رصيد OpenAI أو اتصال الحساب.</p><div class="privacy"><div>🔐</div><div><b>آمن افتراضيًا</b><p>محرك التفسير يعمل من الخادم ومفتاح API لا يظهر في الواجهة.</p></div></div><button class="primary" onclick="showAccount()">عرض Premium</button>`);return}
+const r=data||{};
+let contextHtml='';
+if(smartAnswers.length){
+  contextHtml=`<div class="card" style="margin-bottom:14px"><h3>السياق المستخدم</h3>${smartAnswers.map(a=>`<p style="line-height:1.7"><b>${escapeHtml(a.question)}</b><br><span style="color:#a9aec8">${escapeHtml(a.answer)}</span></p>`).join('')}</div>`;
+}
+ws(contextHtml+resultReportHtml(r,true));
+}
+async function showChat(btn){
+activate(btn);
+if(!currentUser){
+  ws(`<div class="kicker">اسأل المفسر</div><h2>سجّل الدخول أولًا</h2><p style="color:#a9aec8">المحادثة مرتبطة بحسابك ورؤياك وتحفظ تلقائيًا.</p><button class="primary" onclick="openAuth()">تسجيل الدخول</button>`);
+  return;
+}
+if(!currentDreamId){
+  const {data,error}=await sb.from('dreams').select('id,title').not('interpretation','is',null).order('updated_at',{ascending:false}).limit(1).maybeSingle();
+  if(error||!data){
+    ws(`<div class="kicker">اسأل المفسر</div><h2>اختر رؤيا مفسّرة أولًا</h2><p style="color:#a9aec8">افتح إحدى رؤاك المفسّرة من «رؤياي» ثم ابدأ المحادثة حولها.</p><button class="primary" onclick="showDreams()">فتح رؤياي</button>`);
+    return;
+  }
+  currentDreamId=data.id;
+}
+await renderInterpreterChat();
+}
+
+async function renderInterpreterChat(){
+ws(`<div class="kicker">اسأل المفسر</div><h2>جارٍ تحميل المحادثة…</h2><p style="color:#a9aec8">نستعيد سياق الرؤيا والأسئلة السابقة.</p>`);
+const {data:dreamRow,error:dreamErr}=await sb.from('dreams').select('id,title,dream_text,interpretation').eq('id',currentDreamId).single();
+if(dreamErr||!dreamRow){
+  ws(`<h2>تعذر فتح الرؤيا</h2><p style="color:#a9aec8">قد تكون الرؤيا حُذفت أو لم تعد متاحة.</p>`);
+  return;
+}
+const {data:messages,error:msgErr}=await sb.from('dream_messages').select('id,role,content,created_at').eq('dream_id',currentDreamId).order('created_at',{ascending:true}).limit(50);
+if(msgErr){
+  ws(`<h2>تعذر تحميل المحادثة</h2><p style="color:#a9aec8">${escapeHtml(msgErr.message)}</p>`);
+  return;
+}
+const bubbles=(messages||[]).map(m=>{
+  const mine=m.role==='user';
+  return `<div class="card" style="margin:${mine?'10px 12% 10px 0':'10px 0 10px 12%'};background:${mine?'#24203e':'rgba(255,255,255,.045)'}">
+    <small style="color:${mine?'#d6ad5b':'#a9aec8'}">${mine?'أنت':'المفسر الذكي'}</small>
+    <p style="line-height:1.8;white-space:pre-wrap">${escapeHtml(m.content||'')}</p>
+  </div>`;
+}).join('');
+ws(`<div class="kicker">اسأل المفسر</div>
+<h2>${escapeHtml(dreamRow.title||'متابعة حول رؤياك')}</h2>
+<p style="color:#a9aec8;line-height:1.8">يمكنك السؤال عن أي رمز أو شعور أو جزء من التفسير. تبقى الإجابات ضمن سياق هذه الرؤيا.</p>
+<div id="chatMessages">${bubbles||'<div class="card"><p style="color:#a9aec8">لا توجد رسائل بعد. اكتب أول سؤال حول رؤياك.</p></div>'}</div>
+<div class="dreambox" style="margin-top:14px;display:flex;gap:8px;align-items:center">
+  <input id="interpreterQuestion" maxlength="3000" style="flex:1;background:transparent;border:0;outline:0;color:white;padding:10px" placeholder="اسأل عن أي جزء من الرؤيا…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendInterpreterQuestion()}">
+  <button id="sendInterpreterBtn" class="secondary" style="white-space:nowrap" onclick="sendInterpreterQuestion()">إرسال</button>
+</div>
+<p id="chatStatus" style="color:#a9aec8;font-size:13px;margin-top:8px"></p>`);
+}
+
+async function sendInterpreterQuestion(){
+const input=document.getElementById('interpreterQuestion');
+const btn=document.getElementById('sendInterpreterBtn');
+const status=document.getElementById('chatStatus');
+if(!input||!currentDreamId)return;
+const question=input.value.trim();
+if(question.length<2){input.focus();return}
+btn.disabled=true;
+input.disabled=true;
+status.textContent='يفكر المفسر في سؤالك…';
+const {data,error}=await sb.functions.invoke('ask-interpreter',{body:{dream_id:currentDreamId,question}});
+if(error){
+  status.textContent='تعذر إرسال السؤال. تحقق من الاتصال أو رصيد OpenAI ثم حاول مرة أخرى.';
+  btn.disabled=false;
+  input.disabled=false;
+  return;
+}
+input.value='';
+status.textContent='';
+await renderInterpreterChat();
+}
+async function showDreams(btn){
+activate(btn);
+if(!currentUser){
+  ws(`<div class="kicker">رؤياي</div><h2>سجّل الدخول لعرض رؤاك</h2><p style="color:#a9aec8">بعد تسجيل الدخول، ستظهر هنا الرؤى المحفوظة في حسابك فقط.</p><button class="primary" onclick="openAuth()">تسجيل الدخول</button>`);
+  return;
+}
+ws(`<div class="kicker">رؤياي</div><h2>مكتبة رؤاك</h2><p style="color:#a9aec8">جارٍ تحميل الرؤى والرموز…</p>`);
+const {data,error}=await sb.from('dreams')
+  .select('id,title,dream_text,interpretation,interpretation_data,context_clarity,is_favorite,created_at,updated_at')
+  .order('created_at',{ascending:false})
+  .limit(200);
+if(error){
+  ws(`<h2>تعذر تحميل الرؤى</h2><p style="color:#a9aec8">${escapeHtml(error.message)}</p>`);
+  return;
+}
+libraryDreams=data||[];
+renderDreamLibrary();
+}
+
+function dreamStatusLabel(d){
+  return d.interpretation?'مفسّرة':'بانتظار التفسير';
+}
+
+function collectRepeatedSymbols(rows){
+  const counts=new Map();
+  for(const d of rows){
+    const arr=Array.isArray(d?.interpretation_data?.symbols)?d.interpretation_data.symbols:[];
+    for(const x of arr){
+      const name=String(x?.symbol||'').trim();
+      if(!name)continue;
+      counts.set(name,(counts.get(name)||0)+1);
+    }
+  }
+  return [...counts.entries()]
+    .sort((a,b)=>b[1]-a[1] || a[0].localeCompare(b[0],'ar'))
+    .slice(0,8);
+}
+
+function setLibraryFilter(filter){
+  libraryFilter=filter;
+  renderDreamLibrary();
+}
+
+function setLibraryQuery(value){
+  libraryQuery=String(value||'').trim().toLowerCase();
+  renderDreamLibrary(false);
+}
+
+function renderDreamLibrary(resetSearch=true){
+  if(!Array.isArray(libraryDreams)) libraryDreams=[];
+  const q=libraryQuery;
+  const filtered=libraryDreams.filter(d=>{
+    if(libraryFilter==='interpreted'&&!d.interpretation)return false;
+    if(libraryFilter==='pending'&&d.interpretation)return false;
+    if(libraryFilter==='favorite'&&!d.is_favorite)return false;
+    if(q){
+      const hay=`${d.title||''} ${d.dream_text||''}`.toLowerCase();
+      if(!hay.includes(q))return false;
+    }
+    return true;
+  });
+
+  const interpreted=libraryDreams.filter(d=>!!d.interpretation).length;
+  const favorites=libraryDreams.filter(d=>!!d.is_favorite).length;
+  const symbols=collectRepeatedSymbols(libraryDreams);
+
+  const symbolHtml=symbols.length
+    ? `<div class="card" style="margin-top:16px">
+        <div class="sectionTitle" style="margin-top:0"><h2 style="font-size:18px">رموز تتكرر في رؤاك</h2><span>حسب الرؤى المحفوظة</span></div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          ${symbols.map(([name,count])=>`<button class="secondary" style="padding:8px 12px;border-radius:999px" onclick="searchBySymbol('${escapeJs(name)}')">✦ ${escapeHtml(name)} <small>×${count}</small></button>`).join('')}
+        </div>
+      </div>` : '';
+
+  const items=filtered.map(d=>`
+    <div class="card" style="position:relative;cursor:pointer" onclick="openSavedDream('${d.id}')">
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
+        <div style="min-width:0">
+          <b style="display:block;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(d.title||'رؤيا بدون عنوان')}</b>
+          <p style="margin:7px 0 0;color:#a9aec8">${new Date(d.created_at).toLocaleDateString('ar-SA')} • ${dreamStatusLabel(d)}${d.context_clarity!=null?` • وضوح ${Number(d.context_clarity)}%`:''}</p>
+        </div>
+        <button class="secondary" title="المفضلة" aria-label="المفضلة" onclick="event.stopPropagation();toggleFavorite('${d.id}',${!d.is_favorite})" style="padding:7px 10px;border-radius:12px;font-size:18px">${d.is_favorite?'★':'☆'}</button>
+      </div>
+      <p style="color:#c9cce0;line-height:1.7;margin:12px 0 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${escapeHtml(d.dream_text||'')}</p>
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+        <button class="secondary" onclick="event.stopPropagation();openSavedDream('${d.id}')">فتح</button>
+        <button class="secondary" onclick="event.stopPropagation();deleteDream('${d.id}')" style="opacity:.9">حذف</button>
+      </div>
+    </div>`).join('');
+
+  ws(`<div class="kicker">رؤياي</div>
+    <div class="sectionTitle" style="align-items:end">
+      <div><h2 style="margin-bottom:5px">مكتبة رؤاك</h2><span>${libraryDreams.length} رؤيا • ${interpreted} مفسّرة • ${favorites} مفضلة</span></div>
+    </div>
+
+    <div class="dreambox" style="margin-top:14px;padding:4px 12px">
+      <input id="dreamLibrarySearch" value="${escapeHtml(libraryQuery)}" oninput="setLibraryQuery(this.value)" style="width:100%;background:transparent;border:0;outline:0;color:white;padding:12px" placeholder="ابحث في عنوان الرؤيا أو تفاصيلها…">
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0">
+      ${[
+        ['all','الكل'],
+        ['interpreted','المفسّرة'],
+        ['pending','غير المفسّرة'],
+        ['favorite','المفضلة']
+      ].map(([key,label])=>`<button class="${libraryFilter===key?'primary':'secondary'}" style="width:auto;padding:9px 14px" onclick="setLibraryFilter('${key}')">${label}</button>`).join('')}
+    </div>
+
+    ${symbolHtml}
+
+    <div class="sectionTitle" style="margin-top:20px"><h2 style="font-size:18px">الرؤى</h2><span>${filtered.length} نتيجة</span></div>
+    <div class="cards">${items||'<div class="card"><p>لا توجد رؤى مطابقة لهذا البحث أو الفلتر.</p></div>'}</div>`);
+}
+
+function escapeJs(v){
+  return String(v??'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\r?\n/g,' ');
+}
+
+function searchBySymbol(symbol){
+  libraryQuery=String(symbol||'').trim().toLowerCase();
+  libraryFilter='all';
+  renderDreamLibrary();
+}
+
+async function toggleFavorite(id,nextValue){
+  if(!currentUser)return;
+  const {error}=await sb.from('dreams').update({is_favorite:!!nextValue,updated_at:new Date().toISOString()}).eq('id',id);
+  if(error){
+    alert('تعذر تحديث المفضلة.');
+    console.error(error);
+    return;
+  }
+  const row=libraryDreams.find(x=>x.id===id);
+  if(row)row.is_favorite=!!nextValue;
+  renderDreamLibrary(false);
+}
+
+async function deleteDream(id){
+  const row=libraryDreams.find(x=>x.id===id);
+  const title=row?.title||'هذه الرؤيا';
+  if(!confirm(`هل تريد حذف «${title}» نهائيًا؟\nسيتم حذف الأسئلة والمحادثات المرتبطة بها أيضًا.`))return;
+
+  const {error}=await sb.from('dreams').delete().eq('id',id);
+  if(error){
+    alert('تعذر حذف الرؤيا.');
+    console.error(error);
+    return;
+  }
+  libraryDreams=libraryDreams.filter(x=>x.id!==id);
+  if(currentDreamId===id)currentDreamId=null;
+  renderDreamLibrary(false);
+}
+
+async function showAccount(btn){
+activate(btn);
+if(!currentUser){
+  ws(`<div class="kicker">الحساب</div><h2>حساب رؤيا</h2><p style="color:#a9aec8;line-height:1.8">سجّل الدخول لإدارة الخصوصية والاستهلاك والباقات.</p><button class="primary" onclick="openAuth()">تسجيل الدخول</button>`);
+  return;
+}
+
+ws(`<div class="kicker">الحساب</div><h2>جارٍ تحميل حسابك…</h2><p style="color:#a9aec8">نسترجع الخطة والاستهلاك وإعدادات البيانات.</p>`);
+
+const now=new Date();
+const periodStart=`${now.getUTCFullYear()}-${String(now.getUTCMonth()+1).padStart(2,'0')}-01`;
+const [usageRes,dreamCountRes,subsRes,plansRes]=await Promise.all([
+  sb.from('interpretation_usage').select('interpretations_used').eq('period_start',periodStart).maybeSingle(),
+  sb.from('dreams').select('id',{count:'exact',head:true}),
+  sb.from('user_subscriptions').select('id,plan_id,status,starts_at,current_period_end,cancel_at_period_end,subscription_plans(id,name_ar,billing_period,price_sar,monthly_interpretation_limit)').eq('status','active').order('created_at',{ascending:false}).limit(5),
+  sb.from('subscription_plans').select('id,name_ar,billing_period,price_sar,monthly_interpretation_limit,is_active').eq('is_active',true)
+]);
+
+const subscriptions=subsRes.data||[];
+const activeSub=subscriptions.find(x=>{
+  const life=x?.subscription_plans?.billing_period==='lifetime';
+  const end=x?.current_period_end?new Date(x.current_period_end):null;
+  return life||!end||end>now;
+})||null;
+const activePlan=activeSub?.subscription_plans||null;
+const isPremium=!!activeSub;
+const monthlyLimit=isPremium?Number(activePlan?.monthly_interpretation_limit||100):3;
+const used=usageRes.data?.interpretations_used??0;
+const remaining=Math.max(0,monthlyLimit-used);
+const pct=Math.min(100,Math.round((used/monthlyLimit)*100));
+const dreamCount=dreamCountRes.count??0;
+const email=currentUser.email||'حساب مسجل';
+const planName=isPremium?(activePlan?.name_ar||'Premium'):'مجاني';
+const planBadge=isPremium?'Premium':'Free';
+
+const plans=(plansRes.data||[]);
+const planCards=plans.map(p=>{
+  const active=isPremium&&activePlan?.id===p.id;
+  const suffix=p.billing_period==='monthly'?'شهريًا':p.billing_period==='annual'?'سنويًا':'مرة واحدة';
+  return `<div class="card price ${p.id==='annual'?'pop':''}" style="${active?'border-color:#d6ad5b;box-shadow:0 0 0 1px rgba(214,173,91,.25) inset':''}">
+    ${p.id==='annual'?'<span class="badge">الأكثر اختيارًا</span>':''}
+    <h3>${escapeHtml(p.name_ar)}</h3>
+    <div class="amount">${Number(p.price_sar)} <small>ر.س</small></div>
+    <p>${suffix} • حتى ${Number(p.monthly_interpretation_limit||100)} تفسيرًا شهريًا ضمن الاستخدام العادل.</p>
+    ${active?'<button class="primary" disabled>خطتك الحالية ✓</button>':`<button class="${p.id==='annual'?'primary':'secondary'}" onclick="startPremiumCheckout('${p.id}')">اختيار الخطة</button>`}
+  </div>`;
+}).join('');
+
+ws(`<div class="kicker">الحساب</div>
+  <div class="sectionTitle" style="align-items:flex-end">
+    <div><h2 style="margin-bottom:5px">حسابك في رؤيا</h2><span>${escapeHtml(email)}</span></div>
+    <span style="border:1px solid rgba(214,173,91,.35);padding:7px 10px;border-radius:999px;color:#e9c979">${planBadge}</span>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <small style="color:#a9aec8">الخطة الحالية</small>
+    <div class="amount" style="font-size:30px;margin-top:7px">${escapeHtml(planName)}</div>
+    <p>${isPremium?(activePlan?.billing_period==='lifetime'?'اشتراك مدى الحياة فعّال.':`اشتراك فعّال${activeSub?.current_period_end?` حتى ${new Date(activeSub.current_period_end).toLocaleDateString('ar-SA')}`:''}.`):'الحساب يستخدم الخطة المجانية حاليًا.'}</p>
+  </div>
+
+  <div class="cards" style="margin-top:14px">
+    <div class="card">
+      <small style="color:#a9aec8">الرؤى المحفوظة</small>
+      <div class="amount" style="font-size:32px;margin-top:7px">${dreamCount}</div>
+      <p>رؤيا محفوظة في حسابك.</p>
+    </div>
+    <div class="card">
+      <small style="color:#a9aec8">المتبقي هذا الشهر</small>
+      <div class="amount" style="font-size:32px;margin-top:7px">${remaining} <small>من ${monthlyLimit}</small></div>
+      <div class="progress" style="margin-top:12px"><i style="width:${pct}%"></i></div>
+      <p>استخدمت ${used} تفسيرًا هذا الشهر.</p>
+    </div>
+  </div>
+
+  <div class="sectionTitle" style="margin-top:24px"><h2 style="font-size:19px">رؤيا Premium</h2><span>الاشتراك مرتبط بحسابك في قاعدة البيانات</span></div>
+  <div class="pricing">${planCards||'<div class="card"><p>تعذر تحميل الباقات.</p></div>'}</div>
+  <div class="privacy"><div>💳</div><div><b>بوابة الدفع</b><p>محرك الاشتراكات جاهز. زر الدفع لن ينفّذ أي خصم قبل ربط حساب بوابة دفع معتمد والتحقق من العملية من الخادم.</p></div></div>
+
+  <div class="sectionTitle" style="margin-top:24px"><h2 style="font-size:19px">الأمان والجلسات</h2><span>تحكم في الأجهزة المسجّل عليها حسابك</span></div>
+  <div class="card">
+    <h3>تسجيل الخروج من جميع الأجهزة</h3>
+    <p>يوقف جلسات تسجيل الدخول الأخرى ويمنع تجديدها. قد يبقى رمز وصول صادر مسبقًا صالحًا حتى انتهاء مدته القصيرة.</p>
+    <button class="secondary" onclick="logoutAllDevices()">تسجيل الخروج من كل الأجهزة</button>
+  </div>
+
+  <div class="sectionTitle" style="margin-top:24px"><h2 style="font-size:19px">الخصوصية والبيانات</h2><span>أنت تتحكم ببياناتك</span></div>
+  <div class="card">
+    <h3>حذف جميع بيانات رؤيا</h3>
+    <p>يحذف كل الرؤى والأسئلة والمحادثات وسجل الاستخدام، مع إبقاء حساب تسجيل الدخول نفسه.</p>
+    <button class="secondary" onclick="deleteAllRoyaData()">حذف جميع بياناتي</button>
+  </div>
+
+  <div class="card" style="border-color:rgba(255,110,110,.35);margin-top:12px">
+    <h3>حذف الحساب نهائيًا</h3>
+    <p>يحذف حساب تسجيل الدخول وجميع بيانات «رؤيا» المرتبطة به. لا يمكن التراجع عن هذا الإجراء.</p>
+    <button class="secondary" style="border-color:rgba(255,110,110,.45)" onclick="deleteAccountPermanent()">حذف الحساب نهائيًا</button>
+  </div>
+
+  <div class="privacy"><div>🔒</div><div><b>خصوصية افتراضية</b><p>رؤاك خاصة بحسابك، وتطبق قاعدة البيانات سياسات RLS بحيث لا يقرأ المستخدم إلا بياناته.</p></div></div>`);
+}
+
+async function startPremiumCheckout(planId){
+  if(!currentUser){openAuth();return}
+  if(!/^https?:$/.test(location.protocol)){
+    alert('الدفع التجريبي يحتاج فتح الموقع من رابط ويب http/https حتى يستطيع ميسر الرجوع إلى صفحة النتيجة بعد 3D Secure.');
+    return;
+  }
+
+  const {data:plan,error:planError}=await sb.from('subscription_plans')
+    .select('id,name_ar,price_sar,billing_period,is_active')
+    .eq('id',planId).eq('is_active',true).single();
+
+  if(planError||!plan){
+    alert('تعذر تحميل الباقة.');
+    return;
+  }
+
+  const {data:cfg,error:cfgError}=await sb.functions.invoke('moyasar-public-config',{body:{}});
+  if(cfgError||!cfg?.publishable_key){
+    alert('تعذر تحميل إعدادات ميسر التجريبية.');
+    console.error(cfgError||cfg);
+    return;
+  }
+
+  localStorage.setItem('roya_pending_plan',planId);
+
+  const existing=document.getElementById('paymentOverlay');
+  if(existing)existing.remove();
+
+  const overlay=document.createElement('div');
+  overlay.id='paymentOverlay';
+  overlay.className='paymentOverlay';
+  overlay.innerHTML=`<div class="paymentPanel" dir="rtl">
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
+      <div>
+        <div class="kicker">دفع تجريبي</div>
+        <h2 style="margin:6px 0">${escapeHtml(plan.name_ar)}</h2>
+        <p style="color:#a9aec8">${Number(plan.price_sar)} ر.س • بيئة ${cfg.mode==='test'?'اختبار':'حقيقية'}</p>
+      </div>
+      <button class="secondary" style="padding:8px 11px" onclick="closePaymentModal()">إغلاق</button>
+    </div>
+    <div class="paymentStatus" style="margin:12px 0 16px">
+      لن نرسل بيانات بطاقتك إلى خوادم «رؤيا». نموذج ميسر يتولى إنشاء عملية الدفع مباشرة.
+    </div>
+    <div class="mysr-form"></div>
+  </div>`;
+  document.body.appendChild(overlay);
+
+  const callback=new URL(location.href);
+  callback.search='';
+  callback.hash='';
+  callback.searchParams.set('payment_return','1');
+
+  try{
+    Moyasar.init({
+      element: '#paymentOverlay .mysr-form',
+      amount: Math.round(Number(plan.price_sar)*100),
+      currency: 'SAR',
+      description: `اشتراك رؤيا - ${plan.name_ar}`,
+      publishable_api_key: cfg.publishable_key,
+      callback_url: callback.toString(),
+      language: 'ar',
+      methods: ['creditcard'],
+      supported_networks: ['mada','visa','mastercard'],
+      fixed_width: false,
+      metadata: {
+        user_id: currentUser.id,
+        plan_id: plan.id
+      },
+      on_completed: async function(payment){
+        if(payment?.id)localStorage.setItem('roya_pending_payment',payment.id);
+      },
+      on_failure: function(error){
+        console.error('Moyasar payment error',error);
+      }
+    });
+  }catch(e){
+    console.error(e);
+    alert('تعذر تشغيل نموذج ميسر.');
+    closePaymentModal();
+  }
+}
+
+function closePaymentModal(){
+  document.getElementById('paymentOverlay')?.remove();
+}
+
+async function handleMoyasarReturn(){
+  const params=new URLSearchParams(location.search);
+  if(!params.has('payment_return') && !params.get('id'))return;
+
+  const paymentId=params.get('id')||localStorage.getItem('roya_pending_payment')||'';
+  const planId=localStorage.getItem('roya_pending_plan')||'';
+
+  const clean=new URL(location.href);
+  clean.search='';
+  history.replaceState({},'',clean.toString());
+
+  if(!paymentId||!planId){
+    ws(`<div class="kicker">نتيجة الدفع</div><h2>تعذر التحقق من العملية</h2><p style="color:#a9aec8;line-height:1.8">لم نجد رقم العملية أو الخطة المرتبطة بها. لم يتم تفعيل Premium.</p>`);
+    return;
+  }
+
+  ws(`<div class="kicker">نتيجة الدفع</div><h2>جارٍ التحقق من ميسر…</h2><p style="color:#a9aec8">لن يتم تفعيل الاشتراك قبل تأكيد الخادم لحالة الدفع والمبلغ والعملة.</p>`);
+
+  const {data,error}=await sb.functions.invoke('verify-moyasar-payment',{
+    body:{payment_id:paymentId,plan_id:planId}
+  });
+
+  if(error||!data?.ok){
+    ws(`<div class="kicker">نتيجة الدفع</div><h2>لم يتم تأكيد الدفع</h2><p style="color:#a9aec8;line-height:1.8">لم نفعّل Premium لأن التحقق من عملية ميسر لم ينجح.</p><button class="secondary" onclick="showAccount()">العودة إلى الحساب</button>`);
+    console.error(error||data);
+    return;
+  }
+
+  localStorage.removeItem('roya_pending_plan');
+  localStorage.removeItem('roya_pending_payment');
+  ws(`<div class="kicker">تم الدفع بنجاح</div><h2>تم تفعيل Premium ✓</h2><p style="color:#a9aec8;line-height:1.8">تم التحقق من ميسر وتفعيل باقة ${escapeHtml(data?.plan?.name_ar||'Premium')} على حسابك.</p><button class="primary" onclick="showAccount()">عرض اشتراكي</button>`);
+}
+
+
+async function logoutAllDevices(){
+  if(!currentUser)return;
+  if(!confirm('تسجيل الخروج من جميع الأجهزة المرتبطة بهذا الحساب؟'))return;
+  const {error}=await sb.auth.signOut({scope:'global'});
+  if(error){
+    alert('تعذر تسجيل الخروج من جميع الأجهزة.');
+    console.error(error);
+    return;
+  }
+  currentUser=null;
+  currentDreamId=null;
+  libraryDreams=[];
+  await refreshUser();
+  home();
+  alert('تم إنهاء جلسات الحساب. ستحتاج لتسجيل الدخول من جديد.');
+}
+
+async function deleteAllRoyaData(){
+  if(!currentUser)return;
+  const phrase=prompt('سيتم حذف جميع رؤاك وأسئلتك ومحادثاتك نهائيًا مع إبقاء الحساب.\nللتأكيد اكتب: حذف البيانات');
+  if(phrase!=='حذف البيانات')return;
+
+  const {data,error}=await sb.functions.invoke('account-management',{body:{action:'delete_data'}});
+  if(error||!data?.ok){
+    alert('تعذر حذف البيانات. لم يتم تنفيذ الحذف الكامل.');
+    console.error(error||data);
+    return;
+  }
+
+  currentDreamId=null;
+  libraryDreams=[];
+  dream.value='';
+  counter.textContent='0 حرف';
+  alert('تم حذف جميع بيانات «رؤيا» المرتبطة بحسابك.');
+  await showAccount();
+}
+
+async function deleteAccountPermanent(){
+  if(!currentUser)return;
+  const phrase=prompt('هذا الإجراء نهائي ولا يمكن التراجع عنه.\nللتأكيد اكتب: حذف الحساب');
+  if(phrase!=='حذف الحساب')return;
+
+  const {data,error}=await sb.functions.invoke('account-management',{body:{action:'delete_account'}});
+  if(error||!data?.ok){
+    alert('تعذر حذف الحساب. لم يكتمل الإجراء.');
+    console.error(error||data);
+    return;
+  }
+
+  try{await sb.auth.signOut({scope:'local'});}catch(e){}
+  currentUser=null;
+  currentDreamId=null;
+  libraryDreams=[];
+  dream.value='';
+  counter.textContent='0 حرف';
+  await refreshUser();
+  home();
+  alert('تم حذف الحساب وجميع بيانات «رؤيا» المرتبطة به نهائيًا.');
+}
+
+
+const SUPABASE_URL='https://oajqczrxzurwvxjkbseq.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_9LTupYVJR3kKTL4xqj3pdw_vA67W-o4';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+let currentUser=null;
+let currentDreamId=null;
+let libraryDreams=[];
+let libraryFilter='all';
+let libraryQuery='';
+const authModal=document.getElementById('authModal');
+function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function openAuth(){authModal.classList.add('show')}
+async function refreshUser(){const {data}=await sb.auth.getUser();currentUser=data?.user||null;const b=document.getElementById('authBtn');if(b)b.textContent=currentUser?'تسجيل الخروج':'تسجيل الدخول'}
+async function signIn(){const email=document.getElementById('authEmail').value.trim(),password=document.getElementById('authPassword').value;const m=document.getElementById('authMsg');m.textContent='جارٍ تسجيل الدخول…';const {error}=await sb.auth.signInWithPassword({email,password});if(error){m.textContent=error.message;return}m.textContent='تم تسجيل الدخول بنجاح';authModal.classList.remove('show');await refreshUser()}
+async function signUp(){const email=document.getElementById('authEmail').value.trim(),password=document.getElementById('authPassword').value;const m=document.getElementById('authMsg');m.textContent='جارٍ إنشاء الحساب…';const {error}=await sb.auth.signUp({email,password});m.textContent=error?error.message:'تم إنشاء الحساب. إذا كان تأكيد البريد مفعّلًا، افتح رسالة التأكيد ثم سجّل الدخول.'}
+document.getElementById('authBtn').addEventListener('click',async(e)=>{if(currentUser){e.stopImmediatePropagation();await sb.auth.signOut();await refreshUser();alert('تم تسجيل الخروج');}});
+sb.auth.onAuthStateChange(()=>setTimeout(refreshUser,0));refreshUser();
+
+async function openSavedDream(id){
+const {data,error}=await sb.from('dreams')
+  .select('id,title,dream_text,interpretation,interpretation_data,context_clarity,is_favorite,created_at')
+  .eq('id',id).single();
+if(error||!data){alert('تعذر فتح الرؤيا');return}
+currentDreamId=data.id;
+dream.value=data.dream_text||'';
+counter.textContent=dream.value.length+' حرف';
+const dreamActions=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 16px">
+  <button class="secondary" onclick="toggleFavoriteFromDetail('${data.id}',${!data.is_favorite})">${data.is_favorite?'★ إزالة من المفضلة':'☆ إضافة للمفضلة'}</button>
+  <button class="secondary" onclick="deleteDreamFromDetail('${data.id}')">حذف الرؤيا</button>
+  <button class="secondary" onclick="showDreams()">العودة إلى رؤياي</button>
+</div>`;
+if(data.interpretation){
+  const report=(data.interpretation_data&&typeof data.interpretation_data==='object')
+    ? data.interpretation_data
+    : {title:data.title,summary:'',symbols:[],contextual_reading:data.interpretation,psychological_reading:'',conclusion:data.interpretation,interpretation:data.interpretation,context_clarity:data.context_clarity};
+  ws(`<div class="kicker">رؤيا محفوظة</div>${dreamActions}<p style="color:#a9aec8;line-height:1.9">${escapeHtml(data.dream_text||'')}</p>`+resultReportHtml(report,false));
+}else{
+  ws(`<div class="kicker">رؤيا محفوظة</div>${dreamActions}<h2>${escapeHtml(data.title||'رؤيا')}</h2><p style="color:#a9aec8;line-height:1.9">${escapeHtml(data.dream_text||'')}</p><button class="primary" onclick="openQuestions()">استكمال الأسئلة الذكية</button>`);
+}
+}
+
+async function toggleFavoriteFromDetail(id,nextValue){
+  const {error}=await sb.from('dreams').update({is_favorite:!!nextValue,updated_at:new Date().toISOString()}).eq('id',id);
+  if(error){alert('تعذر تحديث المفضلة.');console.error(error);return}
+  const row=libraryDreams.find(x=>x.id===id);
+  if(row)row.is_favorite=!!nextValue;
+  await openSavedDream(id);
+}
+
+async function deleteDreamFromDetail(id){
+  if(!confirm('هل تريد حذف هذه الرؤيا نهائيًا؟ سيتم حذف الأسئلة والمحادثات المرتبطة بها أيضًا.'))return;
+  const {error}=await sb.from('dreams').delete().eq('id',id);
+  if(error){alert('تعذر حذف الرؤيا.');console.error(error);return}
+  libraryDreams=libraryDreams.filter(x=>x.id!==id);
+  currentDreamId=null;
+  await showDreams();
+}
+
+
+window.addEventListener('load', async ()=>{
+  try{
+    await refreshUser();
+    await handleMoyasarReturn();
+  }catch(e){console.error('Payment return handler',e)}
+});
+
+</script>
+</body></html>
