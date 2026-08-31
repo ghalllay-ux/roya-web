@@ -78,13 +78,21 @@ jobs:
           grep -q "location.href='payment.html?plan='" index.html
           grep -q "methods:\['creditcard','applepay'\]" payment.html
           grep -q 'دفع آمن عبر ميسر' payment.html
+      - name: Convert subscriptions to credit packages
+        run: |
+          python3 scripts/credits_checkout_v1.py
+          grep -q 'شحن رصيد التفسيرات' index.html
+          grep -q "payment.html?package=" index.html
+          grep -q "from('credit_packages')" payment.html
+          grep -q "package_id" payment.html
+          if grep -q '>شهري<' index.html; then exit 1; fi
       - name: Persist patched site
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html payment.html
           if ! git diff --cached --quiet; then
-            git commit -m 'Use standalone payment page v3'
+            git commit -m 'Switch Roya subscriptions to credit packages'
             git push
           fi
       - name: Deploy to Cloudflare Pages
