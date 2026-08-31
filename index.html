@@ -878,7 +878,7 @@ async function requestPasswordReset(){
   const m=document.getElementById('authMsg');
   if(!email){m.textContent='اكتب بريدك الإلكتروني أولًا.';document.getElementById('authEmail').focus();return}
   m.textContent='جارٍ إرسال رابط الاستعادة…';
-  const redirectTo=location.origin+'/';
+  const redirectTo='https://roya-web.pages.dev/';
   const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo});
   m.textContent=error?error.message:'تم إرسال رابط استعادة كلمة المرور إلى بريدك. افتح الرسالة واضغط الرابط.';
 }
