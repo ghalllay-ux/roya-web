@@ -9,6 +9,7 @@ on:
       - 'scripts/pricing_offer_v1.py'
       - 'scripts/mobile_app_ui_v1.py'
       - 'scripts/payment_page_v1.py'
+      - 'scripts/password_recovery_v1.py'
       - 'payment.html'
   workflow_dispatch:
 
@@ -28,7 +29,9 @@ jobs:
         run: python3 scripts/mobile_app_ui_v1.py
       - name: Apply dedicated checkout page route
         run: python3 scripts/payment_page_v1.py
-      - name: Verify payment pricing and mobile UI
+      - name: Add password recovery flow
+        run: python3 scripts/password_recovery_v1.py
+      - name: Verify payment pricing mobile UI and password recovery
         run: |
           grep -q 'paymentResultCard' index.html
           grep -q 'roya-pricing-offer-70-v1' index.html
@@ -37,11 +40,14 @@ jobs:
           grep -q 'royaCheckoutPage' index.html
           grep -q 'leaveCheckoutPage' index.html
           grep -q 'Moyasar.init' index.html
+          grep -q 'requestPasswordReset' index.html
+          grep -q 'PASSWORD_RECOVERY' index.html
+          grep -q 'updateRecoveredPassword' index.html
       - name: Commit upgraded UI
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'Render Roya checkout as dedicated in-app page'
+          git commit -m 'Add password recovery to Roya login'
           git push
