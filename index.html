@@ -618,8 +618,13 @@ async function startPremiumCheckout(planId){
     alert('تعذر تحميل الباقة.');
     return;
   }
-const cfg={publishable_key:'pk_test_rkBnvVzFvzJiEuZN53iJUuh2Rmg7a7dSdT9Awhkf',mode:'test'};
-  
+
+  const {data:cfg,error:cfgError}=await sb.functions.invoke('moyasar-public-config',{body:{}});
+  if(cfgError||!cfg?.publishable_key){
+    alert('تعذر تحميل إعدادات ميسر التجريبية.');
+    console.error(cfgError||cfg);
+    return;
+  }
 
   localStorage.setItem('roya_pending_plan',planId);
 
