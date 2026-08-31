@@ -264,10 +264,10 @@ nav{position:fixed;z-index:10;bottom:18px;left:50%;transform:translateX(-50%);wi
 <div class="card"><div class="icon">◉</div><h3>رؤياي</h3><p>سجل شخصي للرؤى المحفوظة، المفضلة، والرموز المتكررة مع بحث سريع.</p></div>
 <div class="card"><div class="icon">☏</div><h3>اسأل المفسر</h3><p>محادثة متابعة تحتفظ بسياق الرؤيا وإجاباتك السابقة.</p></div>
 </div></section>
-<section class="section"><div class="sectionTitle"><h2>رؤيا Premium</h2><span>عرض خصم 70%</span></div><div class="pricing">
-<div class="card price"><h3>شهري</h3><div class="offerLine"><span class="offerBadge70">خصم 70%</span><span class="oldPrice">16.67 ر.س</span></div><div class="amount">5 <small>ر.س / شهر</small></div><div class="priceOfferNote">سعر العرض الحالي</div><button class="secondary" onclick="startPremiumCheckout('monthly')">اختيار الشهري</button></div>
-<div class="card price pop"><span class="badge">الأكثر اختيارًا</span><h3>سنوي</h3><div class="offerLine"><span class="offerBadge70">خصم 70%</span><span class="oldPrice">96.67 ر.س</span></div><div class="amount">29 <small>ر.س / سنة</small></div><div class="priceOfferNote">سعر العرض الحالي</div><button class="primary" onclick="startPremiumCheckout('annual')">اختيار السنوي</button></div>
-<div class="card price"><h3>مدى الحياة</h3><div class="offerLine"><span class="offerBadge70">خصم 70%</span><span class="oldPrice">163.33 ر.س</span></div><div class="amount">49 <small>ر.س / مرة واحدة</small></div><div class="priceOfferNote">سعر العرض الحالي</div><button class="secondary" onclick="startPremiumCheckout('lifetime')">اختيار مدى الحياة</button></div>
+<section class="section"><div class="sectionTitle"><h2>شحن رصيد التفسيرات</h2><span>ادفع مرة واحدة واستخدم رصيدك وقتما تريد</span></div><div class="pricing">
+<div class="card price"><h3>10 تفسيرات</h3><div class="amount">5 <small>ر.س</small></div><div class="priceOfferNote">رصيد لا يرتبط باشتراك شهري</div><button class="secondary" onclick="startPremiumCheckout('credits_5')">اشحن 10 تفسيرات</button></div>
+<div class="card price pop"><span class="badge">الأكثر اختيارًا</span><h3>25 تفسيرًا</h3><div class="amount">10 <small>ر.س</small></div><div class="priceOfferNote">أفضل قيمة للاستخدام المتكرر</div><button class="primary" onclick="startPremiumCheckout('credits_10')">اشحن 25 تفسيرًا</button></div>
+<div class="card price"><h3>60 تفسيرًا</h3><div class="amount">20 <small>ر.س</small></div><div class="priceOfferNote">أكبر رصيد بأفضل تكلفة</div><button class="secondary" onclick="startPremiumCheckout('credits_20')">اشحن 60 تفسيرًا</button></div>
 </div></section>
 
 <section class="section" id="demoFlow">
@@ -914,50 +914,33 @@ if(!currentUser){
   return;
 }
 
-ws(`<div class="kicker">الحساب</div><h2>جارٍ تحميل حسابك…</h2><p style="color:#a9aec8">نسترجع الخطة والاستهلاك وإعدادات البيانات.</p>`);
+ws(`<div class="kicker">الحساب</div><h2>جارٍ تحميل حسابك…</h2><p style="color:#a9aec8">نسترجع رصيدك واستهلاكك وإعدادات البيانات.</p>`);
 
-const now=new Date();
-const periodStart=`${now.getUTCFullYear()}-${String(now.getUTCMonth()+1).padStart(2,'0')}-01`;
-const [usageRes,dreamCountRes,subsRes,plansRes]=await Promise.all([
-  sb.from('interpretation_usage').select('interpretations_used').eq('period_start',periodStart).maybeSingle(),
+const [dreamCountRes,walletRes,packagesRes]=await Promise.all([
   sb.from('dreams').select('id',{count:'exact',head:true}),
-  sb.from('user_subscriptions').select('id,plan_id,status,starts_at,current_period_end,cancel_at_period_end,subscription_plans(id,name_ar,billing_period,price_sar,monthly_interpretation_limit)').eq('status','active').order('created_at',{ascending:false}).limit(5),
-  sb.from('subscription_plans').select('id,name_ar,billing_period,price_sar,monthly_interpretation_limit,is_active').eq('is_active',true)
+  sb.from('user_credit_wallets').select('balance,lifetime_purchased,lifetime_used').eq('user_id',currentUser.id).maybeSingle(),
+  sb.from('credit_packages').select('id,name,price_sar,credits,active,sort_order').eq('active',true).order('sort_order')
 ]);
 
-const subscriptions=subsRes.data||[];
-const activeSub=subscriptions.find(x=>{
-  const life=x?.subscription_plans?.billing_period==='lifetime';
-  const end=x?.current_period_end?new Date(x.current_period_end):null;
-  return life||!end||end>now;
-})||null;
-const activePlan=activeSub?.subscription_plans||null;
-const isPremium=!!activeSub;
-const monthlyLimit=isPremium?Number(activePlan?.monthly_interpretation_limit||100):3;
-const used=usageRes.data?.interpretations_used??0;
-const remaining=Math.max(0,monthlyLimit-used);
-const pct=Math.min(100,Math.round((used/monthlyLimit)*100));
+const balance=Number(walletRes.data?.balance??1);
+const lifetimePurchased=Number(walletRes.data?.lifetime_purchased??0);
+const lifetimeUsed=Number(walletRes.data?.lifetime_used??0);
 const dreamCount=dreamCountRes.count??0;
 const email=currentUser.email||'حساب مسجل';
-const planName=isPremium?(activePlan?.name_ar||'Premium'):'مجاني';
-const planBadge=isPremium?'Premium':'Free';
-
-const plans=(plansRes.data||[]);
-const planCards=plans.map(p=>{
-  const active=isPremium&&activePlan?.id===p.id;
-  const suffix=p.billing_period==='monthly'?'شهريًا':p.billing_period==='annual'?'سنويًا':'مرة واحدة';
-  const offerPrice=Number(p.price_sar);
-  const originalPrice=Math.round((offerPrice/0.30)*100)/100;
-  return `<div class="card price ${p.id==='annual'?'pop':''}" style="${active?'border-color:#d6ad5b;box-shadow:0 0 0 1px rgba(214,173,91,.25) inset':''}">
-    ${p.id==='annual'?'<span class="badge">الأكثر اختيارًا</span>':''}
-    <h3>${escapeHtml(p.name_ar)}</h3>
-    <div class="offerLine"><span class="offerBadge70">خصم 70%</span><span class="oldPrice">${originalPrice.toFixed(2)} ر.س</span></div>
-    <div class="amount">${offerPrice} <small>ر.س</small></div>
-    <div class="priceOfferNote">سعر العرض الحالي</div>
-    <p>${suffix} • حتى ${Number(p.monthly_interpretation_limit||100)} تفسيرًا شهريًا ضمن الاستخدام العادل.</p>
-    ${active?'<button class="primary" disabled>خطتك الحالية ✓</button>':`<button class="${p.id==='annual'?'primary':'secondary'}" onclick="startPremiumCheckout('${p.id}')">اختيار الخطة</button>`}
-  </div>`;
-}).join('');
+const planBadge='رصيد';
+const planName=`${balance} تفسير`;
+const monthlyLimit=Math.max(1,balance+lifetimeUsed);
+const used=lifetimeUsed;
+const remaining=balance;
+const pct=monthlyLimit?Math.min(100,Math.round((used/monthlyLimit)*100)):0;
+const plans=(packagesRes.data||[]);
+const planCards=plans.map(p=>`<div class="card price ${p.id==='credits_10'?'pop':''}">
+  ${p.id==='credits_10'?'<span class="badge">الأكثر اختيارًا</span>':''}
+  <h3>${escapeHtml(p.name)}</h3>
+  <div class="amount">${Number(p.price_sar)} <small>ر.س</small></div>
+  <p>${Number(p.credits)} تفسيرًا تُضاف مباشرة إلى رصيدك بعد تأكيد الدفع.</p>
+  <button class="${p.id==='credits_10'?'primary':'secondary'}" onclick="startPremiumCheckout('${p.id}')">شحن الرصيد</button>
+</div>`).join('');
 
 ws(`<div class="kicker">الحساب</div>
   <div class="sectionTitle" style="align-items:flex-end">
@@ -966,9 +949,9 @@ ws(`<div class="kicker">الحساب</div>
   </div>
 
   <div class="card" style="margin-top:14px">
-    <small style="color:#a9aec8">الخطة الحالية</small>
+    <small style="color:#a9aec8">رصيدك الحالي</small>
     <div class="amount" style="font-size:30px;margin-top:7px">${escapeHtml(planName)}</div>
-    <p>${isPremium?(activePlan?.billing_period==='lifetime'?'اشتراك مدى الحياة فعّال.':`اشتراك فعّال${activeSub?.current_period_end?` حتى ${new Date(activeSub.current_period_end).toLocaleDateString('ar-SA')}`:''}.`):'الحساب يستخدم الخطة المجانية حاليًا.'}</p>
+    <p>كل تفسير مكتمل يخصم رصيدًا واحدًا. لا يوجد تجديد شهري تلقائي.</p>
   </div>
 
   <div class="cards" style="margin-top:14px">
@@ -978,16 +961,16 @@ ws(`<div class="kicker">الحساب</div>
       <p>رؤيا محفوظة في حسابك.</p>
     </div>
     <div class="card">
-      <small style="color:#a9aec8">المتبقي هذا الشهر</small>
-      <div class="amount" style="font-size:32px;margin-top:7px">${remaining} <small>من ${monthlyLimit}</small></div>
+      <small style="color:#a9aec8">الرصيد المتاح</small>
+      <div class="amount" style="font-size:32px;margin-top:7px">${balance} <small>تفسير</small></div>
       <div class="progress" style="margin-top:12px"><i style="width:${pct}%"></i></div>
-      <p>استخدمت ${used} تفسيرًا هذا الشهر.</p>
+      <p>استخدمت ${lifetimeUsed} تفسيرًا إجمالًا، واشتريت ${lifetimePurchased} تفسيرًا.</p>
     </div>
   </div>
 
-  <div class="sectionTitle" style="margin-top:24px"><h2 style="font-size:19px">رؤيا Premium</h2><span>الاشتراك مرتبط بحسابك في قاعدة البيانات</span></div>
+  <div class="sectionTitle" style="margin-top:24px"><h2 style="font-size:19px">شحن الرصيد</h2><span>اختر الباقة المناسبة لك</span></div>
   <div class="pricing">${planCards||'<div class="card"><p>تعذر تحميل الباقات.</p></div>'}</div>
-  <div class="privacy"><div>💳</div><div><b>بوابة الدفع</b><p>محرك الاشتراكات جاهز. زر الدفع لن ينفّذ أي خصم قبل ربط حساب بوابة دفع معتمد والتحقق من العملية من الخادم.</p></div></div>
+  <div class="privacy"><div>💳</div><div><b>بوابة الدفع</b><p>الدفع يتم عبر ميسر، ولا يضاف الرصيد إلا بعد التحقق من نجاح العملية والمبلغ من الخادم.</p></div></div>
 
   <div class="sectionTitle" style="margin-top:24px"><h2 style="font-size:19px">الأمان والجلسات</h2><span>تحكم في الأجهزة المسجّل عليها حسابك</span></div>
   <div class="card">
@@ -1012,10 +995,10 @@ ws(`<div class="kicker">الحساب</div>
   <div class="privacy"><div>🔒</div><div><b>خصوصية افتراضية</b><p>رؤاك خاصة بحسابك، وتطبق قاعدة البيانات سياسات RLS بحيث لا يقرأ المستخدم إلا بياناته.</p></div></div>`);
 }
 
-async function startPremiumCheckout(planId){
+async function startPremiumCheckout(packageId){
   if(!currentUser){openAuth();return}
-  localStorage.setItem('roya_pending_plan',planId);
-  location.href='payment.html?plan='+encodeURIComponent(planId);
+  localStorage.setItem('roya_pending_credit_package',packageId);
+  location.href='payment.html?package='+encodeURIComponent(packageId);
 }
 
 function leaveCheckoutPage(){location.href='./'}
@@ -1024,186 +1007,30 @@ function closePaymentModal(){location.href='./'}
 async function handleMoyasarReturn(){
   const params=new URLSearchParams(location.search);
   if(!params.has('payment_return') && !params.get('id'))return;
-
   const paymentId=params.get('id')||localStorage.getItem('roya_pending_payment')||'';
-  const planId=localStorage.getItem('roya_pending_plan')||'';
-
-  const clean=new URL(location.href);
-  clean.search='';
-  history.replaceState({},'',clean.toString());
-
-  if(!paymentId||!planId){
-    ws(`<div class="paymentResultCard"><div class="paymentResultIcon">!</div><div class="kicker">نتيجة الدفع</div><h2>تعذر التحقق من العملية</h2><p>لم نجد رقم العملية أو الخطة المرتبطة بها. لم يتم تفعيل Premium.</p><button class="secondary" onclick="showAccount()">العودة إلى الحساب</button></div>`);
+  const packageId=localStorage.getItem('roya_pending_credit_package')||'';
+  if(!currentUser){openAuth();return}
+  if(!paymentId||!packageId){
+    ws(`<div class="paymentResultCard"><div class="paymentResultIcon">×</div><div class="kicker">نتيجة الدفع</div><h2>تعذر إكمال العملية</h2><p>لم نجد بيانات باقة الشحن أو رقم العملية.</p><button class="secondary" onclick="showAccount()">العودة إلى الحساب</button></div>`);
     return;
   }
-
-  ws(`<div class="paymentResultCard"><div class="paymentResultIcon">⌛</div><div class="kicker">نتيجة الدفع</div><h2>جارٍ التحقق من ميسر…</h2><p>نتحقق من حالة العملية والمبلغ والعملة قبل تفعيل Premium على حسابك.</p></div>`);
-
-  const {data,error}=await sb.functions.invoke('verify-moyasar-payment',{
-    body:{payment_id:paymentId,plan_id:planId}
-  });
-
+  ws(`<div class="paymentResultCard"><div class="paymentResultIcon">⌛</div><div class="kicker">نتيجة الدفع</div><h2>جارٍ التحقق من ميسر…</h2><p>نتحقق من حالة العملية والمبلغ والعملة قبل إضافة الرصيد إلى حسابك.</p></div>`);
+  const {data,error}=await sb.functions.invoke('verify-moyasar-payment',{body:{payment_id:paymentId,package_id:packageId}});
   if(error||!data?.ok){
-    ws(`<div class="paymentResultCard"><div class="paymentResultIcon">×</div><div class="kicker">نتيجة الدفع</div><h2>لم يتم تأكيد الدفع</h2><p>لم نفعّل Premium لأن التحقق من عملية ميسر لم ينجح.</p><button class="secondary" onclick="showAccount()">العودة إلى الحساب</button></div>`);
-    console.error(error||data);
-    return;
+    ws(`<div class="paymentResultCard"><div class="paymentResultIcon">×</div><div class="kicker">نتيجة الدفع</div><h2>لم يتم تأكيد الدفع</h2><p>لم تتم إضافة الرصيد لأن التحقق من عملية ميسر لم ينجح.</p><button class="secondary" onclick="showAccount()">العودة إلى الحساب</button></div>`);
+    console.error(error||data);return;
   }
-
-  localStorage.removeItem('roya_pending_plan');
   localStorage.removeItem('roya_pending_payment');
-  ws(`<div class="paymentResultCard"><div class="paymentResultIcon">✓</div><div class="kicker">تم الدفع بنجاح</div><h2>تم تفعيل Premium</h2><p>تم التحقق من ميسر وتفعيل باقة ${escapeHtml(data?.plan?.name_ar||'Premium')} على حسابك بنجاح.</p><button class="primary" onclick="showAccount()">عرض اشتراكي</button></div>`);
+  localStorage.removeItem('roya_pending_credit_package');
+  history.replaceState({},'',location.pathname);
+  const added=Number(data.added||0), balance=Number(data.balance||0);
+  ws(`<div class="paymentResultCard"><div class="paymentResultIcon">✓</div><div class="kicker">تم الدفع بنجاح</div><h2>${added>0?`تمت إضافة ${added} تفسيرًا إلى رصيدك`:'تم التحقق من العملية'}</h2><p>رصيدك الحالي: <b>${balance} تفسيرًا</b>. يمكنك استخدامه وقتما تريد.</p><button class="primary" onclick="showAccount()">عرض رصيدي</button></div>`);
 }
-
-
-async function logoutAllDevices(){
-  if(!currentUser)return;
-  if(!confirm('تسجيل الخروج من جميع الأجهزة المرتبطة بهذا الحساب؟'))return;
-  const {error}=await sb.auth.signOut({scope:'global'});
-  if(error){
-    alert('تعذر تسجيل الخروج من جميع الأجهزة.');
-    console.error(error);
-    return;
-  }
-  currentUser=null;
-  currentDreamId=null;
-  libraryDreams=[];
-  await refreshUser();
-  home();
-  alert('تم إنهاء جلسات الحساب. ستحتاج لتسجيل الدخول من جديد.');
-}
-
-async function deleteAllRoyaData(){
-  if(!currentUser)return;
-  const phrase=prompt('سيتم حذف جميع رؤاك وأسئلتك ومحادثاتك نهائيًا مع إبقاء الحساب.\nللتأكيد اكتب: حذف البيانات');
-  if(phrase!=='حذف البيانات')return;
-
-  const {data,error}=await sb.functions.invoke('account-management',{body:{action:'delete_data'}});
-  if(error||!data?.ok){
-    alert('تعذر حذف البيانات. لم يتم تنفيذ الحذف الكامل.');
-    console.error(error||data);
-    return;
-  }
-
-  currentDreamId=null;
-  libraryDreams=[];
-  dream.value='';
-  counter.textContent='0 حرف';
-  alert('تم حذف جميع بيانات «رؤيا» المرتبطة بحسابك.');
-  await showAccount();
-}
-
-async function deleteAccountPermanent(){
-  if(!currentUser)return;
-  const phrase=prompt('هذا الإجراء نهائي ولا يمكن التراجع عنه.\nللتأكيد اكتب: حذف الحساب');
-  if(phrase!=='حذف الحساب')return;
-
-  const {data,error}=await sb.functions.invoke('account-management',{body:{action:'delete_account'}});
-  if(error||!data?.ok){
-    alert('تعذر حذف الحساب. لم يكتمل الإجراء.');
-    console.error(error||data);
-    return;
-  }
-
-  try{await sb.auth.signOut({scope:'local'});}catch(e){}
-  currentUser=null;
-  currentDreamId=null;
-  libraryDreams=[];
-  dream.value='';
-  counter.textContent='0 حرف';
-  await refreshUser();
-  home();
-  alert('تم حذف الحساب وجميع بيانات «رؤيا» المرتبطة به نهائيًا.');
-}
-
-
-const SUPABASE_URL='https://oajqczrxzurwvxjkbseq.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY='sb_publishable_9LTupYVJR3kKTL4xqj3pdw_vA67W-o4';
-const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-let currentUser=null;
-let currentDreamId=null;
-let libraryDreams=[];
-let libraryFilter='all';
-let libraryQuery='';
-const authModal=document.getElementById('authModal');
-function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function openAuth(){authModal.classList.add('show')}
-async function refreshUser(){const {data}=await sb.auth.getUser();currentUser=data?.user||null;const b=document.getElementById('authBtn');if(b)b.textContent=currentUser?'تسجيل الخروج':'تسجيل الدخول'}
-async function signIn(){const email=document.getElementById('authEmail').value.trim(),password=document.getElementById('authPassword').value;const m=document.getElementById('authMsg');m.textContent='جارٍ تسجيل الدخول…';const {error}=await sb.auth.signInWithPassword({email,password});if(error){m.textContent=error.message;return}m.textContent='تم تسجيل الدخول بنجاح';authModal.classList.remove('show');await refreshUser()}
-async function signUp(){const email=document.getElementById('authEmail').value.trim(),password=document.getElementById('authPassword').value;const m=document.getElementById('authMsg');m.textContent='جارٍ إنشاء الحساب…';const {error}=await sb.auth.signUp({email,password});m.textContent=error?error.message:'تم إنشاء الحساب. إذا كان تأكيد البريد مفعّلًا، افتح رسالة التأكيد ثم سجّل الدخول.'}
-async function requestPasswordReset(){
-  const email=document.getElementById('authEmail').value.trim();
-  const m=document.getElementById('authMsg');
-  if(!email){m.textContent='اكتب بريدك الإلكتروني أولًا.';document.getElementById('authEmail').focus();return}
-  m.textContent='جارٍ إرسال رابط الاستعادة…';
-  const redirectTo='https://roya-web.pages.dev/';
-  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo});
-  m.textContent=error?error.message:'تم إرسال رابط استعادة كلمة المرور إلى بريدك. افتح الرسالة واضغط الرابط.';
-}
-async function updateRecoveredPassword(){
-  const password=document.getElementById('resetNewPassword').value;
-  const m=document.getElementById('resetPasswordMsg');
-  if(password.length<8){m.textContent='يجب أن تكون كلمة المرور 8 أحرف على الأقل.';return}
-  m.textContent='جارٍ حفظ كلمة المرور الجديدة…';
-  const {error}=await sb.auth.updateUser({password});
-  if(error){m.textContent=error.message;return}
-  m.textContent='تم تحديث كلمة المرور بنجاح.';
-  setTimeout(()=>{document.getElementById('resetPasswordModal').classList.remove('show');history.replaceState({},'',location.pathname);},700);
-}
-function openPasswordRecovery(){
-  const modal=document.getElementById('resetPasswordModal');
-  if(modal){document.getElementById('resetPasswordMsg').textContent='';document.getElementById('resetNewPassword').value='';modal.classList.add('show');setTimeout(()=>document.getElementById('resetNewPassword').focus(),80)}
-}
-
-document.getElementById('authBtn').addEventListener('click',async(e)=>{if(currentUser){e.stopImmediatePropagation();await sb.auth.signOut();await refreshUser();showLogoutSuccessToast();}});
-sb.auth.onAuthStateChange((event)=>{setTimeout(refreshUser,0);if(event==='PASSWORD_RECOVERY')setTimeout(openPasswordRecovery,50)});refreshUser();
-
-async function openSavedDream(id){
-const {data,error}=await sb.from('dreams')
-  .select('id,title,dream_text,interpretation,interpretation_data,context_clarity,is_favorite,created_at')
-  .eq('id',id).single();
-if(error||!data){alert('تعذر فتح الرؤيا');return}
-currentDreamId=data.id;
-dream.value=data.dream_text||'';
-counter.textContent=dream.value.length+' حرف';
-const dreamActions=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 16px">
-  <button class="secondary" onclick="toggleFavoriteFromDetail('${data.id}',${!data.is_favorite})">${data.is_favorite?'★ إزالة من المفضلة':'☆ إضافة للمفضلة'}</button>
-  <button class="secondary" onclick="deleteDreamFromDetail('${data.id}')">حذف الرؤيا</button>
-  <button class="secondary" onclick="showDreams()">العودة إلى رؤياي</button>
-</div>`;
-if(data.interpretation){
-  const report=(data.interpretation_data&&typeof data.interpretation_data==='object')
-    ? data.interpretation_data
-    : {title:data.title,summary:'',symbols:[],contextual_reading:data.interpretation,psychological_reading:'',conclusion:data.interpretation,interpretation:data.interpretation,context_clarity:data.context_clarity};
-  ws(`<div class="kicker">رؤيا محفوظة</div>${dreamActions}<p style="color:#a9aec8;line-height:1.9">${escapeHtml(data.dream_text||'')}</p>`+resultReportHtml(report,false));
-}else{
-  ws(`<div class="kicker">رؤيا محفوظة</div>${dreamActions}<h2>${escapeHtml(data.title||'رؤيا')}</h2><p style="color:#a9aec8;line-height:1.9">${escapeHtml(data.dream_text||'')}</p><button class="primary" onclick="openQuestions()">استكمال الأسئلة الذكية</button>`);
-}
-}
-
-async function toggleFavoriteFromDetail(id,nextValue){
-  const {error}=await sb.from('dreams').update({is_favorite:!!nextValue,updated_at:new Date().toISOString()}).eq('id',id);
-  if(error){alert('تعذر تحديث المفضلة.');console.error(error);return}
-  const row=libraryDreams.find(x=>x.id===id);
-  if(row)row.is_favorite=!!nextValue;
-  await openSavedDream(id);
-}
-
-async function deleteDreamFromDetail(id){
-  if(!confirm('هل تريد حذف هذه الرؤيا نهائيًا؟ سيتم حذف الأسئلة والمحادثات المرتبطة بها أيضًا.'))return;
-  const {error}=await sb.from('dreams').delete().eq('id',id);
-  if(error){alert('تعذر حذف الرؤيا.');console.error(error);return}
-  libraryDreams=libraryDreams.filter(x=>x.id!==id);
-  currentDreamId=null;
-  await showDreams();
-}
-
 
 window.addEventListener('load', async ()=>{
   try{
     await refreshUser();
     await handleMoyasarReturn();
-    const checkoutPlan=new URLSearchParams(location.search).get('checkout');
-    if(checkoutPlan&&!new URLSearchParams(location.search).has('payment_return')) await startPremiumCheckout(checkoutPlan);
   }catch(e){console.error('Payment route handler',e)}
 });
 
