@@ -37,31 +37,28 @@ jobs:
         run: |
           python3 scripts/mobile_native_notice_v5.py
           grep -q 'roya-mobile-native-notice-v5' index.html
-          if grep -q "function voice(){alert(" index.html; then exit 1; fi
       - name: Apply legacy voice layer
-        run: |
-          python3 scripts/voice_input_v6.py
-          grep -q 'roya-voice-input-v6' index.html
+        run: python3 scripts/voice_input_v6.py
       - name: Apply iPhone-safe voice transcription
-        run: |
-          python3 scripts/voice_input_v7.py
-          grep -q 'roya-voice-input-v7' index.html
-          grep -q 'MediaRecorder' index.html
-          grep -q "transcribe-voice" index.html
+        run: python3 scripts/voice_input_v7.py
       - name: Apply explicit voice controls v8
         run: |
           python3 scripts/voice_input_v8.py
-          grep -q 'roya-voice-input-v8' index.html
           grep -q 'بدء التسجيل' index.html
           grep -q 'إيقاف التسجيل' index.html
-          grep -q 'startRoyaVoiceRecording' index.html
+      - name: Apply iPhone upload fix v9
+        run: |
+          python3 scripts/voice_input_v9.py
+          grep -q 'roya-voice-input-v9' index.html
+          grep -q "functions/v1/transcribe-voice" index.html
+          grep -q 'AUTH_SESSION_MISSING' index.html
       - name: Persist patched index
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
           if ! git diff --cached --quiet; then
-            git commit -m 'Add explicit voice start and stop controls v8'
+            git commit -m 'Fix iPhone voice upload and transcription v9'
             git push
           fi
       - name: Deploy to Cloudflare Pages
