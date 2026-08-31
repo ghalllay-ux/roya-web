@@ -1014,84 +1014,12 @@ ws(`<div class="kicker">الحساب</div>
 
 async function startPremiumCheckout(planId){
   if(!currentUser){openAuth();return}
-  if(!/^https?:$/.test(location.protocol)){
-    alert('الدفع يحتاج فتح الموقع من رابط ويب آمن.');
-    return;
-  }
-
-  const {data:plan,error:planError}=await sb.from('subscription_plans')
-    .select('id,name_ar,price_sar,billing_period,is_active')
-    .eq('id',planId).eq('is_active',true).single();
-  if(planError||!plan){alert('تعذر تحميل الباقة.');return}
-
   localStorage.setItem('roya_pending_plan',planId);
-  history.pushState({royaCheckout:true},'',`${location.pathname}?checkout=${encodeURIComponent(planId)}`);
-  document.querySelector('.shell')?.style.setProperty('display','none');
-  document.querySelector('nav')?.style.setProperty('display','none');
-  document.getElementById('royaCheckoutPage')?.remove();
-
-  const page=document.createElement('main');
-  page.id='royaCheckoutPage'; page.setAttribute('dir','rtl');
-  page.style.cssText='min-height:100vh';
-  page.innerHTML=`<div class="roya-pay-wrap">
-    <div class="roya-pay-top">
-      <div class="roya-pay-brand"><div class="roya-pay-logo">🌙</div><span>رؤيا</span></div>
-      <button class="roya-pay-back" type="button" onclick="leaveCheckoutPage()">عودة</button>
-    </div>
-    <div class="roya-pay-shell">
-      <section class="roya-pay-main" aria-label="إتمام الدفع">
-        <div class="roya-pay-head">
-          <div class="roya-pay-kicker">🔒 إتمام دفع آمن</div>
-          <h1 class="roya-pay-title">أكمل طلبك بثقة</h1>
-          <p class="roya-pay-sub">أدخل بيانات الدفع في النموذج الآمن أدناه. تتم معالجة بيانات البطاقة مباشرة عبر بوابة ميسر.</p>
-        </div>
-        <div class="roya-pay-trust">
-          <div><span>🛡️</span><span><b>معالجة آمنة</b>عبر بوابة ميسر</span></div>
-          <div><span>🔐</span><span><b>خصوصية البطاقة</b>لا نخزن بياناتها</span></div>
-          <div><span>✓</span><span><b>تأكيد واضح</b>بعد نجاح العملية</span></div>
-        </div>
-        <div class="roya-pay-form">
-          <div class="roya-pay-secure"><span>🔒 اتصال آمن ومشفّر</span><span>الدفع بالريال السعودي</span></div>
-          <div class="roya-moyasar-label">بيانات الدفع</div>
-          <div class="mysr-form"></div>
-          <div class="roya-pay-foot">لن يتم تنفيذ الطلب إلا بعد اكتمال عملية الدفع بنجاح. بالمتابعة أنت توافق على شروط الخدمة وسياسة الخصوصية.</div>
-        </div>
-      </section>
-      <aside class="roya-pay-summary" aria-label="ملخص الطلب">
-        <h2>ملخص الطلب</h2>
-        <div class="roya-plan-box">
-          <div style="font-size:11px;color:#aeb5cc;margin-bottom:5px">الخيار المحدد</div>
-          <div class="roya-plan-name">${escapeHtml(plan.name_ar)}</div>
-          <div class="roya-plan-price">${Number(plan.price_sar).toFixed(2)} <small>ر.س</small></div>
-        </div>
-        <div class="roya-summary-row"><span>المبلغ</span><strong>${Number(plan.price_sar).toFixed(2)} ر.س</strong></div>
-        <div class="roya-summary-row"><span>العملة</span><strong>SAR</strong></div>
-        <div class="roya-summary-row"><span>بوابة الدفع</span><strong>ميسر</strong></div>
-        <div class="roya-why"><strong>لماذا هذه الصفحة أكثر أمانًا؟</strong>بيانات الدفع الحساسة يتم إدخالها داخل نموذج مزود الدفع، ولا يعرض رؤيا رقم بطاقتك الكامل أو رمز التحقق.</div>
-      </aside>
-    </div>
-  </div>`
-  document.body.appendChild(page);
-  const callback=new URL(location.origin+location.pathname); callback.searchParams.set('payment_return','1');
-  try{
-    Moyasar.init({
-      element:'#royaCheckoutPage .mysr-form',
-      amount:Math.round(Number(plan.price_sar)*100), currency:'SAR',
-      description:`رؤيا - ${plan.name_ar}`,
-      publishable_api_key:'pk_test_rkBnvVzFvzJiEuZN53iJUuh2Rmg7a7dSdT9Awhkf',
-      callback_url:callback.toString(), language:'ar',
-      methods:['creditcard','applepay'],
-      supported_networks:['mada','visa','mastercard'],
-      apple_pay:{country:'SA',label:'رؤيا',validate_merchant_url:'https://api.moyasar.com/v1/applepay/initiate'},
-      fixed_width:false,
-      metadata:{user_id:currentUser.id,plan_id:plan.id},
-      on_completed:function(payment){if(payment?.id)localStorage.setItem('roya_pending_payment',payment.id)},
-      on_failure:function(error){console.error('Moyasar payment error',error)}
-    });
-  }catch(e){console.error(e);page.querySelector('.mysr-form').innerHTML='<div style="padding:18px;text-align:center;color:#a9aec8">تعذر تشغيل نموذج الدفع. حاول مرة أخرى.</div>'}
+  location.href='payment.html?plan='+encodeURIComponent(planId);
 }
-function leaveCheckoutPage(){document.getElementById('royaCheckoutPage')?.remove();document.querySelector('.shell')?.style.removeProperty('display');document.querySelector('nav')?.style.removeProperty('display');history.replaceState({},'',location.pathname)}
-function closePaymentModal(){leaveCheckoutPage()}
+
+function leaveCheckoutPage(){location.href='./'}
+function closePaymentModal(){location.href='./'}
 
 async function handleMoyasarReturn(){
   const params=new URLSearchParams(location.search);
