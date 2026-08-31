@@ -695,78 +695,14 @@ async function startPremiumCheckout(planId){
     alert('الدفع التجريبي يحتاج فتح الموقع من رابط ويب http/https حتى يستطيع ميسر الرجوع إلى صفحة النتيجة بعد 3D Secure.');
     return;
   }
-
-  const {data:plan,error:planError}=await sb.from('subscription_plans')
-    .select('id,name_ar,price_sar,billing_period,is_active')
-    .eq('id',planId).eq('is_active',true).single();
-
-  if(planError||!plan){
-    alert('تعذر تحميل الباقة.');
-    return;
-  }
-
- 
-const cfg={
-  publishable_key:'pk_test_rkBnvVzFvzJiEuZN53iJUuh2Rmg7a7dSdT9Awhkf',
-  mode:'test'
-};
   localStorage.setItem('roya_pending_plan',planId);
-
-  const existing=document.getElementById('paymentOverlay');
-  if(existing)existing.remove();
-
-  const overlay=document.createElement('div');
-  overlay.id='paymentOverlay';
-  overlay.className='paymentOverlay';
-  overlay.innerHTML=`<div class="paymentPanel" dir="rtl" role="dialog" aria-modal="true" aria-label="إتمام الدفع">
-    <div class="paymentHead"><div class="paymentHeadRow"><div class="paymentBrand"><div class="paymentBrandIcon">◐</div><div>
-      <div class="paymentEyebrow">رؤيا Premium</div><h2 class="paymentTitle">${escapeHtml(plan.name_ar)}</h2>
-      <div class="paymentMeta"><strong style="color:#f2d58a;font-size:17px">${Number(plan.price_sar)} ر.س</strong><span>•</span><span class="paymentPill">● ${cfg.mode==='test'?'وضع الاختبار':'دفع آمن'}</span></div>
-    </div></div><button class="paymentClose" onclick="closePaymentModal()" aria-label="إغلاق">×</button></div></div>
-    <div class="paymentBody">
-      <div class="paymentStatus"><div class="paymentStatusIcon">🔒</div><div><b style="display:block;color:#eef0f8;margin-bottom:2px">دفع مشفّر وآمن</b>بيانات البطاقة تُعالج مباشرة عبر ميسر ولا تمر عبر خوادم «رؤيا».</div></div>
-      <div class="paymentSecureRow"><div class="paymentSecureItem"><b>🔐 اتصال مشفّر</b>حماية أثناء الدفع</div><div class="paymentSecureItem"><b>💳 ميسر</b>بوابة دفع معتمدة</div><div class="paymentSecureItem"><b>✓ تفعيل فوري</b>بعد تأكيد العملية</div></div>
-      <div class="mysr-form"></div><div class="paymentFoot">بالإكمال أنت توافق على تنفيذ عملية الدفع للخطة المحددة عبر ميسر.</div>
-    </div></div>`;
-  document.body.appendChild(overlay);
-
-  const callback=new URL(location.href);
-  callback.search='';
-  callback.hash='';
-  callback.searchParams.set('payment_return','1');
-
-  try{
-    Moyasar.init({
-      element: '#paymentOverlay .mysr-form',
-      amount: Math.round(Number(plan.price_sar)*100),
-      currency: 'SAR',
-      description: `اشتراك رؤيا - ${plan.name_ar}`,
-      publishable_api_key: cfg.publishable_key,
-      callback_url: callback.toString(),
-      language: 'ar',
-      methods: ['creditcard'],
-      supported_networks: ['mada','visa','mastercard'],
-      fixed_width: false,
-      metadata: {
-        user_id: currentUser.id,
-        plan_id: plan.id
-      },
-      on_completed: async function(payment){
-        if(payment?.id)localStorage.setItem('roya_pending_payment',payment.id);
-      },
-      on_failure: function(error){
-        console.error('Moyasar payment error',error);
-      }
-    });
-  }catch(e){
-    console.error(e);
-    alert('تعذر تشغيل نموذج ميسر.');
-    closePaymentModal();
-  }
+  const target=new URL('payment.html',location.href);
+  target.searchParams.set('plan',planId);
+  location.href=target.toString();
 }
 
 function closePaymentModal(){
-  document.getElementById('paymentOverlay')?.remove();
+  if(history.length>1)history.back(); else location.href='./';
 }
 
 async function handleMoyasarReturn(){
