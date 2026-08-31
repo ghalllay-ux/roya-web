@@ -22,13 +22,14 @@ jobs:
           grep -q 'function openAuth()' index.html
           grep -q 'const SUPABASE_URL=' index.html
           grep -q 'async function logoutAllDevices()' index.html
-      - name: Apply premium logout success UI
+      - name: Apply premium logout confirmation UI
         run: |
           python3 scripts/logout_success_ui_v2.py
-          grep -q 'roya-logout-success-v3' index.html
-          grep -q 'showLogoutSuccessToast()' index.html
-          grep -q 'تم تأمين جلستك' index.html
-          if grep -q "alert('تم تسجيل الخروج')" index.html; then exit 1; fi
+          grep -q 'roya-logout-confirm-v4' index.html
+          grep -q 'requestRoyaLogout()' index.html
+          grep -q 'هل تريد تسجيل الخروج؟' index.html
+          grep -q 'نعم، تسجيل الخروج' index.html
+          grep -q 'لا، البقاء' index.html
       - name: Apply premium mobile UI v2
         run: |
           python3 scripts/mobile_app_ui_v2.py
@@ -100,6 +101,7 @@ jobs:
           grep -q 'function openAuth()' index.html
           grep -q 'const SUPABASE_URL=' index.html
           grep -q 'async function logoutAllDevices()' index.html
+          grep -q 'requestRoyaLogout()' index.html
           if grep -q '>شهري<' index.html; then exit 1; fi
       - name: Apply premium card fields UI v4
         run: |
@@ -129,7 +131,7 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html payment.html
           if ! git diff --cached --quiet; then
-            git commit -m 'Apply premium logout confirmation and safe credit checkout'
+            git commit -m 'Deploy logout confirmation and credit checkout'
             git push
           fi
       - name: Deploy to Cloudflare Pages
