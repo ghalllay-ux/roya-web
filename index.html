@@ -1034,17 +1034,45 @@ async function startPremiumCheckout(planId){
   const page=document.createElement('main');
   page.id='royaCheckoutPage';
   page.setAttribute('dir','rtl');
-  page.style.cssText='min-height:100vh;background:radial-gradient(circle at 80% -10%,#312060 0,transparent 34%),linear-gradient(145deg,#070b24,#11103c);color:#f8f7fb;padding:18px 14px 38px;font-family:system-ui,-apple-system,Segoe UI,Tahoma,Arial,sans-serif';
-  page.innerHTML=`<div style="width:min(520px,100%);margin:auto">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-      <div style="display:flex;align-items:center;gap:10px"><div class="mark" style="width:40px;height:40px">◐</div><b style="font-size:20px">رؤيا</b></div>
-      <button class="ghost" onclick="leaveCheckoutPage()">العودة</button>
+  page.style.cssText='min-height:100vh';
+  page.innerHTML=`<div class="roya-pay-wrap">
+    <div class="roya-pay-top">
+      <div class="roya-pay-brand"><div class="roya-pay-logo">🌙</div><span>رؤيا</span></div>
+      <button class="roya-pay-back" type="button" onclick="leaveCheckoutPage()">عودة</button>
     </div>
-    <section style="background:linear-gradient(155deg,rgba(20,25,58,.98),rgba(8,12,33,.99));border:1px solid rgba(242,213,138,.2);border-radius:24px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.45)">
-      <div style="padding:19px 20px 15px;border-bottom:1px solid rgba(255,255,255,.06)"><div style="color:#d9bc77;font-size:11px;font-weight:800">رؤيا Premium</div><h1 style="font-size:22px;margin:5px 0">${escapeHtml(plan.name_ar)}</h1><div style="display:flex;gap:7px;align-items:center;color:#a9aec8;font-size:12px"><strong style="font-size:20px;color:#f2d58a">${Number(plan.price_sar)} ر.س</strong><span>•</span><span>صفحة دفع آمنة</span></div></div>
-      <div style="padding:16px 20px 21px"><div style="padding:10px 11px;border-radius:13px;background:rgba(214,173,91,.07);border:1px solid rgba(214,173,91,.16);font-size:11px;color:#cfd3e8;line-height:1.65;margin-bottom:13px"><b>🔒 دفع مشفّر وآمن</b><br>بيانات البطاقة تُعالج مباشرة عبر ميسر.</div><div class="mysr-form"></div><div style="text-align:center;color:#747d9f;font-size:9px;line-height:1.6;margin-top:11px">بالإكمال أنت توافق على تنفيذ عملية الدفع للخطة المحددة عبر ميسر.</div></div>
-    </section>
-  </div>`;
+    <div class="roya-pay-shell">
+      <section class="roya-pay-main" aria-label="إتمام الدفع">
+        <div class="roya-pay-head">
+          <div class="roya-pay-kicker">🔒 إتمام دفع آمن</div>
+          <h1 class="roya-pay-title">أكمل طلبك بثقة</h1>
+          <p class="roya-pay-sub">أدخل بيانات الدفع في النموذج الآمن أدناه. تتم معالجة بيانات البطاقة مباشرة عبر بوابة ميسر.</p>
+        </div>
+        <div class="roya-pay-trust">
+          <div><span>🛡️</span><span><b>معالجة آمنة</b>عبر بوابة ميسر</span></div>
+          <div><span>🔐</span><span><b>خصوصية البطاقة</b>لا نخزن بياناتها</span></div>
+          <div><span>✓</span><span><b>تأكيد واضح</b>بعد نجاح العملية</span></div>
+        </div>
+        <div class="roya-pay-form">
+          <div class="roya-pay-secure"><span>🔒 اتصال آمن ومشفّر</span><span>الدفع بالريال السعودي</span></div>
+          <div class="roya-moyasar-label">بيانات الدفع</div>
+          <div class="mysr-form"></div>
+          <div class="roya-pay-foot">لن يتم تنفيذ الطلب إلا بعد اكتمال عملية الدفع بنجاح. بالمتابعة أنت توافق على شروط الخدمة وسياسة الخصوصية.</div>
+        </div>
+      </section>
+      <aside class="roya-pay-summary" aria-label="ملخص الطلب">
+        <h2>ملخص الطلب</h2>
+        <div class="roya-plan-box">
+          <div style="font-size:11px;color:#aeb5cc;margin-bottom:5px">الخيار المحدد</div>
+          <div class="roya-plan-name">${escapeHtml(plan.name_ar)}</div>
+          <div class="roya-plan-price">${Number(plan.price_sar).toFixed(2)} <small>ر.س</small></div>
+        </div>
+        <div class="roya-summary-row"><span>المبلغ</span><strong>${Number(plan.price_sar).toFixed(2)} ر.س</strong></div>
+        <div class="roya-summary-row"><span>العملة</span><strong>SAR</strong></div>
+        <div class="roya-summary-row"><span>بوابة الدفع</span><strong>ميسر</strong></div>
+        <div class="roya-why"><strong>لماذا هذه الصفحة أكثر أمانًا؟</strong>بيانات الدفع الحساسة يتم إدخالها داخل نموذج مزود الدفع، ولا يعرض رؤيا رقم بطاقتك الكامل أو رمز التحقق.</div>
+      </aside>
+    </div>
+  </div>`
   document.body.appendChild(page);
 
   const callback=new URL(location.origin+location.pathname);
