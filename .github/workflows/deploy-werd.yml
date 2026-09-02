@@ -29,6 +29,7 @@ jobs:
           test -f werd/home.js
           test -f werd/progress.js
           test -f werd/onboarding.js
+          test -f werd/profile.js
           test -f werd/manifest.webmanifest
           test -f werd/service-worker.js
           grep -q "ward_user_state" werd/app.js
@@ -44,6 +45,7 @@ jobs:
           node --check werd/home.js
           node --check werd/progress.js
           node --check werd/onboarding.js
+          node --check werd/profile.js
           node --check werd/service-worker.js
       - name: Bundle Werd feature layers
         run: |
@@ -51,7 +53,7 @@ jobs:
           from pathlib import Path
           p=Path('werd/index.html')
           s=p.read_text(encoding='utf-8')
-          for tag in ['<script src="./search.js"></script>','<script src="./iman.js"></script>','<script src="./home.js"></script>','<script src="./progress.js"></script>','<script src="./onboarding.js"></script>']:
+          for tag in ['<script src="./search.js"></script>','<script src="./iman.js"></script>','<script src="./home.js"></script>','<script src="./progress.js"></script>','<script src="./onboarding.js"></script>','<script src="./profile.js"></script>']:
               if tag not in s:
                   s=s.replace('</body>', tag+'\n</body>')
           p.write_text(s,encoding='utf-8')
@@ -61,6 +63,7 @@ jobs:
           grep -q 'home.js' werd/index.html
           grep -q 'progress.js' werd/index.html
           grep -q 'onboarding.js' werd/index.html
+          grep -q 'profile.js' werd/index.html
       - name: Ensure Cloudflare Pages project exists
         run: npx --yes wrangler@3.90.0 pages project create werd --production-branch=main || true
         env:
