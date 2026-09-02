@@ -22,6 +22,7 @@ jobs:
           test -f werd/features.js
           test -f werd/reader.js
           test -f werd/listening.js
+          test -f werd/prayer.js
           test -f werd/manifest.webmanifest
           test -f werd/service-worker.js
           grep -q "ward_user_state" werd/app.js
@@ -30,6 +31,7 @@ jobs:
           node --check werd/features.js
           node --check werd/reader.js
           node --check werd/listening.js
+          node --check werd/prayer.js
           node --check werd/service-worker.js
       - name: Ensure Cloudflare Pages project exists
         run: npx --yes wrangler@3.90.0 pages project create werd --production-branch=main || true
