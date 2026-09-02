@@ -1,24 +1,29 @@
-const APP_CACHE='werd-v17';
-const RUNTIME_CACHE='werd-runtime-v17';
+const APP_CACHE='werd-v18';
+const RUNTIME_CACHE='werd-runtime-v18';
 const MUSHAF_OFFLINE_CACHE='werd-mushaf-offline-v1';
-const APP_SHELL=['./','./index.html','./app.css','./app.js','./notifications.js','./features.js','./reader.js','./listening.js','./prayer.js','./more.js','./search.js','./iman.js','./home.js','./progress.js','./onboarding.js','./profile.js','./mushaf.js','./offline-mushaf.js','./manifest.webmanifest','./icon.svg'];
+const AUDIO_OFFLINE_CACHE='werd-audio-offline-v1';
+const APP_SHELL=['./','./index.html','./app.css','./app.js','./notifications.js','./features.js','./reader.js','./listening.js','./prayer.js','./more.js','./search.js','./iman.js','./home.js','./progress.js','./onboarding.js','./profile.js','./mushaf.js','./offline-mushaf.js','./offline-audio.js','./manifest.webmanifest','./icon.svg'];
 
 self.addEventListener('install',event=>{event.waitUntil(caches.open(APP_CACHE).then(cache=>cache.addAll(APP_SHELL)));self.skipWaiting();});
-self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>![APP_CACHE,RUNTIME_CACHE,MUSHAF_OFFLINE_CACHE].includes(k)).map(k=>caches.delete(k)))));self.clients.claim();});
+self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>![APP_CACHE,RUNTIME_CACHE,MUSHAF_OFFLINE_CACHE,AUDIO_OFFLINE_CACHE].includes(k)).map(k=>caches.delete(k)))));self.clients.claim();});
 
 self.addEventListener('fetch',event=>{
   const req=event.request;if(req.method!=='GET')return;const url=new URL(req.url);
 
-  // Audio must bypass Cache API so Safari/iOS can use HTTP Range requests correctly.
-  if((url.hostname.includes('cdn.islamic.network')&&url.pathname.includes('/quran/audio'))||(url.hostname.includes('hisnmuslim.com')&&url.pathname.includes('/audio/'))){
-    event.respondWith(fetch(req));return;
+  // Quran audio explicitly downloaded by the user is served from its persistent cache first.
+  if(url.hostname.includes('cdn.islamic.network')&&url.pathname.includes('/quran/audio')){
+    event.respondWith((async()=>{
+      const saved=await (await caches.open(AUDIO_OFFLINE_CACHE)).match(req,{ignoreVary:true});if(saved)return saved;
+      return fetch(req);
+    })());return;
   }
+  // Other audio bypasses runtime caching so Safari/iOS Range requests remain intact.
+  if(url.hostname.includes('hisnmuslim.com')&&url.pathname.includes('/audio/')){event.respondWith(fetch(req));return;}
 
   if(req.mode==='navigate'){
     event.respondWith(fetch(req).then(res=>{const copy=res.clone();caches.open(APP_CACHE).then(c=>c.put('./index.html',copy));return res;}).catch(()=>caches.match('./index.html')));return;
   }
 
-  // Pages explicitly downloaded by the user must survive app cache upgrades and win when offline.
   if(url.hostname.includes('alquran.cloud')&&url.pathname.includes('/page/')){
     event.respondWith((async()=>{
       const offline=await caches.open(MUSHAF_OFFLINE_CACHE),saved=await offline.match(req);if(saved)return saved;
@@ -34,14 +39,8 @@ self.addEventListener('fetch',event=>{
 });
 
 self.addEventListener('push',event=>{
-  let data={};
-  try{data=event.data?event.data.json():{}}catch(e){data={body:event.data?.text()||'لديك تذكير جديد من ورد'}}
-  const title=data.title||'ورد 🌿';
-  const options={body:data.body||'حان وقت وردك اليومي.',icon:'./icon.svg',badge:'./icon.svg',dir:'rtl',lang:'ar',tag:data.tag||'werd-reminder',renotify:true,data:{url:data.url||'./'}};
+  let data={};try{data=event.data?event.data.json():{}}catch(e){data={body:event.data?.text()||'لديك تذكير جديد من ورد'}}
+  const title=data.title||'ورد 🌿';const options={body:data.body||'حان وقت وردك اليومي.',icon:'./icon.svg',badge:'./icon.svg',dir:'rtl',lang:'ar',tag:data.tag||'werd-reminder',renotify:true,data:{url:data.url||'./'}};
   event.waitUntil(self.registration.showNotification(title,options));
 });
-
-self.addEventListener('notificationclick',event=>{
-  event.notification.close();const target=event.notification.data?.url||'./';
-  event.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(list=>{for(const client of list){if('focus'in client){client.navigate(target).catch(()=>{});return client.focus();}}return clients.openWindow?clients.openWindow(target):undefined;}));
-});
+self.addEventListener('notificationclick',event=>{event.notification.close();const target=event.notification.data?.url||'./';event.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(list=>{for(const client of list){if('focus'in client){client.navigate(target).catch(()=>{});return client.focus();}}return clients.openWindow?clients.openWindow(target):undefined;}));});
