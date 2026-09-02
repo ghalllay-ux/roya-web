@@ -15,74 +15,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate Werd files and JavaScript
         run: |
-          test -f werd/index.html
-          test -f werd/app.css
-          test -f werd/app.js
-          test -f werd/notifications.js
-          test -f werd/features.js
-          test -f werd/audio-engine.js
-          test -f werd/reader.js
-          test -f werd/listening.js
-          test -f werd/prayer.js
-          test -f werd/more.js
-          test -f werd/search.js
-          test -f werd/iman.js
-          test -f werd/home.js
-          test -f werd/progress.js
-          test -f werd/onboarding.js
-          test -f werd/profile.js
-          test -f werd/mushaf.js
-          test -f werd/offline-mushaf.js
-          test -f werd/offline-audio.js
-          test -f werd/playlist.js
-          test -f werd/memorization.js
-          test -f werd/memorization-tracker.js
-          test -f werd/memorization-test.js
-          test -f werd/recitation-test.js
-          test -f werd/weakness-analysis.js
-          test -f werd/daily-memorization-plan.js
-          test -f werd/weekly-memorization-plan.js
-          test -f werd/long-term-memorization-goal.js
-          test -f werd/monthly-memorization-dashboard.js
-          test -f werd/achievement-report.js
-          test -f werd/advanced-achievements.js
-          test -f werd/memorization-journey.js
-          test -f werd/deep-link.js
-          test -f werd/manifest.webmanifest
-          test -f werd/service-worker.js
+          for f in index.html app.css app.js notifications.js features.js audio-engine.js reader.js listening.js prayer.js more.js search.js iman.js home.js progress.js onboarding.js profile.js mushaf.js offline-mushaf.js offline-audio.js playlist.js memorization.js memorization-tracker.js memorization-test.js recitation-test.js weakness-analysis.js daily-memorization-plan.js weekly-memorization-plan.js long-term-memorization-goal.js monthly-memorization-dashboard.js achievement-report.js advanced-achievements.js memorization-journey.js desktop-layout.js deep-link.js manifest.webmanifest service-worker.js; do test -f "werd/$f"; done
           grep -q "ward_user_state" werd/app.js
-          node --check werd/app.js
-          node --check werd/notifications.js
-          node --check werd/features.js
-          node --check werd/audio-engine.js
-          node --check werd/reader.js
-          node --check werd/listening.js
-          node --check werd/prayer.js
-          node --check werd/more.js
-          node --check werd/search.js
-          node --check werd/iman.js
-          node --check werd/home.js
-          node --check werd/progress.js
-          node --check werd/onboarding.js
-          node --check werd/profile.js
-          node --check werd/mushaf.js
-          node --check werd/offline-mushaf.js
-          node --check werd/offline-audio.js
-          node --check werd/playlist.js
-          node --check werd/memorization.js
-          node --check werd/memorization-tracker.js
-          node --check werd/memorization-test.js
-          node --check werd/recitation-test.js
-          node --check werd/weakness-analysis.js
-          node --check werd/daily-memorization-plan.js
-          node --check werd/weekly-memorization-plan.js
-          node --check werd/long-term-memorization-goal.js
-          node --check werd/monthly-memorization-dashboard.js
-          node --check werd/achievement-report.js
-          node --check werd/advanced-achievements.js
-          node --check werd/memorization-journey.js
-          node --check werd/deep-link.js
-          node --check werd/service-worker.js
+          for f in app.js notifications.js features.js audio-engine.js reader.js listening.js prayer.js more.js search.js iman.js home.js progress.js onboarding.js profile.js mushaf.js offline-mushaf.js offline-audio.js playlist.js memorization.js memorization-tracker.js memorization-test.js recitation-test.js weakness-analysis.js daily-memorization-plan.js weekly-memorization-plan.js long-term-memorization-goal.js monthly-memorization-dashboard.js achievement-report.js advanced-achievements.js memorization-journey.js desktop-layout.js deep-link.js service-worker.js; do node --check "werd/$f"; done
       - name: Bundle Werd feature layers
         run: |
           python3 - <<'PY'
@@ -91,37 +26,14 @@ jobs:
           s=p.read_text(encoding='utf-8')
           audio='<script src="./audio-engine.js"></script>'
           reader='<script src="./reader.js"></script>'
-          if audio not in s:
-              s=s.replace(reader, audio+'\n'+reader)
-          for tag in ['<script src="./search.js"></script>','<script src="./iman.js"></script>','<script src="./home.js"></script>','<script src="./progress.js"></script>','<script src="./onboarding.js"></script>','<script src="./profile.js"></script>','<script src="./mushaf.js"></script>','<script src="./offline-mushaf.js"></script>','<script src="./offline-audio.js"></script>','<script src="./playlist.js"></script>','<script src="./memorization.js"></script>','<script src="./memorization-tracker.js"></script>','<script src="./memorization-test.js"></script>','<script src="./recitation-test.js"></script>','<script src="./weakness-analysis.js"></script>','<script src="./daily-memorization-plan.js"></script>','<script src="./weekly-memorization-plan.js"></script>','<script src="./long-term-memorization-goal.js"></script>','<script src="./monthly-memorization-dashboard.js"></script>','<script src="./achievement-report.js"></script>','<script src="./advanced-achievements.js"></script>','<script src="./memorization-journey.js"></script>','<script src="./deep-link.js"></script>']:
-              if tag not in s:
-                  s=s.replace('</body>', tag+'\n</body>')
+          if audio not in s:s=s.replace(reader,audio+'\n'+reader)
+          files=['search.js','iman.js','home.js','progress.js','onboarding.js','profile.js','mushaf.js','offline-mushaf.js','offline-audio.js','playlist.js','memorization.js','memorization-tracker.js','memorization-test.js','recitation-test.js','weakness-analysis.js','daily-memorization-plan.js','weekly-memorization-plan.js','long-term-memorization-goal.js','monthly-memorization-dashboard.js','achievement-report.js','advanced-achievements.js','memorization-journey.js','desktop-layout.js','deep-link.js']
+          for f in files:
+              tag=f'<script src="./{f}"></script>'
+              if tag not in s:s=s.replace('</body>',tag+'\n</body>')
           p.write_text(s,encoding='utf-8')
           PY
-          grep -q 'audio-engine.js' werd/index.html
-          grep -q 'search.js' werd/index.html
-          grep -q 'iman.js' werd/index.html
-          grep -q 'home.js' werd/index.html
-          grep -q 'progress.js' werd/index.html
-          grep -q 'onboarding.js' werd/index.html
-          grep -q 'profile.js' werd/index.html
-          grep -q 'mushaf.js' werd/index.html
-          grep -q 'offline-mushaf.js' werd/index.html
-          grep -q 'offline-audio.js' werd/index.html
-          grep -q 'playlist.js' werd/index.html
-          grep -q 'memorization.js' werd/index.html
-          grep -q 'memorization-tracker.js' werd/index.html
-          grep -q 'memorization-test.js' werd/index.html
-          grep -q 'recitation-test.js' werd/index.html
-          grep -q 'weakness-analysis.js' werd/index.html
-          grep -q 'daily-memorization-plan.js' werd/index.html
-          grep -q 'weekly-memorization-plan.js' werd/index.html
-          grep -q 'long-term-memorization-goal.js' werd/index.html
-          grep -q 'monthly-memorization-dashboard.js' werd/index.html
-          grep -q 'achievement-report.js' werd/index.html
-          grep -q 'advanced-achievements.js' werd/index.html
-          grep -q 'memorization-journey.js' werd/index.html
-          grep -q 'deep-link.js' werd/index.html
+          for f in audio-engine.js search.js iman.js home.js progress.js onboarding.js profile.js mushaf.js offline-mushaf.js offline-audio.js playlist.js memorization.js memorization-tracker.js memorization-test.js recitation-test.js weakness-analysis.js daily-memorization-plan.js weekly-memorization-plan.js long-term-memorization-goal.js monthly-memorization-dashboard.js achievement-report.js advanced-achievements.js memorization-journey.js desktop-layout.js deep-link.js; do grep -q "$f" werd/index.html; done
       - name: Ensure Cloudflare Pages project exists
         run: npx --yes wrangler@3.90.0 pages project create werd --production-branch=main || true
         env:
