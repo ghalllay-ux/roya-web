@@ -13,14 +13,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate Werd files
+      - name: Validate Werd files and JavaScript
         run: |
           test -f werd/index.html
           test -f werd/app.css
           test -f werd/app.js
+          test -f werd/notifications.js
+          test -f werd/features.js
           test -f werd/manifest.webmanifest
           test -f werd/service-worker.js
           grep -q "ward_user_state" werd/app.js
+          node --check werd/app.js
+          node --check werd/notifications.js
+          node --check werd/features.js
+          node --check werd/service-worker.js
       - name: Ensure Cloudflare Pages project exists
         run: npx --yes wrangler@3.90.0 pages project create werd --production-branch=main || true
         env:
