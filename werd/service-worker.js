@@ -1,6 +1,6 @@
-const APP_CACHE='werd-v10';
-const RUNTIME_CACHE='werd-runtime-v10';
-const APP_SHELL=['./','./index.html','./app.css','./app.js','./notifications.js','./features.js','./reader.js','./listening.js','./prayer.js','./more.js','./search.js','./manifest.webmanifest','./icon.svg'];
+const APP_CACHE='werd-v11';
+const RUNTIME_CACHE='werd-runtime-v11';
+const APP_SHELL=['./','./index.html','./app.css','./app.js','./notifications.js','./features.js','./reader.js','./listening.js','./prayer.js','./more.js','./search.js','./iman.js','./manifest.webmanifest','./icon.svg'];
 
 self.addEventListener('install',event=>{event.waitUntil(caches.open(APP_CACHE).then(cache=>cache.addAll(APP_SHELL)));self.skipWaiting();});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>![APP_CACHE,RUNTIME_CACHE].includes(k)).map(k=>caches.delete(k)))));self.clients.claim();});
@@ -9,14 +9,14 @@ self.addEventListener('fetch',event=>{
   const req=event.request;if(req.method!=='GET')return;const url=new URL(req.url);
 
   // Audio must bypass Cache API so Safari/iOS can use HTTP Range requests correctly.
-  if(url.hostname.includes('cdn.islamic.network')&&url.pathname.includes('/quran/audio')){
+  if((url.hostname.includes('cdn.islamic.network')&&url.pathname.includes('/quran/audio'))||(url.hostname.includes('hisnmuslim.com')&&url.pathname.includes('/audio/'))){
     event.respondWith(fetch(req));return;
   }
 
   if(req.mode==='navigate'){
     event.respondWith(fetch(req).then(res=>{const copy=res.clone();caches.open(APP_CACHE).then(c=>c.put('./index.html',copy));return res;}).catch(()=>caches.match('./index.html')));return;
   }
-  if(url.hostname.includes('alquran.cloud')||url.hostname.includes('islamic.network')||url.hostname.includes('aladhan.com')||url.hostname.includes('raw.githubusercontent.com')||url.hostname.includes('cdn.jsdelivr.net')){
+  if(url.hostname.includes('alquran.cloud')||url.hostname.includes('islamic.network')||url.hostname.includes('aladhan.com')||url.hostname.includes('hisnmuslim.com')||url.hostname.includes('raw.githubusercontent.com')||url.hostname.includes('cdn.jsdelivr.net')){
     event.respondWith(caches.open(RUNTIME_CACHE).then(async cache=>{const cached=await cache.match(req);const network=fetch(req).then(res=>{if(res&&(res.status===200||res.type==='opaque'))cache.put(req,res.clone());return res;}).catch(()=>cached);return cached||network;}));return;
   }
   if(url.origin===self.location.origin){event.respondWith(caches.match(req).then(cached=>cached||fetch(req).then(res=>{const copy=res.clone();caches.open(APP_CACHE).then(c=>c.put(req,copy));return res;})));}
