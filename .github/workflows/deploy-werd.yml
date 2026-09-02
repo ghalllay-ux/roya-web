@@ -26,6 +26,7 @@ jobs:
           test -f werd/more.js
           test -f werd/search.js
           test -f werd/iman.js
+          test -f werd/home.js
           test -f werd/manifest.webmanifest
           test -f werd/service-worker.js
           grep -q "ward_user_state" werd/app.js
@@ -38,6 +39,7 @@ jobs:
           node --check werd/more.js
           node --check werd/search.js
           node --check werd/iman.js
+          node --check werd/home.js
           node --check werd/service-worker.js
       - name: Bundle Werd feature layers
         run: |
@@ -45,13 +47,14 @@ jobs:
           from pathlib import Path
           p=Path('werd/index.html')
           s=p.read_text(encoding='utf-8')
-          for tag in ['<script src="./search.js"></script>','<script src="./iman.js"></script>']:
+          for tag in ['<script src="./search.js"></script>','<script src="./iman.js"></script>','<script src="./home.js"></script>']:
               if tag not in s:
                   s=s.replace('</body>', tag+'\n</body>')
           p.write_text(s,encoding='utf-8')
           PY
           grep -q 'search.js' werd/index.html
           grep -q 'iman.js' werd/index.html
+          grep -q 'home.js' werd/index.html
       - name: Ensure Cloudflare Pages project exists
         run: npx --yes wrangler@3.90.0 pages project create werd --production-branch=main || true
         env:
