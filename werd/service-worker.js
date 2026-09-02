@@ -1,5 +1,5 @@
-const APP_CACHE='werd-v34';
-const RUNTIME_CACHE='werd-runtime-v34';
+const APP_CACHE='werd-v35';
+const RUNTIME_CACHE='werd-runtime-v35';
 const MUSHAF_OFFLINE_CACHE='werd-mushaf-offline-v1';
 const AUDIO_OFFLINE_CACHE='werd-audio-offline-v1';
 const APP_SHELL=['./','./index.html','./app.css','./app.js','./notifications.js','./features.js','./audio-engine.js','./reader.js','./listening.js','./prayer.js','./more.js','./search.js','./iman.js','./home.js','./progress.js','./onboarding.js','./profile.js','./mushaf.js','./offline-mushaf.js','./offline-audio.js','./playlist.js','./memorization.js','./memorization-tracker.js','./memorization-test.js','./recitation-test.js','./weakness-analysis.js','./daily-memorization-plan.js','./weekly-memorization-plan.js','./long-term-memorization-goal.js','./monthly-memorization-dashboard.js','./achievement-report.js','./advanced-achievements.js','./memorization-journey.js','./desktop-layout.js','./deep-link.js','./manifest.webmanifest','./icon.svg'];
