@@ -1,6 +1,6 @@
-const APP_CACHE='werd-v12';
-const RUNTIME_CACHE='werd-runtime-v12';
-const APP_SHELL=['./','./index.html','./app.css','./app.js','./notifications.js','./features.js','./reader.js','./listening.js','./prayer.js','./more.js','./search.js','./iman.js','./home.js','./manifest.webmanifest','./icon.svg'];
+const APP_CACHE='werd-v13';
+const RUNTIME_CACHE='werd-runtime-v13';
+const APP_SHELL=['./','./index.html','./app.css','./app.js','./notifications.js','./features.js','./reader.js','./listening.js','./prayer.js','./more.js','./search.js','./iman.js','./home.js','./progress.js','./manifest.webmanifest','./icon.svg'];
 
 self.addEventListener('install',event=>{event.waitUntil(caches.open(APP_CACHE).then(cache=>cache.addAll(APP_SHELL)));self.skipWaiting();});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>![APP_CACHE,RUNTIME_CACHE].includes(k)).map(k=>caches.delete(k)))));self.clients.claim();});
