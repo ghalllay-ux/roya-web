@@ -14,13 +14,14 @@
   ['🔖','علامات القراءة','مواضعك المحفوظة','bookmarks'],
   ['♥️','المفضلة','الآيات والأذكار','favorites'],
   ['📊','الإنجاز','إحصائيات تقدمك','stats'],
-  ['🧠','الحفظ والمراجعة','خطة الحفظ','memorization'],
+  ['🧠','الحفظ والمراجعة','كل أدوات الحفظ في مكان واحد','memorizationHub'],
   ['🔎','البحث','بحث في ورد','search'],
   ['⚙️','الإعدادات','تخصيص التطبيق','settings']
  ];
  function openPage(page){
   if(page==='mushaf'&&typeof window.openWerdMushafV2==='function'){window.openWerdMushafV2();return}
   if(page==='mushaf'&&typeof window.openMushaf==='function'){window.openMushaf();return}
+  if(page==='memorizationHub'&&typeof window.openWerdMemorizationHub==='function'){window.openWerdMemorizationHub();return}
   try{window.go(page)}catch(_){try{go(page)}catch(e){}}
  }
  function style(){if(document.getElementById(ID+'Style'))return;const s=document.createElement('style');s.id=ID+'Style';s.textContent=`
@@ -39,6 +40,6 @@
  }
  @media(min-width:960px){#${ID}{display:none!important}}
  `;document.head.appendChild(s)}
- function build(){style();const home=document.getElementById('home');if(!home||document.getElementById(ID))return;const hub=document.createElement('section');hub.id=ID;hub.innerHTML=`<div class="mhh-head"><h3>استكشف ورد</h3><span>كل الأقسام</span></div><div class="mhh-grid">${items.map((x,i)=>`<button class="mhh-item" type="button" data-target="${x[3]}"><span class="mhh-icon">${x[0]}</span><span class="mhh-text"><b>${x[1]}</b><small>${x[2]}</small></span><span class="mhh-arrow">‹</span></button>`).join('')}</div>`;const hero=home.querySelector('.hero');if(hero)hero.insertAdjacentElement('afterend',hub);else home.prepend(hub);hub.querySelectorAll('[data-target]').forEach(b=>b.onclick=()=>openPage(b.dataset.target))}
+ function build(){style();const home=document.getElementById('home');if(!home||document.getElementById(ID))return;const hub=document.createElement('section');hub.id=ID;hub.innerHTML=`<div class="mhh-head"><h3>استكشف ورد</h3><span>كل الأقسام</span></div><div class="mhh-grid">${items.map(x=>`<button class="mhh-item" type="button" data-target="${x[3]}"><span class="mhh-icon">${x[0]}</span><span class="mhh-text"><b>${x[1]}</b><small>${x[2]}</small></span><span class="mhh-arrow">‹</span></button>`).join('')}</div>`;const hero=home.querySelector('.hero');if(hero)hero.insertAdjacentElement('afterend',hub);else home.prepend(hub);hub.querySelectorAll('[data-target]').forEach(b=>b.onclick=()=>openPage(b.dataset.target))}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();
 })();
