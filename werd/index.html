@@ -39,6 +39,7 @@
 <nav class="bottom"><button class="nav active" data-page="home"><i>⌂</i>الرئيسية</button><button class="nav" data-page="quran"><i>📖</i>المصحف</button><button class="nav" data-page="adhkar"><i>🌿</i>أذكار</button><button class="nav" data-page="tasbih"><i>📿</i>المسبحة</button><button class="nav" data-page="plan"><i>◔</i>الورد</button></nav>
 <div class="toast" id="toast"></div>
 <script src="./app.js"></script>
+<script src="./notifications.js"></script>
 <script>
 let deferredInstallPrompt=null;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;const c=document.getElementById('installCard');if(c)c.style.display='block'});
