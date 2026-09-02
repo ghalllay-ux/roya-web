@@ -1,35 +1,17 @@
-// v73: mini player is a persistent view of audio state. Closing hides UI only; playback continues.
+// v74 lightweight mini-player state: no DOM-wide MutationObserver.
 (function(){
-  let userHidden=false;
+  let userHidden=false,boundAudio=null;
   const $=id=>document.getElementById(id);
-  const audios=()=>[window.werdListeningAudio,...document.querySelectorAll('audio')].filter((a,i,x)=>a&&x.indexOf(a)===i);
-  function player(){return $('werdMiniPlayer')}
-  function hideUI(e){
-    e?.preventDefault?.();e?.stopPropagation?.();e?.stopImmediatePropagation?.();
-    userHidden=true;
-    const m=player();if(m){m.classList.remove('show');m.hidden=true;m.style.setProperty('display','none','important')}
-    document.body.classList.remove('has-mini-player');
-    return false;
-  }
-  function showUI(){
-    userHidden=false;
-    document.body.classList.remove('mini-player-dismissed');
-    const m=player();if(m){m.hidden=false;m.style.removeProperty('display');m.style.removeProperty('visibility');m.style.removeProperty('pointer-events');m.classList.add('show')}
-    document.body.classList.add('has-mini-player');
-  }
-  function isPlaying(){return audios().some(a=>!a.paused&&!a.ended&&a.currentTime>=0)}
-  function sync(){
-    const m=player();if(!m)return;
-    if(isPlaying()&&!userHidden)showUI();
-    ['miniPlay','listenPlay'].forEach(id=>{const b=$(id);if(b){b.textContent=isPlaying()?'⏸':'▶';b.classList.toggle('is-playing',isPlaying())}})
-  }
-  function bind(){
-    const c=$('miniClose');if(c&&!c.dataset.v73){c.dataset.v73='1';c.type='button';c.setAttribute('aria-label','إخفاء المشغل');c.title='إخفاء المشغل';['click','touchend','pointerup'].forEach(ev=>c.addEventListener(ev,hideUI,{capture:true,passive:false}))}
-    audios().forEach(a=>{if(a.dataset?.miniV73)return;if(a.dataset)a.dataset.miniV73='1';a.addEventListener('play',()=>{userHidden=false;showUI();sync()});a.addEventListener('pause',sync);a.addEventListener('ended',sync)})
-  }
-  // Any explicit playback action restores the mini player; closing never stops audio.
-  document.addEventListener('click',e=>{if(e.target?.closest?.('#miniClose'))return;if(e.target?.closest?.('#listenPlay,#miniPlay,[data-listen-surah]')){userHidden=false;setTimeout(()=>{bind();if(isPlaying())showUI();sync()},0)}},true);
-  document.addEventListener('touchend',e=>{if(e.target?.closest?.('#miniClose'))return;if(e.target?.closest?.('#listenPlay,#miniPlay,[data-listen-surah]')){userHidden=false;setTimeout(()=>{bind();if(isPlaying())showUI();sync()},0)}},{capture:true,passive:true});
-  const mo=new MutationObserver(()=>{bind();sync()});mo.observe(document.documentElement,{childList:true,subtree:true});
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{bind();sync()});else{bind();sync()}
+  const player=()=>$('werdMiniPlayer');
+  const audio=()=>window.werdListeningAudio||document.querySelector('audio');
+  function playing(){const a=audio();return !!(a&&!a.paused&&!a.ended)}
+  function hide(e){e?.preventDefault?.();e?.stopPropagation?.();userHidden=true;const m=player();if(m){m.classList.remove('show');m.hidden=true;m.style.setProperty('display','none','important')}document.body.classList.remove('has-mini-player')}
+  function show(){if(userHidden)return;const m=player();if(m){m.hidden=false;m.style.removeProperty('display');m.classList.add('show')}document.body.classList.add('has-mini-player')}
+  function sync(){const p=playing();['miniPlay','listenPlay'].forEach(id=>{const b=$(id);if(b){b.textContent=p?'⏸':'▶';b.classList.toggle('is-playing',p)}});if(p)show()}
+  function bind(){const c=$('miniClose');if(c&&!c.dataset.lightClose){c.dataset.lightClose='1';c.addEventListener('click',hide,true);c.addEventListener('touchend',hide,{capture:true,passive:false})}const a=audio();if(a&&a!==boundAudio){boundAudio=a;a.addEventListener('play',()=>{userHidden=false;show();sync()});a.addEventListener('pause',sync);a.addEventListener('ended',sync)}}
+  document.addEventListener('click',e=>{if(e.target?.closest?.('#miniClose'))return;if(e.target?.closest?.('#listenPlay,#miniPlay,[data-listen-surah]')){userHidden=false;requestAnimationFrame(()=>{bind();sync()})}},true);
+  document.addEventListener('werd:listening-ready',()=>{bind();sync()});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{bind();sync()},{once:true});else{bind();sync()}
+  // Very low-cost fallback for dynamically-created audio/player; stops after binding.
+  let tries=0;const timer=setInterval(()=>{bind();sync();if(++tries>=12&&$('miniClose')&&audio())clearInterval(timer)},500);
 })();
