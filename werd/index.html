@@ -15,31 +15,17 @@
 </head>
 <body>
 <div class="app">
- <header class="top">
-  <div class="brand"><div class="logo">ورد</div><div><h1>ورد <span style="font-size:11px;color:var(--gold)">Cloud</span></h1><small>قرآن وأذكار • مزامنة سحابية</small></div></div>
-  <div class="actions"><button class="iconbtn" id="syncBtn" title="حالة البيانات">☁︎</button><button class="iconbtn" id="darkBtn" title="الوضع الليلي">☾</button></div>
- </header>
+ <header class="top"><div class="brand"><div class="logo">ورد</div><div><h1>ورد <span style="font-size:11px;color:var(--gold)">Cloud</span></h1><small>قرآن وأذكار • مزامنة سحابية</small></div></div><div class="actions"><button class="iconbtn" id="syncBtn" title="حالة البيانات">☁︎</button><button class="iconbtn" id="darkBtn" title="الوضع الليلي">☾</button></div></header>
  <main>
   <section class="page active" id="home"><div class="hero"><div class="eyebrow">وردك اليوم</div><h2>أكمل وردك اليوم</h2><p id="homeGoalText">0 من 20 صفحة • ابدأ وردك بهدوء</p><div class="progress"><span id="homeProgress" style="width:0%"></span></div><div class="hero-meta"><span id="homePct">0٪ إنجاز</span><span id="streak">1 يوم متتالٍ 🌿</span></div><button class="primary" onclick="go('quran')">ابدأ / أكمل القراءة</button></div><div class="grid"><div class="tile" onclick="go('quran')"><div class="em">📖</div><b>القرآن</b></div><div class="tile" onclick="go('adhkar')"><div class="em">🌿</div><b>الأذكار</b></div><div class="tile" onclick="go('tasbih')"><div class="em">📿</div><b>المسبحة</b></div><div class="tile" onclick="go('plan')"><div class="em">◔</div><b>الورد</b></div><div class="tile" onclick="go('stats')"><div class="em">📊</div><b>الإنجاز</b></div></div></section>
   <section class="page" id="quran"><div class="reader-head"><div class="section-title"><h3 id="quranTitle">القرآن الكريم</h3><span id="quranStatus">تحميل الفهرس…</span></div><div class="search"><input id="surahSearch" placeholder="ابحث باسم السورة"><button onclick="filterSurahs()">بحث</button></div></div><div id="surahList" class="card"><div class="loading">جاري جلب فهرس السور…</div></div><div id="reader" style="display:none"><div class="card"><div class="row"><div><b id="readerName"></b><div class="muted" id="readerMeta"></div></div><button class="smallbtn" onclick="closeReader()">فهرس السور</button></div></div><div id="ayahs" class="card"></div><button class="secondary" onclick="markPageRead()">سجل 1 صفحة في ورد اليوم ✓</button></div></section>
   <section class="page" id="adhkar"><div class="section-title"><h3>الأذكار</h3><span id="adhkarStatus">تحميل المصدر…</span></div><div class="chips"><button class="chip active" data-type="morning">الصباح</button><button class="chip" data-type="evening">المساء</button></div><div id="adhkarList"><div class="loading">جاري تحميل الأذكار…</div></div></section>
   <section class="page" id="tasbih"><div class="section-title"><h3>المسبحة</h3><span>الحفظ تلقائي</span></div><div class="card" style="text-align:center"><div class="counter-circle"><div><div class="counter" id="counter">0</div><div class="muted">سبحان الله</div></div></div><button class="tap" id="tapBtn">سبّح</button></div></section>
-  <section class="page" id="plan"><div class="section-title"><h3>الورد اليومي</h3></div></section>
-  <section class="page" id="stats"><div class="section-title"><h3>الإنجاز</h3></div></section>
+  <section class="page" id="plan"><div class="section-title"><h3>الورد اليومي</h3></div></section><section class="page" id="stats"><div class="section-title"><h3>الإنجاز</h3></div></section>
  </main>
 </div>
 <nav class="bottom"><button class="nav active" data-page="home"><i>⌂</i>الرئيسية</button><button class="nav" data-page="quran"><i>📖</i>المصحف</button><button class="nav" data-page="listening"><i>🎧</i>الاستماع</button><button class="nav" data-page="adhkar"><i>🌿</i>أذكار</button><button class="nav" data-page="more"><i>☷</i>المزيد</button></nav>
 <div class="toast" id="toast"></div>
-<script src="./app.js"></script>
-<script src="./notifications.js"></script>
-<script src="./features.js"></script>
-<script src="./reader.js"></script>
-<script src="./listening.js"></script>
-<script src="./prayer.js"></script>
-<script src="./more.js"></script>
-<script src="./mini-player-close-fix.js"></script>
-<script>
-let deferredInstallPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e});window.addEventListener('load',async()=>{if('serviceWorker' in navigator){try{await navigator.serviceWorker.register('./service-worker.js',{scope:'./'})}catch(e){console.error(e)}}});
-</script>
-</body>
-</html>
+<script src="./app.js"></script><script src="./notifications.js"></script><script src="./features.js"></script><script src="./reader.js"></script><script src="./listening.js?v=60"></script><script src="./listening-ios-fix.js?v=60"></script><script src="./prayer.js"></script><script src="./more.js"></script><script src="./mini-player-close-fix.js?v=60"></script>
+<script>let deferredInstallPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e});window.addEventListener('load',async()=>{if('serviceWorker' in navigator){try{await navigator.serviceWorker.register('./service-worker.js?v=60',{scope:'./'})}catch(e){console.error(e)}}});</script>
+</body></html>
