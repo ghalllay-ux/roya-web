@@ -1,137 +1,37 @@
 const WERD_VAPID_PUBLIC_KEY='BJjGSFzsEZVUZTKihHxo3xWe3Hfl6zG3dLxT04BkpwbD0_pYWlxlaXhSZBeekD7eObDxgEdCkOvWA4nJogA5Me0';
 
-function werdNotifDefaults(){
-  return {
-    morning:{enabled:true,time:'06:30'},
-    evening:{enabled:true,time:'18:00'},
-    wird:{enabled:true,time:'20:00'},
-    timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'Asia/Riyadh',
-    pushEnabled:false
-  };
-}
-function ensureWerdNotifState(){
-  const d=werdNotifDefaults();
-  state.notifications={...d,...(state.notifications||{})};
-  state.notifications.morning={...d.morning,...(state.notifications.morning||{})};
-  state.notifications.evening={...d.evening,...(state.notifications.evening||{})};
-  state.notifications.wird={...d.wird,...(state.notifications.wird||{})};
-}
-function b64ToUint8(base64String){
-  const padding='='.repeat((4-base64String.length%4)%4);
-  const base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
-  const raw=atob(base64);const out=new Uint8Array(raw.length);
-  for(let i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);return out;
-}
+function werdNotifDefaults(){return{morning:{enabled:true,time:'06:30'},evening:{enabled:true,time:'18:00'},wird:{enabled:true,time:'20:00'},timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'Asia/Riyadh',pushEnabled:false}}
+function ensureWerdNotifState(){const d=werdNotifDefaults();state.notifications={...d,...(state.notifications||{})};state.notifications.morning={...d.morning,...(state.notifications.morning||{})};state.notifications.evening={...d.evening,...(state.notifications.evening||{})};state.notifications.wird={...d.wird,...(state.notifications.wird||{})}}
+function el(id){return document.getElementById(id)}
+function b64ToUint8(s){const padding='='.repeat((4-s.length%4)%4),base64=(s+padding).replace(/-/g,'+').replace(/_/g,'/'),raw=atob(base64),out=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);return out}
 function isWerdStandalone(){return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}
 function isWerdIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent)}
 
 function injectWerdNotificationUI(){
-  ensureWerdNotifState();
-  if(document.getElementById('werdNotificationsCard'))return;
-  const auth=document.getElementById('authCard'); if(!auth)return;
-  const wrap=document.createElement('div');
-  wrap.innerHTML=`
-    <div class="section-title"><h3>التنبيهات الذكية</h3><span id="werdNotifStatus">غير مفعلة</span></div>
-    <div class="card" id="werdNotificationsCard">
-      <div class="row"><div><b>تنبيهات ورد</b><div class="muted">أذكار الصباح والمساء والورد القرآني</div></div><button class="smallbtn" id="werdEnableNotif">تفعيل</button></div>
-      <div class="list-item"><label><input type="checkbox" id="wnMorningOn"> أذكار الصباح</label><input class="werd-time" type="time" id="wnMorningTime"></div>
-      <div class="list-item"><label><input type="checkbox" id="wnEveningOn"> أذكار المساء</label><input class="werd-time" type="time" id="wnEveningTime"></div>
-      <div class="list-item"><label><input type="checkbox" id="wnWirdOn"> الورد اليومي</label><input class="werd-time" type="time" id="wnWirdTime"></div>
-      <div class="row" style="margin-top:12px"><button class="smallbtn" id="werdTestNotif">إرسال تنبيه تجريبي</button><button class="smallbtn" id="werdDisableNotif" style="display:none">إيقاف التنبيهات</button></div>
-      <div class="muted" style="margin-top:10px;line-height:1.7" id="werdNotifNote">تُحفظ الأوقات مع حسابك وتعمل حسب المنطقة الزمنية لجهازك.</div>
-    </div>`;
-  auth.insertAdjacentElement('afterend',wrap);
-  const style=document.createElement('style');
-  style.textContent='.werd-time{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:8px}.card input[type=checkbox]{accent-color:var(--green);width:18px;height:18px;vertical-align:middle}';
-  document.head.appendChild(style);
-
-  const n=state.notifications;
-  wnMorningOn.checked=n.morning.enabled;wnMorningTime.value=n.morning.time;
-  wnEveningOn.checked=n.evening.enabled;wnEveningTime.value=n.evening.time;
-  wnWirdOn.checked=n.wird.enabled;wnWirdTime.value=n.wird.time;
-  [wnMorningOn,wnMorningTime,wnEveningOn,wnEveningTime,wnWirdOn,wnWirdTime].forEach(el=>el.addEventListener('change',saveWerdNotifPrefs));
-  werdEnableNotif.onclick=enableWerdPush;
-  werdDisableNotif.onclick=disableWerdPush;
-  werdTestNotif.onclick=testWerdNotification;
-  refreshWerdNotifStatus();
+ ensureWerdNotifState();if(el('werdNotificationsCard'))return;const auth=el('authCard');if(!auth)return;
+ const wrap=document.createElement('div');wrap.innerHTML=`<div class="section-title"><h3>التنبيهات الذكية</h3><span id="werdNotifStatus">غير مفعلة</span></div><div class="card" id="werdNotificationsCard"><div class="row"><div><b>تنبيهات ورد</b><div class="muted">أذكار الصباح والمساء والورد القرآني</div></div><button class="smallbtn" id="werdEnableNotif">تفعيل</button></div><div class="list-item"><label><input type="checkbox" id="wnMorningOn"> أذكار الصباح</label><input class="werd-time" type="time" id="wnMorningTime"></div><div class="list-item"><label><input type="checkbox" id="wnEveningOn"> أذكار المساء</label><input class="werd-time" type="time" id="wnEveningTime"></div><div class="list-item"><label><input type="checkbox" id="wnWirdOn"> الورد اليومي</label><input class="werd-time" type="time" id="wnWirdTime"></div><div class="row" style="margin-top:12px"><button class="smallbtn" id="werdTestNotif">إرسال تنبيه تجريبي</button><button class="smallbtn" id="werdDisableNotif" style="display:none">إيقاف التنبيهات</button></div><div class="muted" style="margin-top:10px;line-height:1.7" id="werdNotifNote">تُحفظ الأوقات مع حسابك وتعمل حسب المنطقة الزمنية لجهازك.</div></div>`;auth.insertAdjacentElement('afterend',wrap);
+ const style=document.createElement('style');style.textContent='.werd-time{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:8px}.card input[type=checkbox]{accent-color:var(--green);width:18px;height:18px;vertical-align:middle}';document.head.appendChild(style);
+ const n=state.notifications;el('wnMorningOn').checked=n.morning.enabled;el('wnMorningTime').value=n.morning.time;el('wnEveningOn').checked=n.evening.enabled;el('wnEveningTime').value=n.evening.time;el('wnWirdOn').checked=n.wird.enabled;el('wnWirdTime').value=n.wird.time;
+ ['wnMorningOn','wnMorningTime','wnEveningOn','wnEveningTime','wnWirdOn','wnWirdTime'].forEach(id=>el(id).addEventListener('change',saveWerdNotifPrefs));el('werdEnableNotif').onclick=enableWerdPush;el('werdDisableNotif').onclick=disableWerdPush;el('werdTestNotif').onclick=testWerdNotification;refreshWerdNotifStatus();
 }
-
-function currentWerdPrefs(){
-  return {
-    morning:{enabled:wnMorningOn.checked,time:wnMorningTime.value||'06:30'},
-    evening:{enabled:wnEveningOn.checked,time:wnEveningTime.value||'18:00'},
-    wird:{enabled:wnWirdOn.checked,time:wnWirdTime.value||'20:00'}
-  };
-}
-async function saveWerdNotifPrefs(){
-  if(!document.getElementById('werdNotificationsCard'))return;
-  ensureWerdNotifState();
-  const p=currentWerdPrefs();
-  state.notifications={...state.notifications,...p,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'Asia/Riyadh'};
-  save();
-  if(cloudUser)await syncWerdPushRecord(false);
-  toast('تم حفظ أوقات التنبيهات ✓');
-}
-async function getWerdPushSubscription(){
-  if(!('serviceWorker' in navigator)||!('PushManager' in window))return null;
-  const reg=await navigator.serviceWorker.ready;
-  return await reg.pushManager.getSubscription();
-}
-async function makeWerdSubscription(){
-  const reg=await navigator.serviceWorker.ready;
-  return await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64ToUint8(WERD_VAPID_PUBLIC_KEY)});
-}
+function currentWerdPrefs(){return{morning:{enabled:el('wnMorningOn').checked,time:el('wnMorningTime').value||'06:30'},evening:{enabled:el('wnEveningOn').checked,time:el('wnEveningTime').value||'18:00'},wird:{enabled:el('wnWirdOn').checked,time:el('wnWirdTime').value||'20:00'}}}
+async function saveWerdNotifPrefs(){if(!el('werdNotificationsCard'))return;ensureWerdNotifState();state.notifications={...state.notifications,...currentWerdPrefs(),timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'Asia/Riyadh'};save();if(cloudUser)await syncWerdPushRecord(false);toast('تم حفظ أوقات التنبيهات ✓')}
+async function getWerdPushSubscription(){if(!('serviceWorker'in navigator)||!('PushManager'in window))return null;const reg=await navigator.serviceWorker.ready;return reg.pushManager.getSubscription()}
+async function makeWerdSubscription(){const reg=await navigator.serviceWorker.ready;return reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64ToUint8(WERD_VAPID_PUBLIC_KEY)})}
 async function syncWerdPushRecord(showToast=true){
-  if(!cloudUser)return false;
-  let sub=await getWerdPushSubscription(); if(!sub)return false;
-  const j=sub.toJSON();
-  const row={
-    user_id:cloudUser.id,endpoint:sub.endpoint,
-    p256dh:j.keys?.p256dh||'',auth:j.keys?.auth||'',
-    timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'Asia/Riyadh',
-    preferences:currentWerdPrefs(),updated_at:new Date().toISOString()
-  };
-  let {error}=await sb.from('werd_push_subscriptions').upsert(row,{onConflict:'endpoint'});
-  if(error){
-    console.warn('Push upsert retry',error);
-    try{await sub.unsubscribe();sub=await makeWerdSubscription();const r=sub.toJSON();row.endpoint=sub.endpoint;row.p256dh=r.keys?.p256dh||'';row.auth=r.keys?.auth||'';({error}=await sb.from('werd_push_subscriptions').upsert(row,{onConflict:'endpoint'}));}catch(e){console.error(e)}
-  }
-  if(error){console.error(error);if(showToast)toast('تعذر حفظ اشتراك التنبيهات');return false}
-  ensureWerdNotifState();state.notifications.pushEnabled=true;save();refreshWerdNotifStatus();if(showToast)toast('تم تفعيل التنبيهات السحابية ✓');return true;
+ if(!cloudUser)return false;let sub=await getWerdPushSubscription();if(!sub)return false;const j=sub.toJSON();const row={user_id:cloudUser.id,endpoint:sub.endpoint,p256dh:j.keys?.p256dh||'',auth:j.keys?.auth||'',timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'Asia/Riyadh',preferences:currentWerdPrefs(),updated_at:new Date().toISOString()};let{error}=await sb.from('werd_push_subscriptions').upsert(row,{onConflict:'endpoint'});
+ if(error){console.warn('Push upsert retry',error);try{await sub.unsubscribe();sub=await makeWerdSubscription();const r=sub.toJSON();row.endpoint=sub.endpoint;row.p256dh=r.keys?.p256dh||'';row.auth=r.keys?.auth||'';({error}=await sb.from('werd_push_subscriptions').upsert(row,{onConflict:'endpoint'}))}catch(e){console.error(e)}}
+ if(error){console.error(error);if(showToast)toast('تعذر حفظ اشتراك التنبيهات');return false}ensureWerdNotifState();state.notifications.pushEnabled=true;save();refreshWerdNotifStatus();if(showToast)toast('تم تفعيل التنبيهات السحابية ✓');return true;
 }
 async function enableWerdPush(){
-  if(!cloudUser){toast('سجّل الدخول أولًا لتفعيل التنبيهات السحابية');document.getElementById('authCard')?.scrollIntoView({behavior:'smooth'});return}
-  if(!('Notification' in window)||!('serviceWorker' in navigator)||!('PushManager' in window)){toast('هذا المتصفح لا يدعم Web Push');return}
-  if(isWerdIOS()&&!isWerdStandalone()){toast('على iPhone: ثبّت ورد على الشاشة الرئيسية أولًا ثم فعّل التنبيهات');return}
-  let permission=Notification.permission;
-  if(permission!=='granted')permission=await Notification.requestPermission();
-  if(permission!=='granted'){toast('لم يتم السماح بالتنبيهات');refreshWerdNotifStatus();return}
-  let sub=await getWerdPushSubscription();if(!sub)sub=await makeWerdSubscription();
-  await saveWerdNotifPrefs();await syncWerdPushRecord(true);
+ if(!cloudUser){toast('سجّل الدخول أولًا لتفعيل التنبيهات السحابية');el('authCard')?.scrollIntoView({behavior:'smooth'});return}
+ if(!('Notification'in window)||!('serviceWorker'in navigator)||!('PushManager'in window)){toast('هذا المتصفح لا يدعم Web Push');return}
+ if(isWerdIOS()&&!isWerdStandalone()){toast('على iPhone: ثبّت ورد على الشاشة الرئيسية أولًا ثم فعّل التنبيهات');return}
+ let permission=Notification.permission;if(permission!=='granted')permission=await Notification.requestPermission();if(permission!=='granted'){toast('لم يتم السماح بالتنبيهات');refreshWerdNotifStatus();return}
+ let sub=await getWerdPushSubscription();if(!sub)sub=await makeWerdSubscription();ensureWerdNotifState();state.notifications={...state.notifications,...currentWerdPrefs(),pushEnabled:true,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'Asia/Riyadh'};save();await syncWerdPushRecord(true);
 }
-async function disableWerdPush(){
-  const sub=await getWerdPushSubscription();
-  if(sub&&cloudUser)await sb.from('werd_push_subscriptions').delete().eq('endpoint',sub.endpoint).eq('user_id',cloudUser.id);
-  if(sub)await sub.unsubscribe();
-  ensureWerdNotifState();state.notifications.pushEnabled=false;save();refreshWerdNotifStatus();toast('تم إيقاف التنبيهات');
-}
-async function testWerdNotification(){
-  if(!('Notification' in window)){toast('التنبيهات غير مدعومة');return}
-  if(Notification.permission!=='granted'){toast('فعّل التنبيهات أولًا');return}
-  const reg=await navigator.serviceWorker.ready;
-  await reg.showNotification('ورد 🌿',{body:'هذا تنبيه تجريبي. تنبيهاتك جاهزة.',icon:'./icon.svg',badge:'./icon.svg',data:{url:'./'}});
-}
-async function refreshWerdNotifStatus(){
-  const status=document.getElementById('werdNotifStatus'),on=document.getElementById('werdEnableNotif'),off=document.getElementById('werdDisableNotif'),note=document.getElementById('werdNotifNote');if(!status)return;
-  const sub=await getWerdPushSubscription().catch(()=>null);
-  const active=Notification?.permission==='granted'&&!!sub;
-  status.textContent=active?'مفعلة ✓':(Notification?.permission==='denied'?'محظورة':'غير مفعلة');
-  if(on)on.textContent=active?'مفعلة ✓':'تفعيل';if(off)off.style.display=active?'inline-block':'none';
-  if(note&&isWerdIOS()&&!isWerdStandalone())note.textContent='على iPhone يجب إضافة ورد إلى الشاشة الرئيسية أولًا، ثم فتح التطبيق المثبت وتفعيل التنبيهات.';
-}
-
-function initWerdNotifications(){
-  injectWerdNotificationUI();
-  if(typeof sb!=='undefined')sb.auth.onAuthStateChange(()=>setTimeout(()=>{refreshWerdNotifStatus();if(cloudUser)getWerdPushSubscription().then(s=>{if(s)syncWerdPushRecord(false)})},300));
-}
+async function disableWerdPush(){const sub=await getWerdPushSubscription();if(sub&&cloudUser)await sb.from('werd_push_subscriptions').delete().eq('endpoint',sub.endpoint).eq('user_id',cloudUser.id);if(sub)await sub.unsubscribe();ensureWerdNotifState();state.notifications.pushEnabled=false;save();refreshWerdNotifStatus();toast('تم إيقاف التنبيهات')}
+async function testWerdNotification(){if(!('Notification'in window)){toast('التنبيهات غير مدعومة');return}if(Notification.permission!=='granted'){toast('فعّل التنبيهات أولًا');return}const reg=await navigator.serviceWorker.ready;await reg.showNotification('ورد 🌿',{body:'هذا تنبيه تجريبي. تنبيهاتك جاهزة.',icon:'./icon.svg',badge:'./icon.svg',dir:'rtl',lang:'ar',data:{url:'./'}})}
+async function refreshWerdNotifStatus(){const status=el('werdNotifStatus'),on=el('werdEnableNotif'),off=el('werdDisableNotif'),note=el('werdNotifNote');if(!status)return;const supported='Notification'in window&&'serviceWorker'in navigator&&'PushManager'in window;if(!supported){status.textContent='غير مدعومة';if(on)on.disabled=true;return}const sub=await getWerdPushSubscription().catch(()=>null),permission=Notification.permission,active=permission==='granted'&&!!sub;status.textContent=active?'مفعلة ✓':(permission==='denied'?'محظورة':'غير مفعلة');if(on)on.textContent=active?'مفعلة ✓':'تفعيل';if(off)off.style.display=active?'inline-block':'none';if(note&&isWerdIOS()&&!isWerdStandalone())note.textContent='على iPhone يجب إضافة ورد إلى الشاشة الرئيسية أولًا، ثم فتح التطبيق المثبت وتفعيل التنبيهات.'}
+function initWerdNotifications(){injectWerdNotificationUI();if(typeof sb!=='undefined')sb.auth.onAuthStateChange(()=>setTimeout(()=>{refreshWerdNotifStatus();if(cloudUser)getWerdPushSubscription().then(s=>{if(s)syncWerdPushRecord(false)})},300))}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initWerdNotifications);else initWerdNotifications();
