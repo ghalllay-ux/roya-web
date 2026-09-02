@@ -1,35 +1,35 @@
-// v72 definitive close: remove the mini player node entirely when X is pressed.
+// v73: mini player is a persistent view of audio state. Closing hides UI only; playback continues.
 (function(){
+  let userHidden=false;
   const $=id=>document.getElementById(id);
-  function stopAll(){
-    try{window.werdListeningAudio?.pause?.()}catch(_){}
-    document.querySelectorAll('audio').forEach(a=>{try{a.pause()}catch(_){}});
-  }
-  function hardClose(e){
+  const audios=()=>[window.werdListeningAudio,...document.querySelectorAll('audio')].filter((a,i,x)=>a&&x.indexOf(a)===i);
+  function player(){return $('werdMiniPlayer')}
+  function hideUI(e){
     e?.preventDefault?.();e?.stopPropagation?.();e?.stopImmediatePropagation?.();
-    stopAll();
-    const m=$('werdMiniPlayer');if(m)m.remove();
-    document.body.classList.remove('has-mini-player','mini-player-dismissed');
-    document.body.style.removeProperty('padding-bottom');
-    const p=$('listenPlay');if(p)p.textContent='▶';
-    const s=$('listenStatus');if(s)s.textContent='متوقف';
+    userHidden=true;
+    const m=player();if(m){m.classList.remove('show');m.hidden=true;m.style.setProperty('display','none','important')}
+    document.body.classList.remove('has-mini-player');
     return false;
   }
-  function install(){
-    const c=$('miniClose');if(!c)return;
-    c.type='button';
-    c.setAttribute('aria-label','إغلاق المشغل');
-    c.style.setProperty('pointer-events','auto','important');
-    c.style.setProperty('z-index','99999','important');
-    c.onclick=hardClose;
-    c.addEventListener('touchstart',hardClose,{capture:true,passive:false});
-    c.addEventListener('touchend',hardClose,{capture:true,passive:false});
-    c.addEventListener('pointerdown',hardClose,true);
-    c.addEventListener('pointerup',hardClose,true);
+  function showUI(){
+    userHidden=false;
+    document.body.classList.remove('mini-player-dismissed');
+    const m=player();if(m){m.hidden=false;m.style.removeProperty('display');m.style.removeProperty('visibility');m.style.removeProperty('pointer-events');m.classList.add('show')}
+    document.body.classList.add('has-mini-player');
   }
-  document.addEventListener('click',e=>{if(e.target?.closest?.('#miniClose'))hardClose(e)},true);
-  document.addEventListener('touchstart',e=>{if(e.target?.closest?.('#miniClose'))hardClose(e)},{capture:true,passive:false});
-  document.addEventListener('touchend',e=>{if(e.target?.closest?.('#miniClose'))hardClose(e)},{capture:true,passive:false});
-  const mo=new MutationObserver(install);mo.observe(document.documentElement,{childList:true,subtree:true});
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
+  function isPlaying(){return audios().some(a=>!a.paused&&!a.ended&&a.currentTime>=0)}
+  function sync(){
+    const m=player();if(!m)return;
+    if(isPlaying()&&!userHidden)showUI();
+    ['miniPlay','listenPlay'].forEach(id=>{const b=$(id);if(b){b.textContent=isPlaying()?'⏸':'▶';b.classList.toggle('is-playing',isPlaying())}})
+  }
+  function bind(){
+    const c=$('miniClose');if(c&&!c.dataset.v73){c.dataset.v73='1';c.type='button';c.setAttribute('aria-label','إخفاء المشغل');c.title='إخفاء المشغل';['click','touchend','pointerup'].forEach(ev=>c.addEventListener(ev,hideUI,{capture:true,passive:false}))}
+    audios().forEach(a=>{if(a.dataset?.miniV73)return;if(a.dataset)a.dataset.miniV73='1';a.addEventListener('play',()=>{userHidden=false;showUI();sync()});a.addEventListener('pause',sync);a.addEventListener('ended',sync)})
+  }
+  // Any explicit playback action restores the mini player; closing never stops audio.
+  document.addEventListener('click',e=>{if(e.target?.closest?.('#miniClose'))return;if(e.target?.closest?.('#listenPlay,#miniPlay,[data-listen-surah]')){userHidden=false;setTimeout(()=>{bind();if(isPlaying())showUI();sync()},0)}},true);
+  document.addEventListener('touchend',e=>{if(e.target?.closest?.('#miniClose'))return;if(e.target?.closest?.('#listenPlay,#miniPlay,[data-listen-surah]')){userHidden=false;setTimeout(()=>{bind();if(isPlaying())showUI();sync()},0)}},{capture:true,passive:true});
+  const mo=new MutationObserver(()=>{bind();sync()});mo.observe(document.documentElement,{childList:true,subtree:true});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{bind();sync()});else{bind();sync()}
 })();
