@@ -1,8 +1,8 @@
-const APP_CACHE='werd-v21';
-const RUNTIME_CACHE='werd-runtime-v21';
+const APP_CACHE='werd-v22';
+const RUNTIME_CACHE='werd-runtime-v22';
 const MUSHAF_OFFLINE_CACHE='werd-mushaf-offline-v1';
 const AUDIO_OFFLINE_CACHE='werd-audio-offline-v1';
-const APP_SHELL=['./','./index.html','./app.css','./app.js','./notifications.js','./features.js','./audio-engine.js','./reader.js','./listening.js','./prayer.js','./more.js','./search.js','./iman.js','./home.js','./progress.js','./onboarding.js','./profile.js','./mushaf.js','./offline-mushaf.js','./offline-audio.js','./playlist.js','./memorization.js','./manifest.webmanifest','./icon.svg'];
+const APP_SHELL=['./','./index.html','./app.css','./app.js','./notifications.js','./features.js','./audio-engine.js','./reader.js','./listening.js','./prayer.js','./more.js','./search.js','./iman.js','./home.js','./progress.js','./onboarding.js','./profile.js','./mushaf.js','./offline-mushaf.js','./offline-audio.js','./playlist.js','./memorization.js','./memorization-tracker.js','./manifest.webmanifest','./icon.svg'];
 
 self.addEventListener('install',event=>{event.waitUntil(caches.open(APP_CACHE).then(cache=>cache.addAll(APP_SHELL)));self.skipWaiting();});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>![APP_CACHE,RUNTIME_CACHE,MUSHAF_OFFLINE_CACHE,AUDIO_OFFLINE_CACHE].includes(k)).map(k=>caches.delete(k)))));self.clients.claim();});
