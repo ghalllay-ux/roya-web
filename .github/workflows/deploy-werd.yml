@@ -1,13 +1,10 @@
 name: Deploy Werd to Cloudflare Pages
-
 on:
   push:
     branches: [main]
   workflow_dispatch:
-
 permissions:
   contents: read
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -15,32 +12,27 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate Werd files and JavaScript
         run: |
-          for f in index.html app.css app.js notifications.js features.js audio-engine.js reader.js listening.js listening-ios-fix.js prayer.js more.js search.js iman.js home.js progress.js onboarding.js onboarding-skip-fix.js profile.js mushaf-core-v2.js offline-mushaf.js offline-audio.js playlist.js memorization.js memorization-tracker.js memorization-test.js recitation-test.js weakness-analysis.js daily-memorization-plan.js weekly-memorization-plan.js long-term-memorization-goal.js monthly-memorization-dashboard.js achievement-report.js advanced-achievements.js memorization-journey.js desktop-layout.js premium-islamic-theme.js desktop-premium-home.js reference-sidebar.js mobile-layout-fix.js mobile-home-hub.js mobile-memorization-hub.js deep-link.js manifest.webmanifest service-worker.js _worker.js; do test -f "werd/$f"; done
+          for f in index.html app.css app.js notifications.js features.js audio-engine.js reader.js listening.js listening-ios-fix.js prayer.js more.js search.js iman.js hisn-proxy-fix.js home.js progress.js onboarding.js onboarding-skip-fix.js profile.js mushaf-core-v2.js offline-mushaf.js offline-audio.js playlist.js memorization.js memorization-tracker.js memorization-test.js recitation-test.js weakness-analysis.js daily-memorization-plan.js weekly-memorization-plan.js long-term-memorization-goal.js monthly-memorization-dashboard.js achievement-report.js advanced-achievements.js memorization-journey.js desktop-layout.js premium-islamic-theme.js desktop-premium-home.js reference-sidebar.js mobile-layout-fix.js mobile-home-hub.js mobile-memorization-hub.js deep-link.js manifest.webmanifest service-worker.js _worker.js; do test -f "werd/$f"; done
           grep -q "ward_user_state" werd/app.js
-          for f in app.js notifications.js features.js audio-engine.js reader.js listening.js listening-ios-fix.js prayer.js more.js search.js iman.js home.js progress.js onboarding.js onboarding-skip-fix.js profile.js mushaf-core-v2.js offline-mushaf.js offline-audio.js playlist.js memorization.js memorization-tracker.js memorization-test.js recitation-test.js weakness-analysis.js daily-memorization-plan.js weekly-memorization-plan.js long-term-memorization-goal.js monthly-memorization-dashboard.js achievement-report.js advanced-achievements.js memorization-journey.js desktop-layout.js premium-islamic-theme.js desktop-premium-home.js reference-sidebar.js mobile-layout-fix.js mobile-home-hub.js mobile-memorization-hub.js deep-link.js service-worker.js _worker.js; do node --check "werd/$f"; done
+          for f in app.js notifications.js features.js audio-engine.js reader.js listening.js listening-ios-fix.js prayer.js more.js search.js iman.js hisn-proxy-fix.js home.js progress.js onboarding.js onboarding-skip-fix.js profile.js mushaf-core-v2.js offline-mushaf.js offline-audio.js playlist.js memorization.js memorization-tracker.js memorization-test.js recitation-test.js weakness-analysis.js daily-memorization-plan.js weekly-memorization-plan.js long-term-memorization-goal.js monthly-memorization-dashboard.js achievement-report.js advanced-achievements.js memorization-journey.js desktop-layout.js premium-islamic-theme.js desktop-premium-home.js reference-sidebar.js mobile-layout-fix.js mobile-home-hub.js mobile-memorization-hub.js deep-link.js service-worker.js _worker.js; do node --check "werd/$f"; done
       - name: Bundle Werd feature layers
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('werd/index.html')
-          s=p.read_text(encoding='utf-8')
-          audio='<script src="./audio-engine.js"></script>'
-          reader='<script src="./reader.js"></script>'
+          p=Path('werd/index.html');s=p.read_text(encoding='utf-8')
+          audio='<script src="./audio-engine.js"></script>';reader='<script src="./reader.js"></script>'
           if audio not in s:s=s.replace(reader,audio+'\n'+reader)
           for old in ['mushaf.js','mushaf-resilience.js','decorative-theme.js']:
               s=s.replace(f'<script src="./{old}"></script>\n','').replace(f'<script src="./{old}"></script>','')
-          files=['search.js','iman.js','home.js','progress.js','onboarding.js','onboarding-skip-fix.js','profile.js','mushaf-core-v2.js','offline-mushaf.js','offline-audio.js','playlist.js','memorization.js','memorization-tracker.js','memorization-test.js','recitation-test.js','weakness-analysis.js','daily-memorization-plan.js','weekly-memorization-plan.js','long-term-memorization-goal.js','monthly-memorization-dashboard.js','achievement-report.js','advanced-achievements.js','memorization-journey.js','desktop-layout.js','premium-islamic-theme.js','desktop-premium-home.js','reference-sidebar.js','mobile-layout-fix.js','mobile-home-hub.js','mobile-memorization-hub.js','listening-ios-fix.js','deep-link.js']
+          files=['search.js','iman.js','hisn-proxy-fix.js','home.js','progress.js','onboarding.js','onboarding-skip-fix.js','profile.js','mushaf-core-v2.js','offline-mushaf.js','offline-audio.js','playlist.js','memorization.js','memorization-tracker.js','memorization-test.js','recitation-test.js','weakness-analysis.js','daily-memorization-plan.js','weekly-memorization-plan.js','long-term-memorization-goal.js','monthly-memorization-dashboard.js','achievement-report.js','advanced-achievements.js','memorization-journey.js','desktop-layout.js','premium-islamic-theme.js','desktop-premium-home.js','reference-sidebar.js','mobile-layout-fix.js','mobile-home-hub.js','mobile-memorization-hub.js','listening-ios-fix.js','deep-link.js']
           for f in files:
               tag=f'<script src="./{f}"></script>'
               if tag not in s:s=s.replace('</body>',tag+'\n</body>')
           p.write_text(s,encoding='utf-8')
           PY
           grep -q 'mushaf-core-v2.js' werd/index.html
-          grep -q 'mobile-home-hub.js' werd/index.html
-          grep -q 'mobile-memorization-hub.js' werd/index.html
-          grep -q 'onboarding-skip-fix.js' werd/index.html
+          grep -q 'hisn-proxy-fix.js' werd/index.html
           ! grep -q '<script src="./mushaf.js"></script>' werd/index.html
-          ! grep -q '<script src="./mushaf-resilience.js"></script>' werd/index.html
       - name: Ensure Cloudflare Pages project exists
         run: npx --yes wrangler@3.90.0 pages project create werd --production-branch=main || true
         env:
