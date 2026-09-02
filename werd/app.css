@@ -39,3 +39,46 @@ body.dark{--bg:#0f1f1a;--card:#162821;--ink:#f6f1e8;--muted:#aab6af;--green:#3f9
 body.dark .bottom{background:rgba(22,40,33,.96)}body.dark .offline{background:#1b332a;color:#c8ded2}
 .loading{text-align:center;padding:28px;color:var(--muted)}
 .smallbtn{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 11px;border-radius:12px}
+
+/* Islamic ornamental identity */
+.app{position:relative;overflow:hidden;background:
+ radial-gradient(circle at 12% 8%,rgba(180,147,89,.09),transparent 22%),
+ radial-gradient(circle at 88% 12%,rgba(15,91,69,.055),transparent 23%),
+ var(--bg)}
+.app:before,.app:after{content:"";position:fixed;pointer-events:none;z-index:0;width:170px;height:170px;opacity:.28;background-repeat:no-repeat;background-size:contain}
+.app:before{top:0;right:50%;transform:translateX(270px);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cg fill='none' stroke='%23b49359' stroke-width='1.5' opacity='.7'%3E%3Cpath d='M200 0H92c0 30-20 50-50 50v108'/%3E%3Cpath d='M200 20H112c0 31-20 51-51 51v87'/%3E%3Cpath d='M200 42h-66c0 29-18 47-47 47v69'/%3E%3Ccircle cx='125' cy='75' r='18'/%3E%3Cpath d='M125 53l7 15 16 7-16 7-7 16-7-16-16-7 16-7z'/%3E%3C/g%3E%3C/svg%3E")}
+.app:after{bottom:68px;left:50%;transform:translateX(-270px) rotate(180deg);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cg fill='none' stroke='%230f5b45' stroke-width='1.5' opacity='.45'%3E%3Cpath d='M200 0H92c0 30-20 50-50 50v108'/%3E%3Cpath d='M200 20H112c0 31-20 51-51 51v87'/%3E%3Cpath d='M200 42h-66c0 29-18 47-47 47v69'/%3E%3Ccircle cx='125' cy='75' r='18'/%3E%3Cpath d='M125 53l7 15 16 7-16 7-7 16-7-16-16-7 16-7z'/%3E%3C/g%3E%3C/svg%3E")}
+.top,main{position:relative;z-index:1}
+.top{padding:8px 4px 14px;border-bottom:1px solid rgba(180,147,89,.18)}
+.logo{border:1px solid rgba(180,147,89,.55);background:
+ linear-gradient(rgba(255,255,255,.025),rgba(255,255,255,.025)),
+ repeating-linear-gradient(45deg,rgba(244,228,189,.05) 0 1px,transparent 1px 10px),
+ linear-gradient(145deg,#0e674c,#093e30)}
+.section-title h3{position:relative;padding-inline-start:24px}
+.section-title h3:before{content:"✦";position:absolute;inset-inline-start:0;top:50%;transform:translateY(-50%);font-size:13px;color:var(--gold)}
+.card,.tile,.stat,.search input,.smallbtn,.iconbtn,.chip{border-color:rgba(180,147,89,.25)}
+.card{position:relative;overflow:hidden;background:
+ linear-gradient(135deg,rgba(180,147,89,.035),transparent 34%),var(--card)}
+.card:before{content:"";position:absolute;top:-24px;inset-inline-end:-24px;width:72px;height:72px;border:1px solid rgba(180,147,89,.17);transform:rotate(45deg);border-radius:18px;pointer-events:none}
+.hero{border:1px solid rgba(244,228,189,.2)}
+.hero:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.16;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44'%3E%3Cg fill='none' stroke='%23f5e6c6' stroke-width='1'%3E%3Cpath d='M22 1l5.4 10.1L38 16.6l-10.6 5.3L22 32l-5.4-10.1L6 16.6l10.6-5.5z'/%3E%3Ccircle cx='22' cy='16.6' r='5.8'/%3E%3C/g%3E%3C/svg%3E")}
+#adhkar{position:relative}
+#adhkar:before{content:"☾";position:absolute;top:16px;inset-inline-end:6px;color:rgba(180,147,89,.34);font-size:40px;pointer-events:none}
+#adhkar .chips{justify-content:flex-start;margin-bottom:8px}
+#adhkar .chip{min-width:92px;text-align:center;font-weight:700}
+#adhkar .chip.active{box-shadow:0 7px 18px rgba(15,91,69,.18)}
+#adhkarList .card{padding:20px 18px 17px;border-color:rgba(180,147,89,.32);box-shadow:0 8px 22px rgba(65,54,34,.06)}
+#adhkarList .card:after{content:"۞";position:absolute;inset-inline-start:13px;top:12px;color:rgba(180,147,89,.26);font-size:25px;pointer-events:none}
+#adhkarList .badge{border:1px solid rgba(180,147,89,.24);background:#f4eedf}
+body.dark #adhkarList .badge{background:var(--sage)}
+.dhikr{position:relative;z-index:1;font-size:22px;line-height:2.05}
+.num{border:1px solid rgba(180,147,89,.3);background:linear-gradient(145deg,#edf4ec,#f8f0df)}
+body.dark .num{background:var(--sage)}
+.counter-circle{position:relative}
+.counter-circle:before{content:"۞";position:absolute;top:-22px;font-size:28px;color:var(--gold);background:var(--bg);padding:0 8px}
+.bottom{border-top:1px solid rgba(180,147,89,.35);box-shadow:0 -8px 28px rgba(55,45,27,.06)}
+.bottom:before{content:"";position:absolute;left:0;right:0;top:-7px;height:7px;background:linear-gradient(135deg,transparent 35%,rgba(180,147,89,.28) 36% 40%,transparent 41%) 0 0/18px 7px repeat-x;opacity:.7}
+.nav.active{position:relative}.nav.active:after{content:"◆";display:block;font-size:7px;color:var(--gold);margin-top:2px}
+@media(max-width:420px){.app:before{transform:translateX(225px)}.app:after{transform:translateX(-225px) rotate(180deg)}.dhikr{font-size:20px}}
+body.dark .app{background:radial-gradient(circle at 12% 8%,rgba(180,147,89,.08),transparent 22%),radial-gradient(circle at 88% 12%,rgba(63,156,121,.08),transparent 23%),var(--bg)}
+body.dark .card{background:linear-gradient(135deg,rgba(180,147,89,.035),transparent 34%),var(--card)}
