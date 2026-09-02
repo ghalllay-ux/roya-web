@@ -1,46 +1,21 @@
-const APP_CACHE='werd-v18';
-const RUNTIME_CACHE='werd-runtime-v18';
+const APP_CACHE='werd-v19';
+const RUNTIME_CACHE='werd-runtime-v19';
 const MUSHAF_OFFLINE_CACHE='werd-mushaf-offline-v1';
 const AUDIO_OFFLINE_CACHE='werd-audio-offline-v1';
-const APP_SHELL=['./','./index.html','./app.css','./app.js','./notifications.js','./features.js','./reader.js','./listening.js','./prayer.js','./more.js','./search.js','./iman.js','./home.js','./progress.js','./onboarding.js','./profile.js','./mushaf.js','./offline-mushaf.js','./offline-audio.js','./manifest.webmanifest','./icon.svg'];
+const APP_SHELL=['./','./index.html','./app.css','./app.js','./notifications.js','./features.js','./audio-engine.js','./reader.js','./listening.js','./prayer.js','./more.js','./search.js','./iman.js','./home.js','./progress.js','./onboarding.js','./profile.js','./mushaf.js','./offline-mushaf.js','./offline-audio.js','./manifest.webmanifest','./icon.svg'];
 
 self.addEventListener('install',event=>{event.waitUntil(caches.open(APP_CACHE).then(cache=>cache.addAll(APP_SHELL)));self.skipWaiting();});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>![APP_CACHE,RUNTIME_CACHE,MUSHAF_OFFLINE_CACHE,AUDIO_OFFLINE_CACHE].includes(k)).map(k=>caches.delete(k)))));self.clients.claim();});
 
 self.addEventListener('fetch',event=>{
   const req=event.request;if(req.method!=='GET')return;const url=new URL(req.url);
-
-  // Quran audio explicitly downloaded by the user is served from its persistent cache first.
-  if(url.hostname.includes('cdn.islamic.network')&&url.pathname.includes('/quran/audio')){
-    event.respondWith((async()=>{
-      const saved=await (await caches.open(AUDIO_OFFLINE_CACHE)).match(req,{ignoreVary:true});if(saved)return saved;
-      return fetch(req);
-    })());return;
-  }
-  // Other audio bypasses runtime caching so Safari/iOS Range requests remain intact.
+  if(url.hostname.includes('cdn.islamic.network')&&url.pathname.includes('/quran/audio')){event.respondWith((async()=>{const saved=await (await caches.open(AUDIO_OFFLINE_CACHE)).match(req,{ignoreVary:true});if(saved)return saved;return fetch(req)})());return;}
   if(url.hostname.includes('hisnmuslim.com')&&url.pathname.includes('/audio/')){event.respondWith(fetch(req));return;}
-
-  if(req.mode==='navigate'){
-    event.respondWith(fetch(req).then(res=>{const copy=res.clone();caches.open(APP_CACHE).then(c=>c.put('./index.html',copy));return res;}).catch(()=>caches.match('./index.html')));return;
-  }
-
-  if(url.hostname.includes('alquran.cloud')&&url.pathname.includes('/page/')){
-    event.respondWith((async()=>{
-      const offline=await caches.open(MUSHAF_OFFLINE_CACHE),saved=await offline.match(req);if(saved)return saved;
-      const runtime=await caches.open(RUNTIME_CACHE),cached=await runtime.match(req);
-      try{const res=await fetch(req);if(res&&(res.status===200||res.type==='opaque'))runtime.put(req,res.clone());return res}catch(e){if(cached)return cached;throw e}
-    })());return;
-  }
-
-  if(url.hostname.includes('alquran.cloud')||url.hostname.includes('islamic.network')||url.hostname.includes('aladhan.com')||url.hostname.includes('hisnmuslim.com')||url.hostname.includes('raw.githubusercontent.com')||url.hostname.includes('cdn.jsdelivr.net')){
-    event.respondWith(caches.open(RUNTIME_CACHE).then(async cache=>{const cached=await cache.match(req);const network=fetch(req).then(res=>{if(res&&(res.status===200||res.type==='opaque'))cache.put(req,res.clone());return res;}).catch(()=>cached);return cached||network;}));return;
-  }
+  if(req.mode==='navigate'){event.respondWith(fetch(req).then(res=>{const copy=res.clone();caches.open(APP_CACHE).then(c=>c.put('./index.html',copy));return res;}).catch(()=>caches.match('./index.html')));return;}
+  if(url.hostname.includes('alquran.cloud')&&url.pathname.includes('/page/')){event.respondWith((async()=>{const offline=await caches.open(MUSHAF_OFFLINE_CACHE),saved=await offline.match(req);if(saved)return saved;const runtime=await caches.open(RUNTIME_CACHE),cached=await runtime.match(req);try{const res=await fetch(req);if(res&&(res.status===200||res.type==='opaque'))runtime.put(req,res.clone());return res}catch(e){if(cached)return cached;throw e}})());return;}
+  if(url.hostname.includes('alquran.cloud')||url.hostname.includes('islamic.network')||url.hostname.includes('aladhan.com')||url.hostname.includes('hisnmuslim.com')||url.hostname.includes('raw.githubusercontent.com')||url.hostname.includes('cdn.jsdelivr.net')){event.respondWith(caches.open(RUNTIME_CACHE).then(async cache=>{const cached=await cache.match(req);const network=fetch(req).then(res=>{if(res&&(res.status===200||res.type==='opaque'))cache.put(req,res.clone());return res;}).catch(()=>cached);return cached||network;}));return;}
   if(url.origin===self.location.origin){event.respondWith(caches.match(req).then(cached=>cached||fetch(req).then(res=>{const copy=res.clone();caches.open(APP_CACHE).then(c=>c.put(req,copy));return res;})));}
 });
 
-self.addEventListener('push',event=>{
-  let data={};try{data=event.data?event.data.json():{}}catch(e){data={body:event.data?.text()||'لديك تذكير جديد من ورد'}}
-  const title=data.title||'ورد 🌿';const options={body:data.body||'حان وقت وردك اليومي.',icon:'./icon.svg',badge:'./icon.svg',dir:'rtl',lang:'ar',tag:data.tag||'werd-reminder',renotify:true,data:{url:data.url||'./'}};
-  event.waitUntil(self.registration.showNotification(title,options));
-});
+self.addEventListener('push',event=>{let data={};try{data=event.data?event.data.json():{}}catch(e){data={body:event.data?.text()||'لديك تذكير جديد من ورد'}}const title=data.title||'ورد 🌿';const options={body:data.body||'حان وقت وردك اليومي.',icon:'./icon.svg',badge:'./icon.svg',dir:'rtl',lang:'ar',tag:data.tag||'werd-reminder',renotify:true,data:{url:data.url||'./'}};event.waitUntil(self.registration.showNotification(title,options));});
 self.addEventListener('notificationclick',event=>{event.notification.close();const target=event.notification.data?.url||'./';event.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(list=>{for(const client of list){if('focus'in client){client.navigate(target).catch(()=>{});return client.focus();}}return clients.openWindow?clients.openWindow(target):undefined;}));});
