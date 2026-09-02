@@ -1,0 +1,21 @@
+{
+  "name": "ورد | قرآن وأذكار",
+  "short_name": "ورد",
+  "description": "تطبيق قرآن وأذكار وورد يومي مع حفظ سحابي.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f3ea",
+  "theme_color": "#0f5b45",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
