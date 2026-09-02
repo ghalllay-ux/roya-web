@@ -1,9 +1,10 @@
-const APP_CACHE='werd-v16';
-const RUNTIME_CACHE='werd-runtime-v16';
-const APP_SHELL=['./','./index.html','./app.css','./app.js','./notifications.js','./features.js','./reader.js','./listening.js','./prayer.js','./more.js','./search.js','./iman.js','./home.js','./progress.js','./onboarding.js','./profile.js','./mushaf.js','./manifest.webmanifest','./icon.svg'];
+const APP_CACHE='werd-v17';
+const RUNTIME_CACHE='werd-runtime-v17';
+const MUSHAF_OFFLINE_CACHE='werd-mushaf-offline-v1';
+const APP_SHELL=['./','./index.html','./app.css','./app.js','./notifications.js','./features.js','./reader.js','./listening.js','./prayer.js','./more.js','./search.js','./iman.js','./home.js','./progress.js','./onboarding.js','./profile.js','./mushaf.js','./offline-mushaf.js','./manifest.webmanifest','./icon.svg'];
 
 self.addEventListener('install',event=>{event.waitUntil(caches.open(APP_CACHE).then(cache=>cache.addAll(APP_SHELL)));self.skipWaiting();});
-self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>![APP_CACHE,RUNTIME_CACHE].includes(k)).map(k=>caches.delete(k)))));self.clients.claim();});
+self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>![APP_CACHE,RUNTIME_CACHE,MUSHAF_OFFLINE_CACHE].includes(k)).map(k=>caches.delete(k)))));self.clients.claim();});
 
 self.addEventListener('fetch',event=>{
   const req=event.request;if(req.method!=='GET')return;const url=new URL(req.url);
@@ -16,6 +17,16 @@ self.addEventListener('fetch',event=>{
   if(req.mode==='navigate'){
     event.respondWith(fetch(req).then(res=>{const copy=res.clone();caches.open(APP_CACHE).then(c=>c.put('./index.html',copy));return res;}).catch(()=>caches.match('./index.html')));return;
   }
+
+  // Pages explicitly downloaded by the user must survive app cache upgrades and win when offline.
+  if(url.hostname.includes('alquran.cloud')&&url.pathname.includes('/page/')){
+    event.respondWith((async()=>{
+      const offline=await caches.open(MUSHAF_OFFLINE_CACHE),saved=await offline.match(req);if(saved)return saved;
+      const runtime=await caches.open(RUNTIME_CACHE),cached=await runtime.match(req);
+      try{const res=await fetch(req);if(res&&(res.status===200||res.type==='opaque'))runtime.put(req,res.clone());return res}catch(e){if(cached)return cached;throw e}
+    })());return;
+  }
+
   if(url.hostname.includes('alquran.cloud')||url.hostname.includes('islamic.network')||url.hostname.includes('aladhan.com')||url.hostname.includes('hisnmuslim.com')||url.hostname.includes('raw.githubusercontent.com')||url.hostname.includes('cdn.jsdelivr.net')){
     event.respondWith(caches.open(RUNTIME_CACHE).then(async cache=>{const cached=await cache.match(req);const network=fetch(req).then(res=>{if(res&&(res.status===200||res.type==='opaque'))cache.put(req,res.clone());return res;}).catch(()=>cached);return cached||network;}));return;
   }
