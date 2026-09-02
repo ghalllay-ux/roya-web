@@ -15,38 +15,28 @@ jobs:
           for f in index.html app.css app.js notifications.js features.js audio-engine.js reader.js listening.js listening-ios-fix.js prayer.js more.js search.js iman.js hisn-proxy-fix.js home.js progress.js onboarding.js onboarding-skip-fix.js profile.js mushaf-core-v2.js mobile-mushaf-route-fix.js offline-mushaf.js offline-audio.js playlist.js memorization.js memorization-tracker.js memorization-test.js recitation-test.js weakness-analysis.js daily-memorization-plan.js weekly-memorization-plan.js long-term-memorization-goal.js monthly-memorization-dashboard.js achievement-report.js advanced-achievements.js memorization-journey.js desktop-layout.js premium-islamic-theme.js desktop-premium-home.js reference-sidebar.js mobile-layout-fix.js mobile-home-hub.js mobile-memorization-hub.js deep-link.js manifest.webmanifest service-worker.js _worker.js; do test -f "werd/$f"; done
           grep -q "ward_user_state" werd/app.js
           for f in app.js notifications.js features.js audio-engine.js reader.js listening.js listening-ios-fix.js prayer.js more.js search.js iman.js hisn-proxy-fix.js home.js progress.js onboarding.js onboarding-skip-fix.js profile.js mushaf-core-v2.js mobile-mushaf-route-fix.js offline-mushaf.js offline-audio.js playlist.js memorization.js memorization-tracker.js memorization-test.js recitation-test.js weakness-analysis.js daily-memorization-plan.js weekly-memorization-plan.js long-term-memorization-goal.js monthly-memorization-dashboard.js achievement-report.js advanced-achievements.js memorization-journey.js desktop-layout.js premium-islamic-theme.js desktop-premium-home.js reference-sidebar.js mobile-layout-fix.js mobile-home-hub.js mobile-memorization-hub.js deep-link.js service-worker.js _worker.js; do node --check "werd/$f"; done
-      - name: Bundle Werd feature layers
+      - name: Bundle Werd feature layers and core mobile Quran route
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p=Path('werd/index.html');s=p.read_text(encoding='utf-8')
           audio='<script src="./audio-engine.js"></script>';reader='<script src="./reader.js"></script>'
           if audio not in s:s=s.replace(reader,audio+'\n'+reader)
-          for old in ['mushaf.js','mushaf-resilience.js','decorative-theme.js']:
-              s=s.replace(f'<script src="./{old}"></script>\n','').replace(f'<script src="./{old}"></script>','')
+          for oldf in ['mushaf.js','mushaf-resilience.js','decorative-theme.js']:
+              s=s.replace(f'<script src="./{oldf}"></script>\n','').replace(f'<script src="./{oldf}"></script>','')
           files=['search.js','iman.js','hisn-proxy-fix.js','home.js','progress.js','onboarding.js','onboarding-skip-fix.js','profile.js','mushaf-core-v2.js','mobile-mushaf-route-fix.js','offline-mushaf.js','offline-audio.js','playlist.js','memorization.js','memorization-tracker.js','memorization-test.js','recitation-test.js','weakness-analysis.js','daily-memorization-plan.js','weekly-memorization-plan.js','long-term-memorization-goal.js','monthly-memorization-dashboard.js','achievement-report.js','advanced-achievements.js','memorization-journey.js','desktop-layout.js','premium-islamic-theme.js','desktop-premium-home.js','reference-sidebar.js','mobile-layout-fix.js','mobile-home-hub.js','mobile-memorization-hub.js','listening-ios-fix.js','deep-link.js']
           for f in files:
               tag=f'<script src="./{f}"></script>'
               if tag not in s:s=s.replace('</body>',tag+'\n</body>')
           p.write_text(s,encoding='utf-8')
-
           ap=Path('werd/app.js');a=ap.read_text(encoding='utf-8')
-          old="""function go(id){
- document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');
- document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===id));window.scrollTo({top:0,behavior:'smooth'});
- renderState();
-}"""
-          new="""function go(id){
- if(id==='quran' && window.matchMedia && matchMedia('(max-width:959px)').matches && typeof window.openWerdMushafV2==='function'){window.openWerdMushafV2();return;}
- document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));const target=document.getElementById(id);if(target)target.classList.add('active');
- document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===id||id==='mushafV2'&&n.dataset.page==='quran'));window.scrollTo({top:0,behavior:'smooth'});
- renderState();
-}"""
-          if old not in a: raise SystemExit('go() signature changed; core route patch not applied')
-          a=a.replace(old,new,1);ap.write_text(a,encoding='utf-8')
+          old="function go(id){\n document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');\n document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===id));window.scrollTo({top:0,behavior:'smooth'});\n renderState();\n}"
+          new="function go(id){\n if(id==='quran' && window.matchMedia && matchMedia('(max-width:959px)').matches && typeof window.openWerdMushafV2==='function'){window.openWerdMushafV2();return;}\n document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));const target=document.getElementById(id);if(target)target.classList.add('active');\n document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===id||(id==='mushafV2'&&n.dataset.page==='quran')));window.scrollTo({top:0,behavior:'smooth'});\n renderState();\n}"
+          if old not in a: raise SystemExit('go signature changed')
+          ap.write_text(a.replace(old,new,1),encoding='utf-8')
           PY
           node --check werd/app.js
-          grep -q "id==='quran'.*openWerdMushafV2" werd/app.js
+          grep -q "openWerdMushafV2" werd/app.js
           grep -q 'mushaf-core-v2.js' werd/index.html
           grep -q 'hisn-proxy-fix.js' werd/index.html
           ! grep -q '<script src="./mushaf.js"></script>' werd/index.html
