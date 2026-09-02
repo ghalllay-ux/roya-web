@@ -29,9 +29,25 @@ jobs:
               tag=f'<script src="./{f}"></script>'
               if tag not in s:s=s.replace('</body>',tag+'\n</body>')
           p.write_text(s,encoding='utf-8')
+
+          ap=Path('werd/app.js');a=ap.read_text(encoding='utf-8')
+          old="""function go(id){
+ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');
+ document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===id));window.scrollTo({top:0,behavior:'smooth'});
+ renderState();
+}"""
+          new="""function go(id){
+ if(id==='quran' && window.matchMedia && matchMedia('(max-width:959px)').matches && typeof window.openWerdMushafV2==='function'){window.openWerdMushafV2();return;}
+ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));const target=document.getElementById(id);if(target)target.classList.add('active');
+ document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===id||id==='mushafV2'&&n.dataset.page==='quran'));window.scrollTo({top:0,behavior:'smooth'});
+ renderState();
+}"""
+          if old not in a: raise SystemExit('go() signature changed; core route patch not applied')
+          a=a.replace(old,new,1);ap.write_text(a,encoding='utf-8')
           PY
+          node --check werd/app.js
+          grep -q "id==='quran'.*openWerdMushafV2" werd/app.js
           grep -q 'mushaf-core-v2.js' werd/index.html
-          grep -q 'mobile-mushaf-route-fix.js' werd/index.html
           grep -q 'hisn-proxy-fix.js' werd/index.html
           ! grep -q '<script src="./mushaf.js"></script>' werd/index.html
       - name: Ensure Cloudflare Pages project exists
