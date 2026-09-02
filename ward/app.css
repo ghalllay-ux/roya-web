@@ -1,0 +1,41 @@
+:root{
+ --bg:#f7f3ea;--card:#fffdf8;--ink:#173f32;--muted:#77847c;--green:#0f5b45;
+ --green2:#174f3e;--sage:#dfe9dd;--line:#e8e1d5;--gold:#b49359;--danger:#9d4c45;
+ --shadow:0 10px 26px rgba(28,58,47,.09)
+}
+*{box-sizing:border-box} html{scroll-behavior:smooth}
+body{margin:0;background:#eee9df;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif;color:var(--ink)}
+.app{max-width:540px;margin:auto;min-height:100dvh;background:var(--bg);padding:18px 16px 100px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.brand{display:flex;align-items:center;gap:10px}.logo{width:48px;height:48px;border-radius:16px;background:linear-gradient(145deg,#0e674c,#093e30);display:grid;place-items:center;color:#f4e4bd;font-weight:900;font-size:20px;box-shadow:var(--shadow)}
+.brand h1{margin:0;font-size:22px}.brand small{color:var(--muted)}
+.actions{display:flex;gap:8px}.iconbtn{width:42px;height:42px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);font-size:18px}
+.hero{background:linear-gradient(135deg,#154f3e,#0d674b);color:#fff;border-radius:28px;padding:22px;box-shadow:var(--shadow);overflow:hidden;position:relative}
+.hero:after{content:"";position:absolute;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.07);left:-70px;bottom:-95px}
+.hero h2{font-size:27px;margin:7px 0}.hero p{color:#e4eee9;margin:0 0 16px}.eyebrow{font-size:13px;opacity:.8}
+.progress{height:9px;border-radius:99px;overflow:hidden;background:rgba(255,255,255,.2)}.progress>span{height:100%;display:block;background:#f2d8a0;border-radius:99px}
+.hero-meta{display:flex;justify-content:space-between;margin-top:10px;font-size:13px}
+.primary,.secondary{width:100%;border:0;border-radius:16px;padding:14px 16px;font-size:15px;font-weight:800;margin-top:14px}
+.primary{background:#f8efd9;color:#174b39}.secondary{background:var(--green);color:#fff}
+.section-title{display:flex;align-items:center;justify-content:space-between;margin:22px 2px 12px}.section-title h3{margin:0;font-size:18px}.section-title span{font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.tile{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:15px 8px;text-align:center;box-shadow:0 7px 17px rgba(30,60,48,.05);cursor:pointer}.tile .em{font-size:27px}.tile b{display:block;margin-top:7px;font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:17px;box-shadow:0 7px 20px rgba(30,60,48,.05);margin-bottom:12px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px}.muted{font-size:13px;color:var(--muted)}.badge{background:var(--sage);color:var(--green);border-radius:99px;padding:6px 10px;font-size:12px;font-weight:800}
+.list-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid var(--line)}.list-item:last-child{border-bottom:0}
+.page{display:none}.page.active{display:block}
+.search{display:flex;gap:8px;margin-bottom:12px}.search input{flex:1;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:16px;padding:13px 14px;font-size:15px}.search button{border:0;border-radius:16px;background:var(--green);color:#fff;padding:0 16px}
+.surah{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer}.num{width:38px;height:38px;border-radius:12px;background:var(--sage);display:grid;place-items:center;font-weight:800}.surah .grow{flex:1}.surah b{display:block}.surah small{color:var(--muted)}
+.ayah{font-family:"Geeza Pro","Traditional Arabic",serif;font-size:25px;line-height:2.15;text-align:right;padding:12px 0;border-bottom:1px solid var(--line)}.ayah .an{font-family:inherit;font-size:14px;color:var(--green);background:var(--sage);padding:4px 7px;border-radius:99px}
+.reader-head{position:sticky;top:0;z-index:4;background:var(--bg);padding:5px 0 10px}
+.chips{display:flex;gap:8px;overflow:auto;padding-bottom:7px}.chip{white-space:nowrap;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:9px 12px;border-radius:99px}.chip.active{background:var(--green);color:#fff;border-color:var(--green)}
+.dhikr{font-family:"Geeza Pro","Traditional Arabic",serif;font-size:21px;line-height:2}
+.counter-circle{width:220px;height:220px;border-radius:50%;margin:10px auto 18px;border:18px solid #e8e1d4;box-shadow:inset 0 0 0 9px #cbdccf;display:grid;place-items:center;background:radial-gradient(circle,#fffdf8 58%,#edf3ed 59%)}.counter{font-size:60px;font-weight:900}.tap{width:100%;border:0;border-radius:18px;background:var(--green);color:#fff;padding:17px;font-weight:900;font-size:18px}
+.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:12px;text-align:center}.stat b{display:block;font-size:20px}
+.offline{background:#eef4ee;border-radius:15px;padding:11px 13px;font-size:12px;color:#315948;margin:10px 0}
+.bottom{position:fixed;z-index:20;bottom:0;left:50%;transform:translateX(-50%);width:min(540px,100%);display:grid;grid-template-columns:repeat(5,1fr);background:rgba(255,253,248,.96);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:8px 5px max(8px,env(safe-area-inset-bottom))}
+.nav{border:0;background:transparent;color:#77847c;font-size:11px;padding:7px 2px}.nav i{font-style:normal;display:block;font-size:21px}.nav.active{color:var(--green);font-weight:900}
+.toast{position:fixed;z-index:50;left:50%;transform:translateX(-50%);bottom:90px;background:#163f32;color:#fff;padding:11px 16px;border-radius:14px;opacity:0;pointer-events:none;transition:.25s}.toast.show{opacity:1}
+body.dark{--bg:#0f1f1a;--card:#162821;--ink:#f6f1e8;--muted:#aab6af;--green:#3f9c79;--green2:#2f805f;--sage:#233c32;--line:#284238;background:#0c1713}
+body.dark .bottom{background:rgba(22,40,33,.96)}body.dark .offline{background:#1b332a;color:#c8ded2}
+.loading{text-align:center;padding:28px;color:var(--muted)}
+.smallbtn{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 11px;border-radius:12px}
