@@ -32,6 +32,7 @@ jobs:
           test -f werd/profile.js
           test -f werd/mushaf.js
           test -f werd/offline-mushaf.js
+          test -f werd/offline-audio.js
           test -f werd/manifest.webmanifest
           test -f werd/service-worker.js
           grep -q "ward_user_state" werd/app.js
@@ -50,6 +51,7 @@ jobs:
           node --check werd/profile.js
           node --check werd/mushaf.js
           node --check werd/offline-mushaf.js
+          node --check werd/offline-audio.js
           node --check werd/service-worker.js
       - name: Bundle Werd feature layers
         run: |
@@ -57,7 +59,7 @@ jobs:
           from pathlib import Path
           p=Path('werd/index.html')
           s=p.read_text(encoding='utf-8')
-          for tag in ['<script src="./search.js"></script>','<script src="./iman.js"></script>','<script src="./home.js"></script>','<script src="./progress.js"></script>','<script src="./onboarding.js"></script>','<script src="./profile.js"></script>','<script src="./mushaf.js"></script>','<script src="./offline-mushaf.js"></script>']:
+          for tag in ['<script src="./search.js"></script>','<script src="./iman.js"></script>','<script src="./home.js"></script>','<script src="./progress.js"></script>','<script src="./onboarding.js"></script>','<script src="./profile.js"></script>','<script src="./mushaf.js"></script>','<script src="./offline-mushaf.js"></script>','<script src="./offline-audio.js"></script>']:
               if tag not in s:
                   s=s.replace('</body>', tag+'\n</body>')
           p.write_text(s,encoding='utf-8')
@@ -70,6 +72,7 @@ jobs:
           grep -q 'profile.js' werd/index.html
           grep -q 'mushaf.js' werd/index.html
           grep -q 'offline-mushaf.js' werd/index.html
+          grep -q 'offline-audio.js' werd/index.html
       - name: Ensure Cloudflare Pages project exists
         run: npx --yes wrangler@3.90.0 pages project create werd --production-branch=main || true
         env:
