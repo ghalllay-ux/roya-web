@@ -1,6 +1,6 @@
-const APP_CACHE='werd-v3';
-const RUNTIME_CACHE='werd-runtime-v3';
-const APP_SHELL=['./','./index.html','./app.css','./app.js','./notifications.js','./manifest.webmanifest','./icon.svg'];
+const APP_CACHE='werd-v4';
+const RUNTIME_CACHE='werd-runtime-v4';
+const APP_SHELL=['./','./index.html','./app.css','./app.js','./notifications.js','./features.js','./manifest.webmanifest','./icon.svg'];
 
 self.addEventListener('install',event=>{event.waitUntil(caches.open(APP_CACHE).then(cache=>cache.addAll(APP_SHELL)));self.skipWaiting();});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>![APP_CACHE,RUNTIME_CACHE].includes(k)).map(k=>caches.delete(k)))));self.clients.claim();});
@@ -20,24 +20,11 @@ self.addEventListener('push',event=>{
   let data={};
   try{data=event.data?event.data.json():{}}catch(e){data={body:event.data?.text()||'لديك تذكير جديد من ورد'}}
   const title=data.title||'ورد 🌿';
-  const options={
-    body:data.body||'حان وقت وردك اليومي.',
-    icon:'./icon.svg',
-    badge:'./icon.svg',
-    dir:'rtl',
-    lang:'ar',
-    tag:data.tag||'werd-reminder',
-    renotify:true,
-    data:{url:data.url||'./'}
-  };
+  const options={body:data.body||'حان وقت وردك اليومي.',icon:'./icon.svg',badge:'./icon.svg',dir:'rtl',lang:'ar',tag:data.tag||'werd-reminder',renotify:true,data:{url:data.url||'./'}};
   event.waitUntil(self.registration.showNotification(title,options));
 });
 
 self.addEventListener('notificationclick',event=>{
-  event.notification.close();
-  const target=event.notification.data?.url||'./';
-  event.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(list=>{
-    for(const client of list){if('focus' in client){client.navigate(target).catch(()=>{});return client.focus();}}
-    return clients.openWindow?clients.openWindow(target):undefined;
-  }));
+  event.notification.close();const target=event.notification.data?.url||'./';
+  event.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(list=>{for(const client of list){if('focus'in client){client.navigate(target).catch(()=>{});return client.focus();}}return clients.openWindow?clients.openWindow(target):undefined;}));
 });
