@@ -43,6 +43,7 @@ jobs:
           test -f werd/daily-memorization-plan.js
           test -f werd/weekly-memorization-plan.js
           test -f werd/long-term-memorization-goal.js
+          test -f werd/monthly-memorization-dashboard.js
           test -f werd/deep-link.js
           test -f werd/manifest.webmanifest
           test -f werd/service-worker.js
@@ -73,6 +74,7 @@ jobs:
           node --check werd/daily-memorization-plan.js
           node --check werd/weekly-memorization-plan.js
           node --check werd/long-term-memorization-goal.js
+          node --check werd/monthly-memorization-dashboard.js
           node --check werd/deep-link.js
           node --check werd/service-worker.js
       - name: Bundle Werd feature layers
@@ -85,7 +87,7 @@ jobs:
           reader='<script src="./reader.js"></script>'
           if audio not in s:
               s=s.replace(reader, audio+'\n'+reader)
-          for tag in ['<script src="./search.js"></script>','<script src="./iman.js"></script>','<script src="./home.js"></script>','<script src="./progress.js"></script>','<script src="./onboarding.js"></script>','<script src="./profile.js"></script>','<script src="./mushaf.js"></script>','<script src="./offline-mushaf.js"></script>','<script src="./offline-audio.js"></script>','<script src="./playlist.js"></script>','<script src="./memorization.js"></script>','<script src="./memorization-tracker.js"></script>','<script src="./memorization-test.js"></script>','<script src="./recitation-test.js"></script>','<script src="./weakness-analysis.js"></script>','<script src="./daily-memorization-plan.js"></script>','<script src="./weekly-memorization-plan.js"></script>','<script src="./long-term-memorization-goal.js"></script>','<script src="./deep-link.js"></script>']:
+          for tag in ['<script src="./search.js"></script>','<script src="./iman.js"></script>','<script src="./home.js"></script>','<script src="./progress.js"></script>','<script src="./onboarding.js"></script>','<script src="./profile.js"></script>','<script src="./mushaf.js"></script>','<script src="./offline-mushaf.js"></script>','<script src="./offline-audio.js"></script>','<script src="./playlist.js"></script>','<script src="./memorization.js"></script>','<script src="./memorization-tracker.js"></script>','<script src="./memorization-test.js"></script>','<script src="./recitation-test.js"></script>','<script src="./weakness-analysis.js"></script>','<script src="./daily-memorization-plan.js"></script>','<script src="./weekly-memorization-plan.js"></script>','<script src="./long-term-memorization-goal.js"></script>','<script src="./monthly-memorization-dashboard.js"></script>','<script src="./deep-link.js"></script>']:
               if tag not in s:
                   s=s.replace('</body>', tag+'\n</body>')
           p.write_text(s,encoding='utf-8')
@@ -109,6 +111,7 @@ jobs:
           grep -q 'daily-memorization-plan.js' werd/index.html
           grep -q 'weekly-memorization-plan.js' werd/index.html
           grep -q 'long-term-memorization-goal.js' werd/index.html
+          grep -q 'monthly-memorization-dashboard.js' werd/index.html
           grep -q 'deep-link.js' werd/index.html
       - name: Ensure Cloudflare Pages project exists
         run: npx --yes wrangler@3.90.0 pages project create werd --production-branch=main || true
