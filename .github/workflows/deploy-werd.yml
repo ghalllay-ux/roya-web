@@ -20,6 +20,7 @@ jobs:
           test -f werd/app.js
           test -f werd/notifications.js
           test -f werd/features.js
+          test -f werd/audio-engine.js
           test -f werd/reader.js
           test -f werd/listening.js
           test -f werd/prayer.js
@@ -39,6 +40,7 @@ jobs:
           node --check werd/app.js
           node --check werd/notifications.js
           node --check werd/features.js
+          node --check werd/audio-engine.js
           node --check werd/reader.js
           node --check werd/listening.js
           node --check werd/prayer.js
@@ -59,11 +61,16 @@ jobs:
           from pathlib import Path
           p=Path('werd/index.html')
           s=p.read_text(encoding='utf-8')
+          audio='<script src="./audio-engine.js"></script>'
+          reader='<script src="./reader.js"></script>'
+          if audio not in s:
+              s=s.replace(reader, audio+'\n'+reader)
           for tag in ['<script src="./search.js"></script>','<script src="./iman.js"></script>','<script src="./home.js"></script>','<script src="./progress.js"></script>','<script src="./onboarding.js"></script>','<script src="./profile.js"></script>','<script src="./mushaf.js"></script>','<script src="./offline-mushaf.js"></script>','<script src="./offline-audio.js"></script>']:
               if tag not in s:
                   s=s.replace('</body>', tag+'\n</body>')
           p.write_text(s,encoding='utf-8')
           PY
+          grep -q 'audio-engine.js' werd/index.html
           grep -q 'search.js' werd/index.html
           grep -q 'iman.js' werd/index.html
           grep -q 'home.js' werd/index.html
