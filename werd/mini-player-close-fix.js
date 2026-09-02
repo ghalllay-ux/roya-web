@@ -44,3 +44,9 @@
   function fmt(x){if(!Number.isFinite(x))return'0:00';x=Math.max(0,Math.floor(x));return`${Math.floor(x/60)}:${String(x%60).padStart(2,'0')}`}
   const mo=new MutationObserver(install);mo.observe(document.documentElement,{childList:true,subtree:true});if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
 })();
+
+// Load v70 visual and close-behavior overrides after the legacy player is ready.
+(function(){
+  if(!document.querySelector('link[data-listening-v70]')){const l=document.createElement('link');l.rel='stylesheet';l.href='./listening-controls-v70.css?v=70';l.dataset.listeningV70='1';document.head.appendChild(l)}
+  if(!document.querySelector('script[data-mini-dismiss-v70]')){const s=document.createElement('script');s.src='./mini-player-dismiss-v70.js?v=70';s.defer=true;s.dataset.miniDismissV70='1';document.head.appendChild(s)}
+})();
