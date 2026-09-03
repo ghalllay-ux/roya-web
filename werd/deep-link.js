@@ -14,7 +14,7 @@
   window.addEventListener('pageshow',()=>setTimeout(openRequestedPage,150));
 })();
 
-// Direct surah / ayah selection for voice recitation — v96
+// Direct surah / ayah selection for voice recitation — v100
 (function(){
   const COUNTS=[7,286,200,176,120,165,206,75,129,109,123,111,43,52,99,128,111,110,98,135,112,78,118,64,77,227,93,88,69,60,34,30,73,54,45,83,182,88,75,85,54,53,89,59,37,35,38,29,18,45,60,49,62,55,78,96,29,22,24,13,14,11,11,18,12,12,30,52,52,44,28,28,20,56,40,31,50,40,46,42,29,19,36,25,22,17,19,26,30,20,15,21,11,8,8,19,5,8,8,11,11,8,3,9,5,4,7,3,6,3,5,4,5,6];
   const NAMES=['الفاتحة','البقرة','آل عمران','النساء','المائدة','الأنعام','الأعراف','الأنفال','التوبة','يونس','هود','يوسف','الرعد','إبراهيم','الحجر','النحل','الإسراء','الكهف','مريم','طه','الأنبياء','الحج','المؤمنون','النور','الفرقان','الشعراء','النمل','القصص','العنكبوت','الروم','لقمان','السجدة','الأحزاب','سبأ','فاطر','يس','الصافات','ص','الزمر','غافر','فصلت','الشورى','الزخرف','الدخان','الجاثية','الأحقاف','محمد','الفتح','الحجرات','ق','الذاريات','الطور','النجم','القمر','الرحمن','الواقعة','الحديد','المجادلة','الحشر','الممتحنة','الصف','الجمعة','المنافقون','التغابن','الطلاق','التحريم','الملك','القلم','الحاقة','المعارج','نوح','الجن','المزمل','المدثر','القيامة','الإنسان','المرسلات','النبأ','النازعات','عبس','التكوير','الانفطار','المطففين','الانشقاق','البروج','الطارق','الأعلى','الغاشية','الفجر','البلد','الشمس','الليل','الضحى','الشرح','التين','العلق','القدر','البينة','الزلزلة','العاديات','القارعة','التكاثر','العصر','الهمزة','الفيل','قريش','الماعون','الكوثر','الكافرون','النصر','المسد','الإخلاص','الفلق','الناس'];
@@ -39,7 +39,12 @@
   `;document.head.appendChild(s)}
   function optionList(max,selected=1){let out='';for(let i=1;i<=max;i++)out+=`<option value="${i}"${i===selected?' selected':''}>${i}</option>`;return out}
   function directValues(){const s=Math.max(1,Math.min(114,Number($('rtestDirectSurah')?.value)||1)),max=COUNTS[s-1]||1;let from=Math.max(1,Math.min(max,Number($('rtestDirectFrom')?.value)||1)),to=Math.max(1,Math.min(max,Number($('rtestDirectTo')?.value)||from));if(to<from)to=from;return{s,from,to,max,count:to-from+1,name:NAMES[s-1]||`سورة ${s}`}}
-  function refreshDirect(){if(!directMode)return;const v=directValues();if($('rtestDirectTo')&&Number($('rtestDirectTo').value)!==v.to)$('rtestDirectTo').value=String(v.to);const meta=$('rtestDirectMeta');if(meta)meta.innerHTML=v.count===1?`سيتم تسميع <b>${v.name} — الآية ${v.from}</b> فقط.`:`سيتم تسميع <b>${v.name}</b> من الآية <b>${v.from}</b> إلى الآية <b>${v.to}</b> (${v.count} آية).`;if($('rtestAvailable'))$('rtestAvailable').textContent=v.count===1?`آية واحدة محددة: ${v.name} • ${v.from}`:`${v.count} آية محددة من ${v.name}`;const supported=!!(window.SpeechRecognition||window.webkitSpeechRecognition);if($('rtestStart'))$('rtestStart').disabled=!supported}
+  function voiceSupported(){
+    const native=!!(window.SpeechRecognition||window.webkitSpeechRecognition);
+    const chromeIOS=/CriOS/i.test(navigator.userAgent||'')&&!!navigator.mediaDevices?.getUserMedia&&!!window.MediaRecorder;
+    return native||chromeIOS
+  }
+  function refreshDirect(){if(!directMode)return;const v=directValues();if($('rtestDirectTo')&&Number($('rtestDirectTo').value)!==v.to)$('rtestDirectTo').value=String(v.to);const meta=$('rtestDirectMeta');if(meta)meta.innerHTML=v.count===1?`سيتم تسميع <b>${v.name} — الآية ${v.from}</b> فقط.`:`سيتم تسميع <b>${v.name}</b> من الآية <b>${v.from}</b> إلى الآية <b>${v.to}</b> (${v.count} آية).`;if($('rtestAvailable'))$('rtestAvailable').textContent=v.count===1?`آية واحدة محددة: ${v.name} • ${v.from}`:`${v.count} آية محددة من ${v.name}`;if($('rtestStart'))$('rtestStart').disabled=!voiceSupported()}
   function fillAyahs(reset=true){const s=Math.max(1,Math.min(114,Number($('rtestDirectSurah')?.value)||1)),max=COUNTS[s-1]||1,oldFrom=reset?1:Math.min(max,Number($('rtestDirectFrom')?.value)||1),oldTo=reset?1:Math.min(max,Number($('rtestDirectTo')?.value)||oldFrom);$('rtestDirectFrom').innerHTML=optionList(max,oldFrom);$('rtestDirectTo').innerHTML=optionList(max,Math.max(oldFrom,oldTo));refreshDirect()}
   function setNativeVisible(show){const setup=$('rtestSetup');if(!setup)return;const cfg=setup.querySelector('.rtest-config'),nativeSurah=$('rtestSurah')?.parentElement;[cfg,nativeSurah].forEach(n=>{if(n)n.style.display=show?'':'none'})}
   function deactivateDirect(){directMode=false;$('rtestDirectBtn')?.classList.remove('active');$('rtestDirectPanel')?.classList.remove('show');setNativeVisible(true)}
@@ -71,14 +76,14 @@
   window.addEventListener('pageshow',()=>setTimeout(install,300));
 })();
 
-// Voice recitation selection UX — v97
+// Voice recitation selection UX — v100
 (function(){
   const $=id=>document.getElementById(id);
   function enhance(){
     const btn=$('rtestDirectBtn'),scopes=$('rtestSetup')?.querySelector('.rtest-scope'),session=$('rtestSession');
     if(!btn||!scopes||!session)return setTimeout(enhance,200);
-    if(btn.dataset.v97)return;
-    btn.dataset.v97='1';btn.textContent='🎯 اختر آية';scopes.insertBefore(btn,scopes.firstChild);
+    if(btn.dataset.v100)return;
+    btn.dataset.v100='1';btn.textContent='🎯 اختر آية';scopes.insertBefore(btn,scopes.firstChild);
     let change=$('rtestChangeSelection');
     if(!change){change=document.createElement('button');change.id='rtestChangeSelection';change.type='button';change.className='secondary';change.textContent='← تغيير السورة أو الآية';change.style.cssText='width:100%;margin:0 0 12px;padding:11px;border-radius:14px';session.insertBefore(change,session.firstChild)}
     change.onclick=()=>{
@@ -89,34 +94,4 @@
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(enhance,900));else setTimeout(enhance,900);
   window.addEventListener('pageshow',()=>setTimeout(enhance,450));
-})();
-
-// Chrome on iPhone guard for voice recitation — v98
-(function(){
-  const ua=navigator.userAgent||'';
-  if(!/CriOS/i.test(ua))return;
-  const $=id=>document.getElementById(id);
-  let installed=false;
-  function safariMessage(){
-    const support=$('rtestSupport');
-    if(support)support.innerHTML='<span>🧭</span><div><b>أنت تستخدم Google Chrome على iPhone.</b><br>السماح بالميكروفون وحده لا يكفي لتشغيل تحويل الكلام إلى نص هنا. افتح نفس رابط «ورد» في <b>Safari</b> ثم ابدأ التسميع.</div>';
-    const status=$('rtestMicStatus');if(status)status.textContent='افتح ورد في Safari لاستخدام التسميع الصوتي';
-    if(typeof toast==='function')toast('للتسميع الصوتي على iPhone افتح «ورد» في Safari')
-  }
-  async function copyLink(){
-    try{await navigator.clipboard.writeText(location.href);if(typeof toast==='function')toast('تم نسخ رابط ورد — الصقه في Safari')}catch(e){if(typeof toast==='function')toast('انسخ رابط الصفحة وافتحه في Safari')}
-  }
-  function apply(){
-    const page=$('recitationTest');if(!page)return setTimeout(apply,250);
-    safariMessage();
-    const setup=$('rtestSetup');
-    if(setup&&!$('rtestSafariHelp')){const b=document.createElement('button');b.id='rtestSafariHelp';b.type='button';b.className='secondary';b.textContent='📋 نسخ رابط ورد لفتحه في Safari';b.style.cssText='width:100%;margin-top:9px';b.onclick=copyLink;const support=$('rtestSupport');support?.insertAdjacentElement('afterend',b)}
-    const start=$('rtestStart');if(start){start.disabled=true;start.textContent='التسميع الصوتي يتطلب Safari على iPhone'}
-    installed=true
-  }
-  document.addEventListener('click',e=>{
-    const t=e.target?.closest?.('#rtestMic,#rtestStart');if(!t)return;e.preventDefault();e.stopImmediatePropagation();safariMessage()
-  },true);
-  const obs=new MutationObserver(()=>{if(installed){const start=$('rtestStart');if(start&&!start.disabled){start.disabled=true;start.textContent='التسميع الصوتي يتطلب Safari على iPhone'}}else apply()});
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{apply();obs.observe(document.documentElement,{childList:true,subtree:true,attributes:true})});else{apply();obs.observe(document.documentElement,{childList:true,subtree:true,attributes:true})}
 })();
