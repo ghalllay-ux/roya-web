@@ -1,4 +1,4 @@
-// Guest bridge for Chrome iOS voice recitation — v102
+// Guest bridge for Chrome iOS voice recitation — v103
 (function(){
   if(!/CriOS/i.test(navigator.userAgent||''))return;
   const $=id=>document.getElementById(id);
@@ -9,7 +9,11 @@
     if(!auth||typeof auth.getSession!=='function')return fn?.apply(ctx,args||[]);
     const original=auth.getSession;
     auth.getSession=()=>Promise.resolve({data:{session:{access_token:'werd-guest-recitation'}}});
-    try{return fn?.apply(ctx,args||[])}finally{auth.getSession=original}
+    let result;
+    try{result=fn?.apply(ctx,args||[])}catch(e){auth.getSession=original;throw e}
+    if(result&&typeof result.finally==='function')return result.finally(()=>{auth.getSession=original});
+    auth.getSession=original;
+    return result;
   }
 
   function wrap(el){
@@ -39,8 +43,8 @@
     observer=new MutationObserver(()=>setTimeout(apply,0));
     observer.observe(page,{subtree:true,childList:true,attributes:true,attributeFilter:['disabled','class']});
     document.addEventListener('click',e=>{if(e.target?.closest?.('#rtestDirectBtn,#rtestStart,#rtestMic'))setTimeout(apply,30)});
-    setInterval(apply,350);
-    setTimeout(apply,120);
+    setInterval(apply,250);
+    setTimeout(apply,100);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
 })();
