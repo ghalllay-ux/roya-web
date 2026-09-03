@@ -15,31 +15,73 @@ jobs:
           for f in index.html app.css app.js notifications.js features.js audio-engine.js reader.js listening.js listening-ios-fix.js prayer.js more.js search.js iman.js hisn-proxy-fix.js home.js progress.js onboarding.js onboarding-skip-fix.js profile.js mushaf-core-v2.js mobile-mushaf-route-fix.js offline-mushaf.js offline-audio.js playlist.js memorization.js memorization-tracker.js memorization-test.js recitation-test.js weakness-analysis.js daily-memorization-plan.js weekly-memorization-plan.js long-term-memorization-goal.js monthly-memorization-dashboard.js achievement-report.js advanced-achievements.js memorization-journey.js desktop-layout.js premium-islamic-theme.js desktop-premium-home.js reference-sidebar.js mobile-layout-fix.js mobile-home-hub.js mobile-memorization-hub.js deep-link.js manifest.webmanifest service-worker.js _worker.js; do test -f "werd/$f"; done
           grep -q "ward_user_state" werd/app.js
           for f in app.js notifications.js features.js audio-engine.js reader.js listening.js listening-ios-fix.js prayer.js more.js search.js iman.js hisn-proxy-fix.js home.js progress.js onboarding.js onboarding-skip-fix.js profile.js mushaf-core-v2.js mobile-mushaf-route-fix.js offline-mushaf.js offline-audio.js playlist.js memorization.js memorization-tracker.js memorization-test.js recitation-test.js weakness-analysis.js daily-memorization-plan.js weekly-memorization-plan.js long-term-memorization-goal.js monthly-memorization-dashboard.js achievement-report.js advanced-achievements.js memorization-journey.js desktop-layout.js premium-islamic-theme.js desktop-premium-home.js reference-sidebar.js mobile-layout-fix.js mobile-home-hub.js mobile-memorization-hub.js deep-link.js service-worker.js _worker.js; do node --check "werd/$f"; done
+      - name: Prepare verified Hisn Muslim local data
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 --connect-timeout 10 --max-time 90 \
+            https://raw.githubusercontent.com/SalehGNUTUX/GT_HISNMUSLIM/main/hisnmuslim.json \
+            -o /tmp/hisnmuslim.json || \
+          curl --fail --location --retry 3 --connect-timeout 10 --max-time 90 \
+            https://cdn.jsdelivr.net/gh/SalehGNUTUX/GT_HISNMUSLIM@main/hisnmuslim.json \
+            -o /tmp/hisnmuslim.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data=json.loads(Path('/tmp/hisnmuslim.json').read_text(encoding='utf-8'))
+          if not isinstance(data,list) or len(data)!=132:
+              raise SystemExit('Hisn source validation failed')
+          out=Path('werd/hisn');out.mkdir(exist_ok=True)
+          index=[];ids=[]
+          for d in data:
+              i=int(d['id']);title=str(d['category']).strip();arr=d.get('array')
+              if not title or not isinstance(arr,list):
+                  raise SystemExit(f'Invalid Hisn door {i}')
+              ids.append(i);fn=f'{i:03d}.json'
+              index.append({'id':i,'category':title,'file':fn,'count':len(arr)})
+              (out/fn).write_text(json.dumps({'id':i,'category':title,'array':arr},ensure_ascii=False,separators=(',',':')),encoding='utf-8')
+          if sorted(ids)!=list(range(1,133)):
+              raise SystemExit('Hisn IDs are incomplete')
+          Path('werd/hisn-index.json').write_text(json.dumps({'total':132,'categories':index},ensure_ascii=False,separators=(',',':')),encoding='utf-8')
+          PY
       - name: Bundle Werd feature layers and core mobile Quran route
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import re
           p=Path('werd/index.html');s=p.read_text(encoding='utf-8')
-          audio='<script src="./audio-engine.js"></script>';reader='<script src="./reader.js"></script>'
-          if audio not in s:s=s.replace(reader,audio+'\n'+reader)
+          def has_script(name):
+              return bool(re.search(r'<script\s+src=["\']\./'+re.escape(name)+r'(?:\?[^"\']*)?["\']\s*></script>',s))
+          # Remove the obsolete Hisn wrapper from the deployed page completely.
+          s=re.sub(r'<script\s+src=["\']\./hisn-proxy-fix\.js(?:\?[^"\']*)?["\']\s*></script>\s*','',s)
           for oldf in ['mushaf.js','mushaf-resilience.js','decorative-theme.js']:
-              s=s.replace(f'<script src="./{oldf}"></script>\n','').replace(f'<script src="./{oldf}"></script>','')
-          files=['search.js','iman.js','hisn-proxy-fix.js','home.js','progress.js','onboarding.js','onboarding-skip-fix.js','profile.js','mushaf-core-v2.js','mobile-mushaf-route-fix.js','offline-mushaf.js','offline-audio.js','playlist.js','memorization.js','memorization-tracker.js','memorization-test.js','recitation-test.js','weakness-analysis.js','daily-memorization-plan.js','weekly-memorization-plan.js','long-term-memorization-goal.js','monthly-memorization-dashboard.js','achievement-report.js','advanced-achievements.js','memorization-journey.js','desktop-layout.js','premium-islamic-theme.js','desktop-premium-home.js','reference-sidebar.js','mobile-layout-fix.js','mobile-home-hub.js','mobile-memorization-hub.js','listening-ios-fix.js','deep-link.js']
+              s=re.sub(r'<script\s+src=["\']\./'+re.escape(oldf)+r'(?:\?[^"\']*)?["\']\s*></script>\s*','',s)
+          files=['audio-engine.js','search.js','iman.js','home.js','progress.js','onboarding.js','onboarding-skip-fix.js','profile.js','mushaf-core-v2.js','mobile-mushaf-route-fix.js','offline-mushaf.js','offline-audio.js','playlist.js','memorization.js','memorization-tracker.js','memorization-test.js','recitation-test.js','weakness-analysis.js','daily-memorization-plan.js','weekly-memorization-plan.js','long-term-memorization-goal.js','monthly-memorization-dashboard.js','achievement-report.js','advanced-achievements.js','memorization-journey.js','desktop-layout.js','premium-islamic-theme.js','desktop-premium-home.js','reference-sidebar.js','mobile-layout-fix.js','mobile-home-hub.js','mobile-memorization-hub.js','listening-ios-fix.js','deep-link.js']
           for f in files:
-              tag=f'<script src="./{f}"></script>'
-              if tag not in s:s=s.replace('</body>',tag+'\n</body>')
+              if not has_script(f):
+                  s=s.replace('</body>',f'<script src="./{f}"></script>\n</body>')
+          # De-duplicate local JS by basename while preserving the first (usually versioned) tag.
+          seen=set()
+          pattern=re.compile(r'<script\s+src=["\'](\./[^"\']+\.js(?:\?[^"\']*)?)["\']\s*></script>')
+          def dedupe(m):
+              src=m.group(1);base=src.split('?',1)[0]
+              if base in seen:return ''
+              seen.add(base);return m.group(0)
+          s=pattern.sub(dedupe,s)
           p.write_text(s,encoding='utf-8')
           ap=Path('werd/app.js');a=ap.read_text(encoding='utf-8')
           old="function go(id){\n document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');\n document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===id));window.scrollTo({top:0,behavior:'smooth'});\n renderState();\n}"
           new="function go(id){\n if(id==='quran' && window.matchMedia && matchMedia('(max-width:959px)').matches && typeof window.openWerdMushafV2==='function'){window.openWerdMushafV2();return;}\n document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));const target=document.getElementById(id);if(target)target.classList.add('active');\n document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===id||(id==='mushafV2'&&n.dataset.page==='quran')));window.scrollTo({top:0,behavior:'smooth'});\n renderState();\n}"
-          if old not in a: raise SystemExit('go signature changed')
-          ap.write_text(a.replace(old,new,1),encoding='utf-8')
+          if old in a:a=a.replace(old,new,1)
+          elif 'openWerdMushafV2' not in a:raise SystemExit('go signature changed')
+          ap.write_text(a,encoding='utf-8')
           PY
           node --check werd/app.js
           grep -q "openWerdMushafV2" werd/app.js
           grep -q 'mushaf-core-v2.js' werd/index.html
-          grep -q 'hisn-proxy-fix.js' werd/index.html
-          ! grep -q '<script src="./mushaf.js"></script>' werd/index.html
+          test "$(grep -o 'src="./iman.js[^"]*"' werd/index.html | wc -l)" -eq 1
+          ! grep -q 'hisn-proxy-fix.js' werd/index.html
+          test -f werd/hisn/001.json
+          test -f werd/hisn/132.json
       - name: Ensure Cloudflare Pages project exists
         run: npx --yes wrangler@3.90.0 pages project create werd --production-branch=main || true
         env:
