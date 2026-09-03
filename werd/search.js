@@ -4,8 +4,22 @@
   const LIMIT_QURAN=40;
 
   function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-  function norm(v){return String(v||'').normalize('NFKD').replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g,'').replace(/[إأآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ؤ/g,'و').replace(/ئ/g,'ي').replace(/ـ/g,'').toLowerCase().trim()}
+  function norm(v){
+    return String(v||'')
+      .normalize('NFKD')
+      .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g,'')
+      .replace(/[إأآٱ]/g,'ا')
+      .replace(/ى/g,'ي')
+      .replace(/ؤ/g,'و')
+      .replace(/ئ/g,'ي')
+      .replace(/ة/g,'ه')
+      .replace(/ـ/g,'')
+      .replace(/\s+/g,' ')
+      .toLowerCase()
+      .trim();
+  }
   function contains(text,q){return norm(text).includes(norm(q))}
+  function cleanSurahQuery(q){return norm(q).replace(/^سوره\s*/,'').trim()}
   function history(){if(!Array.isArray(state.searchHistory))state.searchHistory=[];return state.searchHistory}
   function saveHistory(q){q=q.trim();if(q.length<2)return;state.searchHistory=[q,...history().filter(x=>x!==q)].slice(0,8);save();renderHistory()}
 
@@ -23,12 +37,12 @@
     if(!document.getElementById('searchPage')){
       const sec=document.createElement('section');sec.className='page';sec.id='searchPage';sec.innerHTML=`
         <div class="section-title"><h3>البحث الشامل</h3><button class="smallbtn" id="searchBack">المزيد</button></div>
-        <div class="card"><div class="global-search"><input id="globalSearchInput" inputmode="search" autocomplete="off" placeholder="ابحث في القرآن والأذكار…"><button id="globalSearchBtn">بحث</button></div><div class="search-filters" id="searchFilters"><button class="chip active" data-sfilter="all">الكل</button><button class="chip" data-sfilter="quran">القرآن</button><button class="chip" data-sfilter="surah">السور</button><button class="chip" data-sfilter="adhkar">الأذكار</button><button class="chip" data-sfilter="saved">المحفوظات</button></div></div>
-        <div class="section-title"><h3>عمليات البحث الأخيرة</h3><button class="smallbtn" id="clearSearchHistory">مسح</button></div><div class="card"><div class="search-history" id="searchHistory"></div></div>
+        <div class="card"><div class="global-search"><input id="globalSearchInput" inputmode="search" autocomplete="off" placeholder="ابحث في القرآن والأذكار…"><button id="globalSearchBtn" type="button">بحث</button></div><div class="search-filters" id="searchFilters"><button class="chip active" data-sfilter="all" type="button">الكل</button><button class="chip" data-sfilter="quran" type="button">القرآن</button><button class="chip" data-sfilter="surah" type="button">السور</button><button class="chip" data-sfilter="adhkar" type="button">الأذكار</button><button class="chip" data-sfilter="saved" type="button">المحفوظات</button></div></div>
+        <div class="section-title"><h3>عمليات البحث الأخيرة</h3><button class="smallbtn" id="clearSearchHistory" type="button">مسح</button></div><div class="card"><div class="search-history" id="searchHistory"></div></div>
         <div class="section-title"><h3>النتائج</h3><span class="search-count" id="searchCount">ابدأ بكتابة كلمة</span></div><div id="globalSearchResults"><div class="card search-empty">يمكنك البحث باسم سورة، كلمة من القرآن، ذكر محفوظ، مفضلة أو علامة قراءة.</div></div>`;main.appendChild(sec);
     }
     const grid=document.querySelector('#more .more-grid');if(grid&&!document.getElementById('moreSearchTile')){
-      const b=document.createElement('button');b.className='more-tile';b.id='moreSearchTile';b.innerHTML='<span class="mi">⌕</span><b>البحث الشامل</b><small>القرآن والأذكار والمحفوظات</small>';b.onclick=()=>openSearch();grid.insertBefore(b,grid.firstChild);
+      const b=document.createElement('button');b.className='more-tile';b.id='moreSearchTile';b.type='button';b.innerHTML='<span class="mi">⌕</span><b>البحث الشامل</b><small>القرآن والأذكار والمحفوظات</small>';b.onclick=()=>openSearch();grid.insertBefore(b,grid.firstChild);
     }
     wire();renderHistory();
   }
@@ -36,24 +50,40 @@
   let activeFilter='all',lastResults=[];
   function wire(){
     const input=document.getElementById('globalSearchInput'),btn=document.getElementById('globalSearchBtn');
-    if(btn)btn.onclick=()=>runSearch(input.value);
-    if(input){input.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();runSearch(input.value)}};input.oninput=()=>{if(!input.value.trim()){lastResults=[];renderResults([],false)}}}
-    document.querySelectorAll('[data-sfilter]').forEach(b=>b.onclick=()=>{activeFilter=b.dataset.sfilter;document.querySelectorAll('[data-sfilter]').forEach(x=>x.classList.toggle('active',x===b));renderResults(lastResults,false)});
-    document.getElementById('searchBack').onclick=()=>go('more');
-    document.getElementById('clearSearchHistory').onclick=()=>{state.searchHistory=[];save();renderHistory();toast('تم مسح سجل البحث')};
+    if(btn)btn.onclick=()=>runSearch(input?.value||'');
+    if(input){
+      input.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();runSearch(input.value)}};
+      input.oninput=()=>{if(!input.value.trim()){lastResults=[];renderResults([],false)}};
+    }
+    document.querySelectorAll('[data-sfilter]').forEach(b=>b.onclick=()=>{
+      activeFilter=b.dataset.sfilter;
+      document.querySelectorAll('[data-sfilter]').forEach(x=>x.classList.toggle('active',x===b));
+      renderResults(lastResults,false);
+    });
+    const back=document.getElementById('searchBack');if(back)back.onclick=()=>go('more');
+    const clear=document.getElementById('clearSearchHistory');if(clear)clear.onclick=()=>{state.searchHistory=[];save();renderHistory();toast('تم مسح سجل البحث')};
   }
 
   window.openSearch=function(q=''){
     go('searchPage');const input=document.getElementById('globalSearchInput');if(input){input.value=q;setTimeout(()=>input.focus(),80)}if(q)runSearch(q);
   };
 
-  function renderHistory(){const box=document.getElementById('searchHistory');if(!box)return;const h=history();box.innerHTML=h.length?h.map(q=>`<button data-history="${esc(q)}">${esc(q)}</button>`).join(''):'<span class="muted">لا توجد عمليات بحث سابقة.</span>';box.querySelectorAll('[data-history]').forEach(b=>b.onclick=()=>{document.getElementById('globalSearchInput').value=b.dataset.history;runSearch(b.dataset.history)})}
+  function renderHistory(){
+    const box=document.getElementById('searchHistory');if(!box)return;const h=history();
+    box.innerHTML=h.length?h.map(q=>`<button type="button" data-history="${esc(q)}">${esc(q)}</button>`).join(''):'<span class="muted">لا توجد عمليات بحث سابقة.</span>';
+    box.querySelectorAll('[data-history]').forEach(b=>b.onclick=()=>{const input=document.getElementById('globalSearchInput');if(input)input.value=b.dataset.history;runSearch(b.dataset.history)});
+  }
 
   function localResults(q){
     const out=[];const list=(Array.isArray(surahs)&&surahs.length)?surahs:fallbackSurahs;
-    list.filter(s=>contains(`${s.name} ${s.englishName||''}`,q)).forEach(s=>out.push({kind:'surah',title:s.name,meta:`سورة رقم ${s.number} • ${s.numberOfAyahs||''} آية`,surah:Number(s.number)}));
+    const sq=cleanSurahQuery(q);
+    list.filter(s=>{
+      const name=`${s.name||''} ${s.englishName||''} ${s.number||''}`;
+      return contains(name,q)||contains(name,sq);
+    }).forEach(s=>out.push({kind:'surah',title:s.name,meta:`سورة رقم ${s.number} • ${s.numberOfAyahs||''} آية`,surah:Number(s.number)}));
+
     const allAdhkar=Array.isArray(adhkar)&&adhkar.length?adhkar:fallbackAdhkar;
-    allAdhkar.filter(x=>contains(`${x.content||x.zekr||''} ${x.source||''}`,q)).slice(0,20).forEach((x,i)=>out.push({kind:'adhkar',title:'ذكر',text:x.content||x.zekr||'',meta:x.source||'حصن المسلم',adhkarType:Number(x.type)===2?'evening':'morning'}));
+    allAdhkar.filter(x=>contains(`${x.content||x.zekr||''} ${x.source||''}`,q)).slice(0,20).forEach(x=>out.push({kind:'adhkar',title:'ذكر',text:x.content||x.zekr||'',meta:x.source||'حصن المسلم',adhkarType:Number(x.type)===2?'evening':'morning'}));
     const favA=state.favorites?.ayahs||[],favD=state.favorites?.adhkar||[],marks=state.bookmarks||[];
     favA.filter(x=>contains(`${x.surahName||''} ${x.text||''}`,q)).forEach(x=>out.push({kind:'saved',subkind:'favAyah',title:`${x.surahName} • الآية ${x.ayahNumber}`,text:x.text,meta:'مفضلة',surah:Number(x.surahNumber),ayah:Number(x.ayahNumber)}));
     favD.filter(x=>contains(`${x.text||''} ${x.source||''}`,q)).forEach(x=>out.push({kind:'saved',subkind:'favDhikr',title:'ذكر محفوظ',text:x.text,meta:x.source||'المفضلة'}));
@@ -72,14 +102,26 @@
   }
 
   async function runSearch(raw){
-    const q=raw.trim();if(q.length<2){toast('اكتب حرفين على الأقل للبحث');return}const seq=++searchSeq;saveHistory(q);const count=document.getElementById('searchCount'),box=document.getElementById('globalSearchResults');count.textContent='جاري البحث…';box.innerHTML='<div class="card loading">جاري البحث في ورد والقرآن…</div>';
-    const local=localResults(q),remote=await remoteQuran(q,seq);if(seq!==searchSeq)return;lastResults=[...local,...remote];renderResults(lastResults,true);
+    const q=String(raw||'').trim();
+    if(q.length<2){toast('اكتب حرفين على الأقل للبحث');return}
+    const seq=++searchSeq;saveHistory(q);
+    const count=document.getElementById('searchCount'),box=document.getElementById('globalSearchResults');
+    if(count)count.textContent='جاري البحث…';if(box)box.innerHTML='<div class="card loading">جاري البحث في ورد والقرآن…</div>';
+    const local=localResults(q),remote=await remoteQuran(q,seq);if(seq!==searchSeq)return;
+    lastResults=[...local,...remote];renderResults(lastResults,true);
   }
 
-  function filtered(items){if(activeFilter==='all')return items;if(activeFilter==='saved')return items.filter(x=>x.kind==='saved');return items.filter(x=>x.kind===activeFilter)}
+  function filtered(items){
+    if(activeFilter==='all')return items;
+    if(activeFilter==='saved')return items.filter(x=>x.kind==='saved');
+    // "القرآن" means Quran content as a whole, so surah-name matches belong here too.
+    if(activeFilter==='quran')return items.filter(x=>x.kind==='quran'||x.kind==='surah');
+    return items.filter(x=>x.kind===activeFilter);
+  }
   function renderResults(items,announce){
-    const box=document.getElementById('globalSearchResults'),count=document.getElementById('searchCount');if(!box)return;const rows=filtered(items);count.textContent=`${rows.length} نتيجة${activeFilter==='quran'&&rows.length>=LIMIT_QURAN?' على الأقل':''}`;
-    if(!rows.length){box.innerHTML='<div class="card search-empty">لا توجد نتائج مطابقة في هذا التصنيف.</div>';return}
+    const box=document.getElementById('globalSearchResults'),count=document.getElementById('searchCount');if(!box)return;const rows=filtered(items);
+    if(count)count.textContent=`${rows.length} نتيجة${activeFilter==='quran'&&rows.filter(x=>x.kind==='quran').length>=LIMIT_QURAN?' على الأقل':''}`;
+    if(!rows.length){box.innerHTML='<div class="card search-empty">لا توجد نتائج مطابقة في هذا التصنيف. جرّب «الكل» أو اكتب اسم السورة بدون تشكيل.</div>';return}
     box.innerHTML=rows.map((x,i)=>`<div class="card search-result" data-result="${i}"><div class="sr-head"><b>${esc(x.title)}</b><span class="badge">${x.kind==='quran'?'قرآن':x.kind==='surah'?'سورة':x.kind==='adhkar'?'أذكار':'محفوظ'}</span></div>${x.text?`<div class="sr-text">${esc(x.text)}</div>`:''}<div class="sr-source">${esc(x.meta||'')}</div></div>`).join('');
     box.querySelectorAll('[data-result]').forEach((node,i)=>node.onclick=()=>openResult(rows[i]));if(announce&&rows.length)toast(`تم العثور على ${rows.length} نتيجة`);
   }
