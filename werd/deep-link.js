@@ -70,3 +70,23 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(install,700));else setTimeout(install,700);
   window.addEventListener('pageshow',()=>setTimeout(install,300));
 })();
+
+// Voice recitation selection UX — v97
+(function(){
+  const $=id=>document.getElementById(id);
+  function enhance(){
+    const btn=$('rtestDirectBtn'),scopes=$('rtestSetup')?.querySelector('.rtest-scope'),session=$('rtestSession');
+    if(!btn||!scopes||!session)return setTimeout(enhance,200);
+    if(btn.dataset.v97)return;
+    btn.dataset.v97='1';btn.textContent='🎯 اختر آية';scopes.insertBefore(btn,scopes.firstChild);
+    let change=$('rtestChangeSelection');
+    if(!change){change=document.createElement('button');change.id='rtestChangeSelection';change.type='button';change.className='secondary';change.textContent='← تغيير السورة أو الآية';change.style.cssText='width:100%;margin:0 0 12px;padding:11px;border-radius:14px';session.insertBefore(change,session.firstChild)}
+    change.onclick=()=>{
+      try{if(typeof window.openWerdRecitationTest==='function')window.openWerdRecitationTest()}catch(e){}
+      setTimeout(()=>{const direct=$('rtestDirectBtn');if(direct&&typeof direct.onclick==='function')direct.onclick();$('rtestSetup')?.scrollIntoView({behavior:'smooth',block:'start'})},80)
+    };
+    setTimeout(()=>{if(typeof btn.onclick==='function')btn.onclick()},30)
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(enhance,900));else setTimeout(enhance,900);
+  window.addEventListener('pageshow',()=>setTimeout(enhance,450));
+})();
