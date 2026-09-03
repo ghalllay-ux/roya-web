@@ -28,3 +28,9 @@
   audio.addEventListener('play',()=>{playing=true;render()});audio.addEventListener('pause',()=>{playing=false;render()});audio.addEventListener('ended',next);audio.addEventListener('timeupdate',()=>{const d=audio.duration,c=audio.currentTime,p=Number.isFinite(d)&&d>0?c/d*100:0;if($('listenSeek'))$('listenSeek').value=String(p);if($('listenCurrent'))$('listenCurrent').textContent=fmt(c);if($('listenDuration'))$('listenDuration').textContent=fmt(d);if($('miniProgress'))$('miniProgress').style.width=p+'%'});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(bind,0),{once:true});else setTimeout(bind,0);let tries=0,t=setInterval(()=>{if(!bound)bind();if(++tries>=12||bound)clearInterval(t)},300);
 })();
+
+// v94: iPhone recitation setup fix. Loaded from a no-store script path so Safari receives it immediately.
+(function(){
+  if(document.querySelector('script[data-rtest-v94]'))return;
+  const s=document.createElement('script');s.src='./recitation-empty-fix-v94.js?v=94';s.defer=true;s.dataset.rtestV94='1';document.head.appendChild(s);
+})();
