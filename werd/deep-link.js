@@ -90,3 +90,33 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(enhance,900));else setTimeout(enhance,900);
   window.addEventListener('pageshow',()=>setTimeout(enhance,450));
 })();
+
+// Chrome on iPhone guard for voice recitation — v98
+(function(){
+  const ua=navigator.userAgent||'';
+  if(!/CriOS/i.test(ua))return;
+  const $=id=>document.getElementById(id);
+  let installed=false;
+  function safariMessage(){
+    const support=$('rtestSupport');
+    if(support)support.innerHTML='<span>🧭</span><div><b>أنت تستخدم Google Chrome على iPhone.</b><br>السماح بالميكروفون وحده لا يكفي لتشغيل تحويل الكلام إلى نص هنا. افتح نفس رابط «ورد» في <b>Safari</b> ثم ابدأ التسميع.</div>';
+    const status=$('rtestMicStatus');if(status)status.textContent='افتح ورد في Safari لاستخدام التسميع الصوتي';
+    if(typeof toast==='function')toast('للتسميع الصوتي على iPhone افتح «ورد» في Safari')
+  }
+  async function copyLink(){
+    try{await navigator.clipboard.writeText(location.href);if(typeof toast==='function')toast('تم نسخ رابط ورد — الصقه في Safari')}catch(e){if(typeof toast==='function')toast('انسخ رابط الصفحة وافتحه في Safari')}
+  }
+  function apply(){
+    const page=$('recitationTest');if(!page)return setTimeout(apply,250);
+    safariMessage();
+    const setup=$('rtestSetup');
+    if(setup&&!$('rtestSafariHelp')){const b=document.createElement('button');b.id='rtestSafariHelp';b.type='button';b.className='secondary';b.textContent='📋 نسخ رابط ورد لفتحه في Safari';b.style.cssText='width:100%;margin-top:9px';b.onclick=copyLink;const support=$('rtestSupport');support?.insertAdjacentElement('afterend',b)}
+    const start=$('rtestStart');if(start){start.disabled=true;start.textContent='التسميع الصوتي يتطلب Safari على iPhone'}
+    installed=true
+  }
+  document.addEventListener('click',e=>{
+    const t=e.target?.closest?.('#rtestMic,#rtestStart');if(!t)return;e.preventDefault();e.stopImmediatePropagation();safariMessage()
+  },true);
+  const obs=new MutationObserver(()=>{if(installed){const start=$('rtestStart');if(start&&!start.disabled){start.disabled=true;start.textContent='التسميع الصوتي يتطلب Safari على iPhone'}}else apply()});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{apply();obs.observe(document.documentElement,{childList:true,subtree:true,attributes:true})});else{apply();obs.observe(document.documentElement,{childList:true,subtree:true,attributes:true})}
+})();
