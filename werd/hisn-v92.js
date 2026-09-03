@@ -1,0 +1,46 @@
+// Werd Hisn Muslim v92 — self-contained 132-door index. No index fetch, no spinner dependency.
+(function(){
+  const VERSION='92';
+  const TITLES=[
+'أذكار الصباح والمساء','أذكار النوم','أذكار الاستيقاظ من النوم','دعاء دخول الخلاء','دعاء الخروج من الخلاء','الذكر قبل الوضوء','الذكر بعد الفراغ من الوضوء','الذكر عند الخروج من المنزل','الذكر عند دخول المنزل','دعاء الذهاب إلى المسجد','دعاء دخول المسجد','دعاء الخروج من المسجد','أذكار الآذان','دعاء لبس الثوب','دعاء لبس الثوب الجديد','الدعاء لمن لبس ثوبا جديدا','ما يقول إذا وضع ثوبه','دعاء الاستفتاح','دعاء الركوع','دعاء الرفع من الركوع','دعاء السجود','دعاء الجلسة بين السجدتين','دعاء سجود التلاوة','التشهد','الصلاة على النبي بعد التشهد','الدعاء بعد التشهد الأخير قبل السلام','الأذكار بعد السلام من الصلاة','دعاء صلاة الاستخارة','الدعاء إذا تقلب ليلا','دعاء الفزع في النوم ومن بلي بالوحشة','ما يفعل من رأى الرؤيا أو الحلم','دعاء قنوت الوتر','الذكر عقب السلام من الوتر','دعاء الهم والحزن','دعاء الكرب','دعاء لقاء العدو وذي السلطان','دعاء من خاف ظلم السلطان','الدعاء على العدو','ما يقول من خاف قوما','دعاء من أصابه وسوسة في الإيمان','دعاء قضاء الدين','دعاء الوسوسة في الصلاة والقراءة','دعاء من استصعب عليه أمر','ما يقول ويفعل من أذنب ذنبا','دعاء طرد الشيطان ووساوسه','الدعاء حينما يقع ما لا يرضاه','تهنئة المولود له وجوابه','ما يعوذ به الأولاد','الدعاء للمريض في عيادته','فضل عيادة المريض','دعاء المريض الذي يئس من حياته','تلقين المحتضر','دعاء من أصيب بمصيبة','الدعاء عند إغماض الميت','الدعاء للميت في الصلاة عليه','الدعاء للفرط في الصلاة عليه','دعاء التعزية','الدعاء عند إدخال الميت القبر','الدعاء بعد دفن الميت','دعاء زيارة القبور','دعاء الريح','دعاء الرعد','من أدعية الاستسقاء','الدعاء إذا نزل المطر','الذكر بعد نزول المطر','من أدعية الاستصحاء','دعاء رؤية الهلال','الدعاء عند إفطار الصائم','الدعاء قبل الطعام','الدعاء عند الفراغ من الطعام','دعاء الضيف لصاحب الطعام','التعريض بالدعاء لطلب الطعام أو الشراب','الدعاء إذا أفطر عند أهل بيت','دعاء الصائم إذا حضر الطعام ولم يفطر','ما يقول الصائم إذا سابه أحد','الدعاء عند رؤية باكورة الثمر','دعاء العطاس','ما يقال للكافر إذا عطس فحمد الله','الدعاء للمتزوج','دعاء المتزوج وشراء الدابة','الدعاء قبل إتيان الزوجة','دعاء الغضب','دعاء من رأى مبتلى','ما يقال في المجلس','كفارة المجلس','الدعاء لمن قال غفر الله لك','الدعاء لمن صنع إليك معروفا','ما يعصم الله به من الدجال','الدعاء لمن قال إني أحبك في الله','الدعاء لمن عرض عليك ماله','الدعاء لمن أقرض عند القضاء','دعاء الخوف من الشرك','الدعاء لمن قال بارك الله فيك','دعاء كراهية الطيرة','دعاء الركوب','دعاء السفر','دعاء دخول القرية أو البلدة','دعاء دخول السوق','الدعاء إذا تعس المركوب','دعاء المسافر للمقيم','دعاء المقيم للمسافر','التكبير والتسبيح في سير السفر','دعاء المسافر إذا أسحر','الدعاء إذا نزل منزلا في سفر أو غيره','ذكر الرجوع من السفر','ما يقول من أتاه أمر يسره أو يكرهه','فضل الصلاة على النبي ﷺ','إفشاء السلام','كيف يرد السلام على الكافر إذا سلم','الدعاء عند سماع صياح الديك ونهيق الحمار','دعاء نباح الكلاب بالليل','الدعاء لمن سببته','ما يقول المسلم إذا مدح المسلم','ما يقول المسلم إذا زكي','كيف يلبي المحرم في الحج أو العمرة','التكبير إذا أتى الركن الأسود','الدعاء بين الركن اليماني والحجر الأسود','دعاء الوقوف على الصفا والمروة','الدعاء يوم عرفة','الذكر عند المشعر الحرام','التكبير عند رمي الجمار مع كل حصاة','دعاء التعجب والأمر السار','ما يفعل من أتاه أمر يسره','ما يقول من أحس وجعا في جسده','دعاء من خشي أن يصيب شيئا بعينه','ما يقال عند الفزع','ما يقول عند الذبح أو النحر','ما يقول لرد كيد مردة الشياطين','الاستغفار والتوبة','فضل التسبيح والتحميد والتهليل والتكبير','كيف كان النبي يسبح؟','من أنواع الخير والآداب الجامعة'];
+  const cats=TITLES.map((category,i)=>({id:i+1,category}));
+  const $=id=>document.getElementById(id);
+  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  let current=null;
+  function inject(){
+    const main=document.querySelector('main'); if(!main)return null;
+    let s=$('hisn');
+    if(!s){
+      s=document.createElement('section');s.id='hisn';s.className='page';
+      s.innerHTML='<div class="section-title"><h3>حصن المسلم</h3><button class="smallbtn" id="hisnBack">المزيد</button></div><div class="card"><input id="hisnSearch" style="width:100%;box-sizing:border-box;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink)" placeholder="ابحث في أبواب حصن المسلم"></div><div class="section-title"><h3 id="hisnTitle">الأبواب</h3><span id="hisnStatus">132 باب</span></div><div id="hisnBody"></div>';
+      main.appendChild(s);
+    }
+    const back=$('hisnBack'),search=$('hisnSearch');
+    if(back&&!back.dataset.v92){back.dataset.v92='1';back.onclick=()=>{if(current){current=null;render(search?.value||'')}else window.go?.('more')}}
+    if(search&&!search.dataset.v92){search.dataset.v92='1';search.oninput=e=>{if(!current)render(e.target.value)}}
+    return s;
+  }
+  function render(q=''){
+    inject(); current=null;
+    const b=$('hisnBody'),st=$('hisnStatus'),title=$('hisnTitle'); if(!b)return;
+    if(title)title.textContent='الأبواب'; q=String(q||'').trim();
+    const list=cats.filter(x=>!q||x.category.includes(q)); if(st)st.textContent='132 باب';
+    b.innerHTML=list.length?'<div class="card">'+list.map(x=>'<button type="button" class="list-item" data-hisn-door="'+x.id+'" style="width:100%;border:0;background:transparent;color:inherit;text-align:right"><div><b>'+esc(x.category)+'</b><small>باب رقم '+x.id+'</small></div><span>‹</span></button>').join('')+'</div>':'<div class="card" style="text-align:center">لا توجد نتائج.</div>';
+    b.querySelectorAll('[data-hisn-door]').forEach(n=>n.onclick=()=>door(Number(n.dataset.hisnDoor)));
+  }
+  async function getJson(url,ms=6500){const c=new AbortController(),t=setTimeout(()=>c.abort(),ms);try{const r=await fetch(url,{cache:'no-store',signal:c.signal,headers:{Accept:'application/json'}});if(!r.ok)throw Error('HTTP '+r.status);return await r.json()}finally{clearTimeout(t)}}
+  function itemsFrom(j){if(Array.isArray(j))return j;if(Array.isArray(j?.array))return j.array;if(Array.isArray(j?.items))return j.items;const raw=j?.data||j;if(raw&&typeof raw==='object'){for(const v of Object.values(raw))if(Array.isArray(v))return v}return []}
+  async function door(id){
+    current=cats[id-1]; if(!current)return; const b=$('hisnBody'),st=$('hisnStatus'),title=$('hisnTitle');
+    if(title)title.textContent=current.category;if(st)st.textContent='تحميل الباب…';if(b)b.innerHTML='<div class="card loading">جاري تحميل الأذكار…</div>';
+    const n=String(id).padStart(3,'0'),sources=['./api/hisn/'+id+'?v='+VERSION,'https://cdn.jsdelivr.net/gh/SalehGNUTUX/GT_HISNMUSLIM@main/assets/data/categories/'+n+'.json','https://raw.githubusercontent.com/SalehGNUTUX/GT_HISNMUSLIM/main/assets/data/categories/'+n+'.json'];
+    let items=[]; for(const src of sources){try{items=itemsFrom(await getJson(src));if(items.length)break}catch(e){}}
+    if(!items.length){if(st)st.textContent='تعذر التحميل';if(b)b.innerHTML='<div class="card" style="text-align:center;padding:26px">تعذر تحميل هذا الباب.<br><button class="smallbtn" id="hisnDoorRetry" style="margin-top:12px">إعادة المحاولة</button></div>';const r=$('hisnDoorRetry');if(r)r.onclick=()=>door(id);return}
+    if(st)st.textContent=items.length+' ذكر/دعاء';
+    if(b)b.innerHTML=items.map(x=>{const text=x.text||x.ARABIC_TEXT||'',repeat=Number(x.count||x.REPEAT||1)||1;return '<div class="card"><div style="font-size:20px;line-height:2.05">'+esc(text)+'</div>'+(repeat>1?'<div class="badge" style="margin-top:10px">التكرار '+repeat+'</div>':'')+'<div class="muted" style="font-size:11px;margin-top:10px">المصدر: حصن المسلم من أذكار الكتاب والسنة</div></div>'}).join('');
+  }
+  function open(){inject();render($('hisnSearch')?.value||'');window.go?.('hisn')}
+  inject();render('');
+  window.__WERD_HISN_BOOTED=true;window.__werdHisnVersion=VERSION;window.openHisn=open;window.__werdHisn={open,reload:()=>render(''),version:VERSION};
+  document.addEventListener('click',e=>{if(e.target?.closest?.('[data-more-page="hisn"],[data-page="hisn"],[onclick*="openHisn"],[onclick*="hisn"]'))setTimeout(()=>{render($('hisnSearch')?.value||'')},0)},true);
+})();
