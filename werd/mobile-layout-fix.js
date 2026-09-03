@@ -5,10 +5,44 @@
   if(document.getElementById(ID))return;
   const s=document.createElement('style');s.id=ID;s.textContent=`
   @media(max-width:959px){
+    html{
+      width:100%!important;
+      min-height:100%!important;
+      height:auto!important;
+      overflow-x:hidden!important;
+      overflow-y:auto!important;
+      overscroll-behavior-y:auto!important;
+      -webkit-overflow-scrolling:touch!important;
+    }
+    body{
+      position:static!important;
+      width:100%!important;
+      min-height:100dvh!important;
+      height:auto!important;
+      overflow-x:hidden!important;
+      overflow-y:visible!important;
+      overscroll-behavior-y:auto!important;
+      -webkit-overflow-scrolling:touch!important;
+    }
     #desktopExtraNav,.desktop-extra-nav{display:none!important}
     #premiumDesktopHome{display:none!important}
-    .app{width:100%!important;max-width:760px!important;margin:0 auto!important;padding:0 16px 96px!important;min-height:100vh!important;overflow:visible!important}
-    main{width:100%!important;max-width:100%!important;overflow:visible!important}
+    .app{
+      width:100%!important;
+      max-width:760px!important;
+      margin:0 auto!important;
+      padding:0 16px 96px!important;
+      min-height:calc(100dvh + 1px)!important;
+      height:auto!important;
+      overflow-x:hidden!important;
+      overflow-y:visible!important;
+    }
+    main,.page,.page.active{
+      width:100%!important;
+      max-width:100%!important;
+      height:auto!important;
+      overflow-x:visible!important;
+      overflow-y:visible!important;
+    }
     .top{position:relative!important;top:auto!important;right:auto!important;left:auto!important;width:100%!important;height:auto!important;margin:0!important;padding:18px 0 14px!important}
     .bottom{position:fixed!important;z-index:80!important;right:0!important;left:0!important;bottom:0!important;top:auto!important;width:100%!important;height:auto!important;min-height:72px!important;display:grid!important;grid-template-columns:repeat(5,1fr)!important;padding:7px max(8px,env(safe-area-inset-right)) calc(7px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))!important;overflow:hidden!important;background:rgba(255,253,248,.97)!important;border:0!important;border-top:1px solid var(--line)!important;box-shadow:0 -8px 25px rgba(30,60,48,.06)!important;transform:none!important}
     .bottom:before{display:none!important;content:none!important}
@@ -21,7 +55,13 @@
   }
   `;document.head.appendChild(s)
  }
- function clean(){if(matchMedia('(max-width:959px)').matches){const x=document.getElementById('desktopExtraNav');if(x)x.style.display='none'}}
- function init(){inject();clean();addEventListener('resize',clean)}
+ function clean(){
+  if(matchMedia('(max-width:959px)').matches){
+    const x=document.getElementById('desktopExtraNav');if(x)x.style.display='none';
+    document.documentElement.style.removeProperty('overflow');
+    document.body.style.removeProperty('overflow');
+  }
+ }
+ function init(){inject();clean();addEventListener('resize',clean);addEventListener('pageshow',clean)}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
