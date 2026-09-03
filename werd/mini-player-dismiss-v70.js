@@ -15,3 +15,12 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{bind();sync()},{once:true});else{bind();sync()}
   let tries=0;const timer=setInterval(()=>{bind();sync();if(++tries>=12&&$('miniClose')&&audio())clearInterval(timer)},500);
 })();
+
+// v94: restore the memorization/voice-recitation feature chain that is present in
+// the app shell but was no longer loaded by the compact index page.
+(function(){
+  const modules=['memorization.js','memorization-tracker.js','memorization-test.js','recitation-test.js','weakness-analysis.js','mobile-memorization-hub.js'];
+  function load(src){return new Promise(resolve=>{if(document.querySelector(`script[data-werd-module="${src}"]`))return resolve();const s=document.createElement('script');s.src=`./${src}?v=94`;s.async=false;s.dataset.werdModule=src;s.onload=resolve;s.onerror=resolve;document.body.appendChild(s)})}
+  async function boot(){for(const m of modules)await load(m);document.dispatchEvent(new CustomEvent('werd:memorization-modules-ready'))}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+})();
