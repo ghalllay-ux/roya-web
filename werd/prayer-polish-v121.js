@@ -1,16 +1,16 @@
-// Premium prayer city, timezone and precise location presentation for Werd
+// Persistent premium GPS city header and clear location action for Werd
 (function(){
-  const STYLE_ID='werdPrayerPremiumCityV124Style';
+  const STYLE_ID='werdPrayerCityV125Style';
   const CITY_KEY='werd_prayer_city_v1';
   const LOC_KEY='werd_prayer_location';
-  let lookupPromise=null;
+  let lookupPromise=null,painting=false;
 
   function read(key){try{return JSON.parse(localStorage.getItem(key)||'null')}catch(_){return null}}
-  function text(v){return String(v||'').trim()}
-  function esc(v){return text(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+  function txt(v){return String(v||'').trim()}
+  function esc(v){return txt(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
   function parts(c){
     if(!c)return{city:'',region:''};
-    const city=text(c.city),region=text(c.region);
+    const city=txt(c.city),region=txt(c.region);
     return{city:city||region||'',region:city&&region&&city!==region?region:''};
   }
   function samePlace(c,l){return !!(c&&l)&&Math.abs(Number(c.latitude)-Number(l.latitude))<.02&&Math.abs(Number(c.longitude)-Number(l.longitude))<.02}
@@ -22,91 +22,125 @@
     const mins=-new Date().getTimezoneOffset(),sign=mins>=0?'+':'-',a=Math.abs(mins),h=Math.floor(a/60),m=a%60;
     return `UTC${sign}${h}${m?':'+String(m).padStart(2,'0'):''}`;
   }
+  async function reverseCity(lat,lon){
+    try{
+      const u=`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&zoom=14&addressdetails=1&accept-language=ar`;
+      const r=await fetch(u,{cache:'no-store'});
+      if(r.ok){
+        const j=await r.json(),a=j.address||{};
+        const city=a.city||a.town||a.village||a.hamlet||a.municipality||a.county||a.state_district||'';
+        const region=a.state||a.region||'';
+        if(city)return{city,region,country:a.country||''};
+      }
+    }catch(_){ }
+    try{
+      const u=`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&localityLanguage=ar`;
+      const r=await fetch(u,{cache:'no-store'});
+      if(r.ok){
+        const j=await r.json(),city=j.locality||j.city||'',region=j.principalSubdivision||'';
+        if(city)return{city,region,country:j.countryName||''};
+      }
+    }catch(_){ }
+    return null;
+  }
   async function resolveCity(){
     const loc=read(LOC_KEY);if(!loc||!Number.isFinite(Number(loc.latitude))||!Number.isFinite(Number(loc.longitude)))return null;
     const cached=read(CITY_KEY);if(samePlace(cached,loc)&&parts(cached).city)return cached;
     if(lookupPromise)return lookupPromise;
     lookupPromise=(async()=>{
-      let result=null;
-      try{
-        const u=`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(loc.latitude)}&lon=${encodeURIComponent(loc.longitude)}&zoom=14&addressdetails=1&accept-language=ar`;
-        const r=await fetch(u,{cache:'no-store'});
-        if(r.ok){
-          const j=await r.json(),a=j.address||{};
-          const city=a.city||a.town||a.village||a.hamlet||a.municipality||a.county||a.state_district||'';
-          const region=a.state||a.region||'';
-          if(city){result={city,region,country:a.country||'',latitude:Number(loc.latitude),longitude:Number(loc.longitude),updatedAt:new Date().toISOString()};try{localStorage.setItem(CITY_KEY,JSON.stringify(result))}catch(_){}}
-        }
-      }catch(e){console.warn('Werd city lookup',e)}
-      lookupPromise=null;return result;
+      const found=await reverseCity(loc.latitude,loc.longitude);
+      if(!found){lookupPromise=null;return cached||null}
+      const out={...found,latitude:Number(loc.latitude),longitude:Number(loc.longitude),updatedAt:new Date().toISOString()};
+      try{localStorage.setItem(CITY_KEY,JSON.stringify(out))}catch(_){ }
+      lookupPromise=null;return out;
     })();
     return lookupPromise;
   }
   function injectStyle(){
-    let old=document.getElementById(STYLE_ID);if(old)return;
+    if(document.getElementById(STYLE_ID))return;
+    document.querySelectorAll('#werdPrayerPremiumCityV124Style,#werdPrayerPolishV121Style').forEach(x=>x.remove());
     const s=document.createElement('style');s.id=STYLE_ID;s.textContent=`
-      #prayer .section-title:first-child{align-items:center!important;gap:14px!important;margin-bottom:16px!important}
-      #prayer #prayerStatus{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:7px!important;min-width:0!important;color:inherit!important;text-align:right!important;direction:rtl!important;line-height:1!important}
-      #prayer #prayerStatus .wpc-card{position:relative;display:flex;align-items:center;gap:11px;max-width:min(58vw,340px);padding:9px 12px 9px 13px;border:1.4px solid rgba(183,148,82,.36);border-radius:20px;background:linear-gradient(145deg,rgba(255,255,255,.92),rgba(249,241,221,.78));box-shadow:0 10px 26px rgba(21,76,57,.08),inset 0 1px 0 rgba(255,255,255,.95);overflow:hidden}
-      #prayer #prayerStatus .wpc-card:after{content:"";position:absolute;inset:auto -28px -34px auto;width:88px;height:88px;border:1px solid rgba(183,148,82,.12);border-radius:50%;pointer-events:none}
-      #prayer #prayerStatus .wpc-pin{width:38px;height:38px;flex:0 0 38px;border-radius:13px;display:grid;place-items:center;color:#f8e5b6;background:linear-gradient(145deg,#147658,#07503c);box-shadow:0 8px 18px rgba(9,82,60,.20),0 0 0 3px rgba(183,148,82,.09)}
-      #prayer #prayerStatus .wpc-pin svg{width:19px;height:19px;display:block}
-      #prayer #prayerStatus .wpc-copy{display:flex;flex-direction:column;align-items:flex-start;min-width:0;direction:rtl;text-align:right}
-      #prayer #prayerStatus .wpc-kicker{font-family:"SF Arabic","Geeza Pro","Noto Sans Arabic","Segoe UI",Tahoma,sans-serif;font-size:8.5px;font-weight:900;color:#b08d48;letter-spacing:.35px;margin-bottom:3px}
-      #prayer #prayerStatus .wpc-city{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:"SF Arabic","Geeza Pro","Noto Sans Arabic","Segoe UI",Tahoma,sans-serif;font-size:21px;font-weight:950;line-height:1.05;color:#07543f;letter-spacing:-.45px;text-shadow:0 1px 0 rgba(255,255,255,.76)}
-      #prayer #prayerStatus .wpc-region{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:4px;font-family:"SF Arabic","Geeza Pro","Noto Sans Arabic","Segoe UI",Tahoma,sans-serif;font-size:10.5px;font-weight:700;line-height:1.2;color:#7c887f}
-      #prayer #prayerStatus .wpc-zone{display:inline-flex;align-items:center;gap:6px;margin-inline-start:4px;padding:5px 10px;border:1px solid rgba(183,148,82,.25);border-radius:999px;background:rgba(255,253,246,.72);font-family:"SF Arabic","Geeza Pro","Segoe UI",Tahoma,sans-serif;font-size:9.5px;font-weight:850;color:#718078;white-space:nowrap;box-shadow:0 4px 12px rgba(32,68,54,.035)}
-      #prayer #prayerStatus .wpc-dot{width:6px;height:6px;border-radius:50%;background:#148064;box-shadow:0 0 0 3px rgba(20,128,100,.09)}
+      #prayer .section-title:first-child{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;gap:14px!important;margin-bottom:17px!important}
+      #prayer .section-title:first-child>h3{grid-column:2!important;grid-row:1!important;margin:0!important}
+      #prayer #prayerStatus{grid-column:1!important;grid-row:1!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:6px!important;min-width:0!important;width:max-content!important;max-width:100%!important;color:inherit!important;text-align:right!important;direction:rtl!important;line-height:1!important;padding:0!important;background:none!important;border:0!important}
+      #prayer #prayerStatus .wp-city-premium{position:relative;display:flex;align-items:center;gap:11px;min-width:190px;max-width:min(62vw,350px);padding:9px 13px 9px 15px;border:1.5px solid rgba(180,147,89,.40);border-radius:20px;background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(249,240,219,.86));box-shadow:0 12px 28px rgba(18,70,53,.10),inset 0 1px 0 rgba(255,255,255,.98);overflow:hidden;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+      #prayer #prayerStatus .wp-city-premium:after{content:"";position:absolute;width:90px;height:90px;border:1px solid rgba(180,147,89,.13);border-radius:50%;left:-42px;bottom:-54px;pointer-events:none}
+      #prayer #prayerStatus .wp-city-pin{width:39px;height:39px;flex:0 0 39px;border-radius:13px;display:grid;place-items:center;color:#f6e1ad;background:linear-gradient(145deg,#17795b,#07503d);box-shadow:0 9px 20px rgba(10,86,63,.22),0 0 0 3px rgba(180,147,89,.10)}
+      #prayer #prayerStatus .wp-city-pin svg{width:19px;height:19px;display:block}
+      #prayer #prayerStatus .wp-city-copy{display:flex;flex-direction:column;align-items:flex-start;min-width:0;direction:rtl;text-align:right}
+      #prayer #prayerStatus .wp-city-kicker{display:block;margin-bottom:3px;font-family:"SF Arabic","Geeza Pro","Noto Sans Arabic","Segoe UI",Tahoma,sans-serif;font-size:8px;font-weight:900;line-height:1;color:#b08b43;letter-spacing:.25px}
+      #prayer #prayerStatus .wp-city-name{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:"SF Arabic","Geeza Pro","Noto Sans Arabic","Segoe UI",Tahoma,sans-serif;font-size:22px!important;font-weight:950!important;line-height:1.08!important;color:#07543f!important;letter-spacing:-.55px!important;text-shadow:0 1px 0 rgba(255,255,255,.8)}
+      #prayer #prayerStatus .wp-city-region{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:4px;font-family:"SF Arabic","Geeza Pro","Noto Sans Arabic","Segoe UI",Tahoma,sans-serif;font-size:10px!important;font-weight:750!important;line-height:1.2!important;color:#7d8981!important}
+      #prayer #prayerStatus .wp-zone-pill{display:inline-flex;align-items:center;gap:6px;margin-inline-start:4px;padding:5px 10px;border:1px solid rgba(180,147,89,.26);border-radius:999px;background:rgba(255,253,247,.82);font-family:"SF Arabic","Geeza Pro","Segoe UI",Tahoma,sans-serif;font-size:9px!important;font-weight:850!important;color:#718078!important;white-space:nowrap;box-shadow:0 4px 12px rgba(32,68,54,.04)}
+      #prayer #prayerStatus .wp-zone-dot{width:6px;height:6px;border-radius:50%;background:#148064;box-shadow:0 0 0 3px rgba(20,128,100,.09)}
       .prayer-location-pro .plp-head #plpLocateMount{display:none!important}
-      .wpc-locate{margin:3px 18px 17px;padding:13px;border:1px solid rgba(15,91,69,.14);border-radius:19px;background:linear-gradient(135deg,rgba(15,91,69,.065),rgba(183,148,82,.065));display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center}
-      .wpc-locate-copy b{display:block;font-size:13px;font-weight:900;color:var(--ink)}
-      .wpc-locate-copy small{display:block;margin-top:4px;font-size:10px;line-height:1.65;color:var(--muted)}
-      .wpc-locate #locatePrayerBtn{min-height:50px!important;padding:0 18px!important;border:0!important;border-radius:16px!important;background:linear-gradient(145deg,#137657,#09503d)!important;color:#fff!important;font-size:12.5px!important;font-weight:900!important;box-shadow:0 9px 21px rgba(15,91,69,.20)!important;white-space:nowrap!important}
-      .wpc-locate #locatePrayerBtn:active{transform:scale(.97)}
-      body.dark #prayer #prayerStatus .wpc-card{background:linear-gradient(145deg,rgba(34,59,50,.94),rgba(22,43,35,.88));border-color:rgba(183,148,82,.28);box-shadow:0 10px 26px rgba(0,0,0,.16)}
-      body.dark #prayer #prayerStatus .wpc-city{color:#f2e4bf;text-shadow:none}
-      body.dark #prayer #prayerStatus .wpc-kicker{color:#d1b36f}
-      body.dark #prayer #prayerStatus .wpc-region{color:#aab9b0}
-      body.dark #prayer #prayerStatus .wpc-zone{background:rgba(255,255,255,.035);border-color:rgba(183,148,82,.24);color:#aebbb4}
+      .wp-locate-action{margin:3px 18px 17px;padding:13px;border:1px solid rgba(15,91,69,.14);border-radius:19px;background:linear-gradient(135deg,rgba(15,91,69,.065),rgba(180,147,89,.065));display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center}
+      .wp-locate-copy b{display:block;font-size:13px;font-weight:900;color:var(--ink)}
+      .wp-locate-copy small{display:block;margin-top:4px;font-size:10px;line-height:1.65;color:var(--muted)}
+      .wp-locate-action #locatePrayerBtn{min-height:50px!important;padding:0 18px!important;border:0!important;border-radius:16px!important;background:linear-gradient(145deg,#137657,#09503d)!important;color:#fff!important;font-size:12.5px!important;font-weight:900!important;box-shadow:0 9px 21px rgba(15,91,69,.20)!important;white-space:nowrap!important}
+      body.dark #prayer #prayerStatus .wp-city-premium{background:linear-gradient(145deg,rgba(34,59,50,.96),rgba(22,43,35,.90));border-color:rgba(180,147,89,.30);box-shadow:0 12px 28px rgba(0,0,0,.18)}
+      body.dark #prayer #prayerStatus .wp-city-name{color:#f3e4bc!important;text-shadow:none}
+      body.dark #prayer #prayerStatus .wp-city-kicker{color:#d1b36f}
+      body.dark #prayer #prayerStatus .wp-city-region{color:#aab9b0!important}
+      body.dark #prayer #prayerStatus .wp-zone-pill{background:rgba(255,255,255,.04);border-color:rgba(180,147,89,.25);color:#aebbb4!important}
       @media(max-width:430px){
-        #prayer .section-title:first-child{align-items:center!important;gap:9px!important}
-        #prayer #prayerStatus{gap:5px!important}
-        #prayer #prayerStatus .wpc-card{max-width:51vw;padding:8px 9px 8px 10px;border-radius:17px;gap:8px}
-        #prayer #prayerStatus .wpc-pin{width:33px;height:33px;flex-basis:33px;border-radius:11px}
-        #prayer #prayerStatus .wpc-pin svg{width:17px;height:17px}
-        #prayer #prayerStatus .wpc-kicker{font-size:7.5px;margin-bottom:2px}
-        #prayer #prayerStatus .wpc-city{font-size:18px;letter-spacing:-.3px}
-        #prayer #prayerStatus .wpc-region{font-size:9px;margin-top:3px}
-        #prayer #prayerStatus .wpc-zone{font-size:8px;padding:4px 7px}
-        .wpc-locate{margin-left:15px;margin-right:15px;grid-template-columns:1fr;padding:12px}
-        .wpc-locate #locatePrayerBtn{width:100%!important;min-height:52px!important;font-size:13px!important}
+        #prayer .section-title:first-child{gap:9px!important}
+        #prayer #prayerStatus .wp-city-premium{min-width:0;max-width:57vw;padding:8px 10px;border-radius:17px;gap:8px}
+        #prayer #prayerStatus .wp-city-pin{width:34px;height:34px;flex-basis:34px;border-radius:11px}
+        #prayer #prayerStatus .wp-city-pin svg{width:17px;height:17px}
+        #prayer #prayerStatus .wp-city-kicker{font-size:7px}
+        #prayer #prayerStatus .wp-city-name{font-size:19px!important;letter-spacing:-.35px!important}
+        #prayer #prayerStatus .wp-city-region{font-size:9px!important;margin-top:3px}
+        #prayer #prayerStatus .wp-zone-pill{font-size:8px!important;padding:4px 7px}
+        .wp-locate-action{margin-left:15px;margin-right:15px;grid-template-columns:1fr;padding:12px}
+        .wp-locate-action #locatePrayerBtn{width:100%!important;min-height:52px!important;font-size:13px!important}
       }
     `;document.head.appendChild(s);
   }
-  async function paint(){
-    const status=document.getElementById('prayerStatus');if(!status)return false;
-    let loc=read(LOC_KEY),cached=read(CITY_KEY);
-    if(loc&&!samePlace(cached,loc)){cached=await resolveCity()||cached}
-    if(!parts(cached).city){cached=await resolveCity()||cached}
-    const p=parts(cached),city=p.city||'موقعك الحالي',region=p.region||'';
-    const html=`<span class="wpc-card"><span class="wpc-pin" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></span><span class="wpc-copy"><small class="wpc-kicker">موقع الصلاة</small><strong class="wpc-city">${esc(city)}</strong>${region?`<small class="wpc-region">${esc(region)}</small>`:''}</span></span><span class="wpc-zone"><span class="wpc-dot"></span>${zoneName()} • ${utcOffset()}</span>`;
-    if(status.innerHTML!==html)status.innerHTML=html;
-    return true;
+  async function paintCity(force=false){
+    const status=document.getElementById('prayerStatus');if(!status||painting)return false;
+    painting=true;
+    try{
+      const loc=read(LOC_KEY);let cached=read(CITY_KEY);
+      if(loc&&(!samePlace(cached,loc)||!parts(cached).city))cached=await resolveCity()||cached;
+      const p=parts(cached),city=p.city||'موقعك الحالي',region=p.region||'';
+      const current=status.querySelector('.wp-city-premium');
+      if(!force&&current&&current.dataset.city===city&&current.dataset.region===region){painting=false;return true}
+      status.innerHTML=`<span class="wp-city-premium" data-city="${esc(city)}" data-region="${esc(region)}"><span class="wp-city-pin" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></span><span class="wp-city-copy"><small class="wp-city-kicker">الموقع الحالي</small><strong class="wp-city-name">${esc(city)}</strong>${region?`<small class="wp-city-region">${esc(region)}</small>`:''}</span></span><span class="wp-zone-pill"><span class="wp-zone-dot"></span>${zoneName()} • ${utcOffset()}</span>`;
+      return true;
+    }finally{painting=false}
   }
   function placeLocate(){
     const card=document.querySelector('.prayer-location-pro'),btn=document.getElementById('locatePrayerBtn');if(!card||!btn)return false;
-    let row=document.getElementById('wpcLocate');
-    if(!row){row=document.createElement('div');row.id='wpcLocate';row.className='wpc-locate';row.innerHTML='<div class="wpc-locate-copy"><b>تحديث موقع الصلاة</b><small>يستخدم GPS الدقيق لتحديث اسم المدينة ومواقيت الصلاة والقبلة حسب موقعك الفعلي.</small></div><div id="wpcLocateMount"></div>';const summary=card.querySelector('.plp-summary');if(summary)summary.insertAdjacentElement('afterend',row);else card.prepend(row)}
-    const mount=row.querySelector('#wpcLocateMount');if(mount&&btn.parentElement!==mount)mount.appendChild(btn);
+    let row=document.getElementById('wpLocateAction');
+    if(!row){
+      row=document.createElement('div');row.id='wpLocateAction';row.className='wp-locate-action';
+      row.innerHTML='<div class="wp-locate-copy"><b>تحديث موقع الصلاة</b><small>يستخدم GPS الدقيق لتحديث المدينة ومواقيت الصلاة والقبلة حسب موقعك الفعلي.</small></div><div id="wpLocateMount"></div>';
+      const summary=card.querySelector('.plp-summary');if(summary)summary.insertAdjacentElement('afterend',row);else card.prepend(row);
+    }
+    const mount=row.querySelector('#wpLocateMount');if(mount&&btn.parentElement!==mount)mount.appendChild(btn);
     if(!btn.disabled)btn.textContent='📍 تحديث موقعي بدقة';
-    btn.setAttribute('aria-label','تحديث الموقع الدقيق لمواقيت الصلاة والقبلة');return true;
+    return true;
   }
-  function refresh(){injectStyle();paint();placeLocate()}
+  function refresh(force=false){injectStyle();paintCity(force);placeLocate()}
   function boot(){
-    let tries=0;const t=setInterval(()=>{tries++;refresh();if((document.getElementById('prayerStatus')&&document.getElementById('locatePrayerBtn'))||tries>55)clearInterval(t)},130);
-    setTimeout(refresh,900);setTimeout(refresh,2300);setTimeout(refresh,5000);
-    const mo=new MutationObserver(()=>{clearTimeout(mo._t);mo._t=setTimeout(refresh,45)});mo.observe(document.body,{childList:true,subtree:true});
-    window.addEventListener('pageshow',()=>setTimeout(refresh,90));document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(refresh,90)});
+    injectStyle();
+    let tries=0;const ready=setInterval(()=>{tries++;refresh(true);if(document.getElementById('prayerStatus')||tries>60)clearInterval(ready)},120);
+    setTimeout(()=>refresh(true),700);setTimeout(()=>refresh(true),1800);setTimeout(()=>refresh(true),4000);
+    const root=document.body;
+    const mo=new MutationObserver(muts=>{
+      if(painting)return;
+      let relevant=false;
+      for(const m of muts){
+        const t=m.target?.nodeType===1?m.target:m.target?.parentElement;
+        if(t&&(t.id==='prayerStatus'||t.closest?.('#prayerStatus')||t.closest?.('#prayer'))){relevant=true;break}
+      }
+      if(relevant){clearTimeout(mo._t);mo._t=setTimeout(()=>refresh(false),35)}
+    });
+    mo.observe(root,{childList:true,subtree:true,characterData:true});
+    document.addEventListener('click',e=>{if(e.target.closest?.('#locatePrayerBtn')){setTimeout(()=>refresh(true),700);setTimeout(()=>refresh(true),1800);setTimeout(()=>refresh(true),3200)}},true);
+    window.addEventListener('pageshow',()=>setTimeout(()=>refresh(true),80));
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(()=>refresh(true),80)});
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
