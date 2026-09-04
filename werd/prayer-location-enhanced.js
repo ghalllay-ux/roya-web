@@ -3,7 +3,6 @@
   const STYLE_ID='werdPrayerLocationEnhancedStyle';
   const CARD_CLASS='prayer-location-pro';
   const CITY_CACHE_KEY='werd_prayer_city_v1';
-  const RETURN_KEY='werd_prayer_precision_return_v120';
   let minuteTimer=null,cityRequestKey='',locating=false;
 
   function locationData(){try{return JSON.parse(localStorage.getItem('werd_prayer_location')||'null')}catch(_){return null}}
@@ -131,6 +130,12 @@
     });
   }
 
+  async function refreshPrayerDataInPlace(){
+    await updateSummary();
+    const method=document.getElementById('prayerMethod');
+    if(method)method.dispatchEvent(new Event('change',{bubbles:true}));
+  }
+
   async function preciseLocate(ev){
     if(ev){ev.preventDefault();ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation()}
     if(locating)return false;locating=true;
@@ -149,10 +154,9 @@
       saveLocation(loc);try{localStorage.removeItem(CITY_CACHE_KEY)}catch(_){}
       const label=document.getElementById('prayerLocationLabel');if(label)label.textContent=`${loc.latitude.toFixed(5)}, ${loc.longitude.toFixed(5)} • دقة ${acc}م`;
       const city=await resolveCity(loc);const name=cityLabel(city);if(name)paintPrayerCity(name);
-      if(note){note.classList.remove('warn');note.innerHTML=`<b>تم تثبيت الموقع:</b> ${name||'من GPS مباشرة'} • دقة ${acc}م<br>سيتم الآن إعادة حساب مواقيت الصلاة والقبلة من هذه الإحداثيات.`}
-      try{sessionStorage.setItem(RETURN_KEY,'1')}catch(_){}
+      if(note){note.classList.remove('warn');note.innerHTML=`<b>تم تثبيت الموقع:</b> ${name||'من GPS مباشرة'} • دقة ${acc}م<br>يتم الآن تحديث مواقيت الصلاة والقبلة دون مغادرة موضعك في الصفحة.`}
       if(typeof toast==='function')toast(name?`تم تحديد موقعك: ${name}`:`تم تحديث الموقع بدقة ${acc}م`);
-      setTimeout(()=>location.reload(),650);
+      await refreshPrayerDataInPlace();
       return true;
     }catch(e){
       console.warn('Precise location failed',e);
@@ -181,14 +185,10 @@
     new MutationObserver(()=>updateSummary()).observe(label,{childList:true,subtree:true,characterData:true});
     keepPrayerCityVisible();updateSummary();if(minuteTimer)clearInterval(minuteTimer);minuteTimer=setInterval(updateSummary,60000);return true;
   }
-  function restorePrayerPage(){
-    let back=false;try{back=sessionStorage.getItem(RETURN_KEY)==='1';if(back)sessionStorage.removeItem(RETURN_KEY)}catch(_){}
-    if(back)setTimeout(()=>{try{if(typeof go==='function')go('prayer')}catch(_){}},350);
-  }
   function boot(){
     injectStyle();fixHomeButton();
-    if(enhance()){restorePrayerPage();return}
-    let tries=0;const t=setInterval(()=>{tries++;fixHomeButton();if(enhance()){clearInterval(t);restorePrayerPage()}else if(tries>40)clearInterval(t)},150)
+    if(enhance())return;
+    let tries=0;const t=setInterval(()=>{tries++;fixHomeButton();if(enhance())clearInterval(t);else if(tries>40)clearInterval(t)},150)
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
