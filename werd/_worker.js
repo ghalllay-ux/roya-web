@@ -9,6 +9,30 @@ async function ayah(surah,ayahNo){surah=Math.max(1,Math.min(114,Number(surah)||1
 async function hisnMirror(path){const r=await timed('https://raw.githubusercontent.com/SalehGNUTUX/GT_HISNMUSLIM/main/hisnmuslim.json',7000);if(!r.ok)throw Error('mirror');const all=await r.json();if(!Array.isArray(all)||!all.length)throw Error('empty');if(path==='index')return {'العربية':all.map(x=>({ID:Number(x.id),TITLE:String(x.category||''),AUDIO_URL:x.audio||'',TEXT:String(x.id)+'.json'})).filter(x=>x.ID&&x.TITLE)};const d=all.find(x=>Number(x.id)===Number(path));if(!d)throw Error('door');return {[String(d.category||'حصن المسلم')]:Array.isArray(d.array)?d.array.map(x=>({ID:Number(x.id)||0,ARABIC_TEXT:String(x.text||''),REPEAT:Number(x.count)||1,AUDIO:x.audio||''})):[]}}
 async function hisnOfficial(path){const target=path==='index'?'https://www.hisnmuslim.com/api/ar/husn_ar.json':`https://www.hisnmuslim.com/api/ar/${Number(path)}.json`;const r=await timed(target,5000);if(!r.ok)throw Error('official');return await r.json()}
 async function hisn(path){try{return json({ok:true,data:await hisnMirror(path),source:'verified-mirror'},200,'public, max-age=3600, s-maxage=86400')}catch(e){try{return json({ok:true,data:await hisnOfficial(path),source:'hisnmuslim.com'},200,'no-store')}catch(_){return json({ok:false,error:'HISN_SOURCE_UNAVAILABLE'},502,'no-store')}}}
+
+const SUPABASE_URL='https://oajqczrxzurwvxjkbseq.supabase.co';
+const SUPABASE_KEY='sb_publishable_9LTupYVJR3kKTL4xqj3pdw_vA67W-o4';
+async function visitorPresence(request){
+  if(request.method!=='POST')return json({ok:false,error:'METHOD_NOT_ALLOWED'},405,'no-store');
+  let body={};try{body=await request.json()}catch(_){return json({ok:false,error:'INVALID_JSON'},400,'no-store')}
+  const visitorId=String(body.visitor_id||'').trim();if(visitorId.length<8||visitorId.length>120)return json({ok:false,error:'INVALID_VISITOR'},400,'no-store');
+  const cf=request.cf||{};
+  const payload={
+    p_visitor_id:visitorId,
+    p_country_code:String(cf.country||'').slice(0,8)||null,
+    p_city:String(cf.city||'').slice(0,120)||null,
+    p_device_type:String(body.device_type||'').slice(0,32)||null,
+    p_os_name:String(body.os_name||'').slice(0,48)||null,
+    p_browser_name:String(body.browser_name||'').slice(0,48)||null
+  };
+  try{
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/rpc/touch_werd_visitor_presence`,{method:'POST',headers:{apikey:SUPABASE_KEY,'content-type':'application/json','cache-control':'no-store'},body:JSON.stringify(payload)});
+    const text=await r.text();let data=null;try{data=text?JSON.parse(text):null}catch(_){}
+    if(!r.ok)return json({ok:false,error:'PRESENCE_UPSTREAM'},502,'no-store');
+    return json({ok:true,online_now:Number(data)||0},200,'no-store')
+  }catch(_){return json({ok:false,error:'PRESENCE_UNAVAILABLE'},502,'no-store')}
+}
+
 const GA4_ID='G-ZDW0QTWJS0';
-async function assetWithAnalytics(request,env){const res=await env.ASSETS.fetch(request),type=res.headers.get('content-type')||'';if(!type.includes('text/html'))return res;let html=await res.text(),changed=false;if(!html.includes(GA4_ID)&&html.includes('</head>')){const tag=`<script async src="https://www.googletagmanager.com/gtag/js?id=${GA4_ID}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${GA4_ID}');</script>`;html=html.replace('</head>',tag+'</head>');changed=true}if(!html.includes('recitation-analysis-fix.js')&&html.includes('</body>')){html=html.replace('</body>','<script src="./recitation-analysis-fix.js?v=130"></script></body>');changed=true}if(!html.includes('contact-center.js')&&html.includes('</body>')){html=html.replace('</body>','<script src="./contact-center.js?v=1"></script></body>');changed=true}if(!html.includes('auth-recovery.js')&&html.includes('</body>')){html=html.replace('</body>','<script src="./auth-recovery.js?v=2"></script></body>');changed=true}if(!changed)return new Response(html,{status:res.status,statusText:res.statusText,headers:res.headers});const headers=new Headers(res.headers);headers.delete('content-length');return new Response(html,{status:res.status,statusText:res.statusText,headers})}
-export default{async fetch(request,env){const u=new URL(request.url);let m=u.pathname.match(/^\/api\/mushaf\/(\d+)$/);if(m)return mushaf(Math.max(1,Math.min(604,Number(m[1])||1)));m=u.pathname.match(/^\/api\/ayah\/(\d+)\/(\d+)$/);if(m)return ayah(m[1],m[2]);m=u.pathname.match(/^\/api\/hisn\/(index|\d+)$/);if(m)return hisn(m[1]);return assetWithAnalytics(request,env)}};
+async function assetWithAnalytics(request,env){const res=await env.ASSETS.fetch(request),type=res.headers.get('content-type')||'';if(!type.includes('text/html'))return res;let html=await res.text(),changed=false;if(!html.includes(GA4_ID)&&html.includes('</head>')){const tag=`<script async src="https://www.googletagmanager.com/gtag/js?id=${GA4_ID}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${GA4_ID}');</script>`;html=html.replace('</head>',tag+'</head>');changed=true}if(!html.includes('recitation-analysis-fix.js')&&html.includes('</body>')){html=html.replace('</body>','<script src="./recitation-analysis-fix.js?v=130"></script></body>');changed=true}if(!html.includes('contact-center.js')&&html.includes('</body>')){html=html.replace('</body>','<script src="./contact-center.js?v=1"></script></body>');changed=true}if(!html.includes('auth-recovery.js')&&html.includes('</body>')){html=html.replace('</body>','<script src="./auth-recovery.js?v=2"></script></body>');changed=true}if(!html.includes('visitor-presence.js')&&html.includes('</body>')){html=html.replace('</body>','<script src="./visitor-presence.js?v=1"></script></body>');changed=true}if(!changed)return new Response(html,{status:res.status,statusText:res.statusText,headers:res.headers});const headers=new Headers(res.headers);headers.delete('content-length');return new Response(html,{status:res.status,statusText:res.statusText,headers})}
+export default{async fetch(request,env){const u=new URL(request.url);if(u.pathname==='/api/visitor-presence')return visitorPresence(request);let m=u.pathname.match(/^\/api\/mushaf\/(\d+)$/);if(m)return mushaf(Math.max(1,Math.min(604,Number(m[1])||1)));m=u.pathname.match(/^\/api\/ayah\/(\d+)\/(\d+)$/);if(m)return ayah(m[1],m[2]);m=u.pathname.match(/^\/api\/hisn\/(index|\d+)$/);if(m)return hisn(m[1]);return assetWithAnalytics(request,env)}};
