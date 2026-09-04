@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://werd-7tn.pages.dev/sitemap.xml
