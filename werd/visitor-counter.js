@@ -41,3 +41,106 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(load,180));else setTimeout(load,180);
   window.addEventListener('pageshow',()=>setTimeout(()=>{inject();showCached();load()},180));
 })();
+
+// Privacy-conscious GA4 interaction tracking for Werd — v130
+(function(){
+  if(window.__werdGAEventsInstalled)return;
+  window.__werdGAEventsInstalled=true;
+
+  const pageEvents={
+    quran:'quran_open',
+    mushafV2:'quran_open',
+    listening:'listening_open',
+    adhkar:'adhkar_open',
+    prayer:'prayer_open',
+    searchPage:'search_open',
+    khatma:'khatma_open',
+    tasbih:'tasbih_open'
+  };
+  let lastNavEvent='',lastNavAt=0;
+
+  function send(name,params={}){
+    try{
+      if(typeof window.gtag!=='function')return;
+      window.gtag('event',name,{event_category:'werd_interaction',...params});
+    }catch(e){console.warn('Werd GA4 event',e)}
+  }
+  window.werdTrackEvent=send;
+
+  function trackPage(id,source='navigation'){
+    const eventName=pageEvents[id];if(!eventName)return;
+    const now=Date.now();
+    if(eventName===lastNavEvent&&now-lastNavAt<700)return;
+    lastNavEvent=eventName;lastNavAt=now;
+    send(eventName,{section:id==='mushafV2'?'quran':id,source});
+  }
+
+  function wrapGo(){
+    const base=window.go;
+    if(typeof base!=='function'||base.__werdGAWrapped)return false;
+    function trackedGo(id,...args){trackPage(id);return base.apply(this,[id,...args])}
+    trackedGo.__werdGAWrapped=true;
+    trackedGo.__werdGABase=base;
+    window.go=trackedGo;
+    try{go=trackedGo}catch(_){ }
+    return true;
+  }
+
+  function displayMode(){
+    try{
+      if(window.matchMedia?.('(display-mode: standalone)').matches)return'standalone';
+      if(window.navigator.standalone)return'ios_standalone';
+    }catch(_){ }
+    return'browser';
+  }
+
+  function trackAppOpen(){
+    let first=true;
+    try{first=sessionStorage.getItem('werd_ga_session_open')!=='1';if(first)sessionStorage.setItem('werd_ga_session_open','1')}catch(_){ }
+    if(first)send('werd_app_open',{display_mode:displayMode()});
+  }
+
+  function currentSection(){
+    return document.querySelector('.page.active')?.id||'unknown';
+  }
+
+  function trackSearch(){
+    const input=document.getElementById('globalSearchInput');
+    const q=String(input?.value||'').trim();
+    if(q.length<2)return;
+    const filter=document.querySelector('#searchFilters .chip.active')?.dataset?.sfilter||'all';
+    // Deliberately do not send the search text itself.
+    send('search_performed',{query_length:Math.min(q.length,100),search_filter:filter});
+  }
+
+  document.addEventListener('click',e=>{
+    const el=e.target?.closest?.('button,a,[role="button"],.tile,.more-tile,.explore-tile,.explore-card');
+    if(!el)return;
+    const id=el.id||'';
+    const text=String(el.textContent||'').replace(/\s+/g,' ').trim();
+
+    if(id==='globalSearchBtn')trackSearch();
+    if(id==='locatePrayerBtn')send('prayer_location_request',{section:'prayer'});
+    if(id==='startCompass')send('qibla_compass_start',{section:'prayer'});
+    if(/القبلة/.test(text)&&id!=='startCompass')send('qibla_open',{source:'ui'});
+  },true);
+
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Enter'&&e.target?.id==='globalSearchInput')trackSearch();
+  },true);
+
+  const mediaSeen=new WeakMap();
+  document.addEventListener('play',e=>{
+    const media=e.target;
+    if(!(media instanceof HTMLMediaElement))return;
+    const now=Date.now(),prev=mediaSeen.get(media)||0;
+    if(now-prev<2000)return;
+    mediaSeen.set(media,now);
+    send('audio_play',{section:currentSection(),media_type:media.tagName.toLowerCase()});
+  },true);
+
+  if(!wrapGo()){
+    let tries=0;const t=setInterval(()=>{tries++;if(wrapGo()||tries>=20)clearInterval(t)},100);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',trackAppOpen,{once:true});else trackAppOpen();
+})();
