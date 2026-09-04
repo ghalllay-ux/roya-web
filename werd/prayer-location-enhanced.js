@@ -30,15 +30,24 @@
   }
   function paintPrayerCity(name){
     if(!name)return;
-    const status=document.getElementById('prayerStatus');
-    if(status&&status.textContent!==name)status.textContent=name;
+    const status=document.getElementById('prayerStatus');if(!status)return;
+    // prayer-polish-v121 owns the premium markup. Never destroy it with textContent.
+    if(status.querySelector('.wp-city-premium')){
+      status.dataset.werdCityName=name;
+      try{window.dispatchEvent(new CustomEvent('werd:prayer-city',{detail:{name}}))}catch(_){}
+      return;
+    }
+    if(status.textContent!==name)status.textContent=name;
   }
   function keepPrayerCityVisible(){
     const status=document.getElementById('prayerStatus');if(!status||status.dataset.werdCityWatch==='1')return;
     status.dataset.werdCityWatch='1';
     new MutationObserver(()=>{
       const loc=locationData(),cached=cityCache(),name=samePlace(cached,loc)?cityLabel(cached):'';
-      if(name&&status.textContent!==name)status.textContent=name;
+      if(!name)return;
+      // Do not flatten the premium city component back into plain text.
+      if(status.querySelector('.wp-city-premium'))return;
+      if(status.textContent!==name)status.textContent=name;
     }).observe(status,{childList:true,subtree:true,characterData:true});
   }
   function fixHomeButton(){
