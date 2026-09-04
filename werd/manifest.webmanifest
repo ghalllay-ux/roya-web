@@ -11,5 +11,8 @@
   "background_color": "#f7f3ea",
   "theme_color": "#0f5b45",
   "orientation": "portrait-primary",
-  "icons": [{"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+  "icons": [
+    {"src":"./werd-touch-icon-v4.png","sizes":"180x180","type":"image/png","purpose":"any"},
+    {"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"maskable"}
+  ]
 }
