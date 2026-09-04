@@ -4,6 +4,7 @@
  const items=[
   ['📖','المصحف','قراءة القرآن','mushaf'],
   ['🎧','الاستماع','التلاوات والقراء','listening'],
+  ['🎙️','التسميع بالصوت','سمّع واحصل على تحليل فوري','recitationTest'],
   ['🌿','الأذكار','الصباح والمساء','adhkar'],
   ['🤲','حصن المسلم','الأدعية والأذكار','hisn'],
   ['◔','الورد اليومي','هدفك وتقدمك','plan'],
@@ -24,6 +25,7 @@
   if(page==='mushaf'&&typeof window.openWerdMushafV2==='function'){window.openWerdMushafV2();return}
   if(page==='mushaf'&&typeof window.openMushaf==='function'){window.openMushaf();return}
   if(page==='memorizationHub'&&typeof window.openWerdMemorizationHub==='function'){window.openWerdMemorizationHub();return}
+  if(page==='recitationTest'&&typeof window.openWerdRecitationTest==='function'){window.openWerdRecitationTest();return}
   if(page==='search'&&typeof window.openSearch==='function'){window.openSearch();return}
   if(page==='qibla'){
    callGo('prayer');
