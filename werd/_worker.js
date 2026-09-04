@@ -52,7 +52,7 @@ async function assetWithAnalytics(request,env){
   if(!html.includes(GA4_ID)&&html.includes('</head>')){const tag=`<script async src="https://www.googletagmanager.com/gtag/js?id=${GA4_ID}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${GA4_ID}');</script>`;html=html.replace('</head>',tag+'</head>');changed=true}
   if(!html.includes('recitation-analysis-fix.js')&&html.includes('</body>')){html=html.replace('</body>','<script src="./recitation-analysis-fix.js?v=130"></script></body>');changed=true}
   if(!html.includes('contact-center.js')&&html.includes('</body>')){html=html.replace('</body>','<script src="./contact-center.js?v=1"></script></body>');changed=true}
-  if(!html.includes('contact-security.js')&&html.includes('</body>')){html=html.replace('</body>','<script src="./contact-security.js?v=1"></script></body>');changed=true}
+  if(!html.includes('contact-security.js')&&html.includes('</body>')){html=html.replace('</body>','<script src="./contact-security.js?v=2"></script></body>');changed=true}
   if(!html.includes('auth-recovery.js')&&html.includes('</body>')){html=html.replace('</body>','<script src="./auth-recovery.js?v=2"></script></body>');changed=true}
   if(!html.includes('visitor-presence.js')&&html.includes('</body>')){html=html.replace('</body>','<script src="./visitor-presence.js?v=1"></script></body>');changed=true}
   if(!changed)return new Response(html,{status:res.status,statusText:res.statusText,headers:res.headers});
