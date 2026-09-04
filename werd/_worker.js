@@ -33,6 +33,36 @@ async function visitorPresence(request){
   }catch(_){return json({ok:false,error:'PRESENCE_UNAVAILABLE'},502,'no-store')}
 }
 
+async function werdTouchIcon(request,env){
+  try{
+    const assetUrl=new URL('/icon180-v4.b64',request.url);
+    const r=await env.ASSETS.fetch(new Request(assetUrl,{method:'GET'}));
+    if(!r.ok)return new Response('icon unavailable',{status:404});
+    const b64=(await r.text()).trim(),bin=atob(b64),bytes=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+    return new Response(bytes,{status:200,headers:{'content-type':'image/png','cache-control':'public, max-age=31536000, immutable','x-content-type-options':'nosniff'}})
+  }catch(_){return new Response('icon unavailable',{status:500})}
+}
+
 const GA4_ID='G-ZDW0QTWJS0';
-async function assetWithAnalytics(request,env){const res=await env.ASSETS.fetch(request),type=res.headers.get('content-type')||'';if(!type.includes('text/html'))return res;let html=await res.text(),changed=false;if(!html.includes(GA4_ID)&&html.includes('</head>')){const tag=`<script async src="https://www.googletagmanager.com/gtag/js?id=${GA4_ID}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${GA4_ID}');</script>`;html=html.replace('</head>',tag+'</head>');changed=true}if(!html.includes('recitation-analysis-fix.js')&&html.includes('</body>')){html=html.replace('</body>','<script src="./recitation-analysis-fix.js?v=130"></script></body>');changed=true}if(!html.includes('contact-center.js')&&html.includes('</body>')){html=html.replace('</body>','<script src="./contact-center.js?v=1"></script></body>');changed=true}if(!html.includes('auth-recovery.js')&&html.includes('</body>')){html=html.replace('</body>','<script src="./auth-recovery.js?v=2"></script></body>');changed=true}if(!html.includes('visitor-presence.js')&&html.includes('</body>')){html=html.replace('</body>','<script src="./visitor-presence.js?v=1"></script></body>');changed=true}if(!changed)return new Response(html,{status:res.status,statusText:res.statusText,headers:res.headers});const headers=new Headers(res.headers);headers.delete('content-length');return new Response(html,{status:res.status,statusText:res.statusText,headers})}
-export default{async fetch(request,env){const u=new URL(request.url);if(u.pathname==='/api/visitor-presence')return visitorPresence(request);let m=u.pathname.match(/^\/api\/mushaf\/(\d+)$/);if(m)return mushaf(Math.max(1,Math.min(604,Number(m[1])||1)));m=u.pathname.match(/^\/api\/ayah\/(\d+)\/(\d+)$/);if(m)return ayah(m[1],m[2]);m=u.pathname.match(/^\/api\/hisn\/(index|\d+)$/);if(m)return hisn(m[1]);return assetWithAnalytics(request,env)}};
+async function assetWithAnalytics(request,env){
+  const res=await env.ASSETS.fetch(request),type=res.headers.get('content-type')||'';
+  if(!type.includes('text/html'))return res;
+  let html=await res.text(),changed=false;
+  const appleIcon='<link rel="apple-touch-icon" sizes="180x180" href="./werd-touch-icon-v4.png">';
+  if(/<link\s+rel=["']apple-touch-icon["'][^>]*>/i.test(html)){
+    const next=html.replace(/<link\s+rel=["']apple-touch-icon["'][^>]*>/i,appleIcon);if(next!==html){html=next;changed=true}
+  }else if(html.includes('</head>')){html=html.replace('</head>',appleIcon+'</head>');changed=true}
+  if(/<link\s+rel=["']manifest["'][^>]*>/i.test(html)){
+    const next=html.replace(/<link\s+rel=["']manifest["'][^>]*>/i,'<link rel="manifest" href="./manifest.webmanifest?v=4">');if(next!==html){html=next;changed=true}
+  }
+  if(!html.includes(GA4_ID)&&html.includes('</head>')){const tag=`<script async src="https://www.googletagmanager.com/gtag/js?id=${GA4_ID}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${GA4_ID}');</script>`;html=html.replace('</head>',tag+'</head>');changed=true}
+  if(!html.includes('recitation-analysis-fix.js')&&html.includes('</body>')){html=html.replace('</body>','<script src="./recitation-analysis-fix.js?v=130"></script></body>');changed=true}
+  if(!html.includes('contact-center.js')&&html.includes('</body>')){html=html.replace('</body>','<script src="./contact-center.js?v=1"></script></body>');changed=true}
+  if(!html.includes('auth-recovery.js')&&html.includes('</body>')){html=html.replace('</body>','<script src="./auth-recovery.js?v=2"></script></body>');changed=true}
+  if(!html.includes('visitor-presence.js')&&html.includes('</body>')){html=html.replace('</body>','<script src="./visitor-presence.js?v=1"></script></body>');changed=true}
+  if(!changed)return new Response(html,{status:res.status,statusText:res.statusText,headers:res.headers});
+  const headers=new Headers(res.headers);headers.delete('content-length');headers.set('cache-control','no-store');
+  return new Response(html,{status:res.status,statusText:res.statusText,headers})
+}
+export default{async fetch(request,env){const u=new URL(request.url);if(u.pathname==='/werd-touch-icon-v4.png'||u.pathname==='/apple-touch-icon.png'||u.pathname==='/apple-touch-icon-precomposed.png')return werdTouchIcon(request,env);if(u.pathname==='/api/visitor-presence')return visitorPresence(request);let m=u.pathname.match(/^\/api\/mushaf\/(\d+)$/);if(m)return mushaf(Math.max(1,Math.min(604,Number(m[1])||1)));m=u.pathname.match(/^\/api\/ayah\/(\d+)\/(\d+)$/);if(m)return ayah(m[1],m[2]);m=u.pathname.match(/^\/api\/hisn\/(index|\d+)$/);if(m)return hisn(m[1]);return assetWithAnalytics(request,env)}};
