@@ -1,23 +1,13 @@
-// Werd contact form + protected admin inbox — v2
+// Werd contact form + protected admin inbox — v1
 (function(){
   const $=id=>document.getElementById(id);
   const CATS={question:'استفسار',suggestion:'اقتراح',issue:'مشكلة',feedback:'ملاحظة',other:'أخرى'};
   const STATUS={new:'جديدة',read:'مقروءة',replied:'تم الرد',closed:'مغلقة'};
-  const CONTACT_KEY='werd_contact_client_v1';
   let isAdmin=false,adminChecked=false,currentMessages=[],activeFilter='all';
 
-  function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]))}
+  function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
   function notify(m){try{typeof toast==='function'?toast(m):console.log(m)}catch(_){console.log(m)}}
   function fmtDate(v){try{return new Intl.DateTimeFormat('ar-SA',{dateStyle:'medium',timeStyle:'short'}).format(new Date(v))}catch(_){return String(v||'')}}
-  function rawContactToken(){
-    let v='';try{v=localStorage.getItem(CONTACT_KEY)||''}catch(_){}
-    if(v&&v.length>=24)return v;
-    try{v=crypto.randomUUID?`${crypto.randomUUID()}-${crypto.randomUUID()}`:`${Date.now()}-${Math.random()}-${Math.random()}`}catch(_){v=`${Date.now()}-${Math.random()}-${Math.random()}`}
-    try{localStorage.setItem(CONTACT_KEY,v)}catch(_){}
-    return v;
-  }
-  async function sha256Hex(v){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(v)));return Array.from(new Uint8Array(d)).map(b=>b.toString(16).padStart(2,'0')).join('')}
-  async function contactClientKey(){if(!crypto?.subtle)throw new Error('secure_crypto_unavailable');return sha256Hex(rawContactToken())}
   function css(){
     if($('werdContactStyle'))return;
     const s=document.createElement('style');s.id='werdContactStyle';s.textContent=`
@@ -50,7 +40,7 @@
       <div class="section-title"><h3>إدارة التواصل</h3><button class="smallbtn" id="contactAdminBack" type="button">المزيد</button></div>
       <div class="card" id="contactAdminGate"><div class="contact-admin-lock"><div style="font-size:36px">🔐</div><b>صندوق رسائل «ورد»</b><div class="muted" id="contactAdminGateText" style="margin-top:7px">جاري التحقق من صلاحية الإدارة…</div><div id="contactAdminClaim" style="display:none"><input id="contactAdminCode" placeholder="رمز تفعيل الإدارة"><button class="primary" id="contactAdminClaimBtn" style="width:100%">تفعيل لوحة الإدارة</button></div></div></div>
       <div id="contactAdminContent" style="display:none">
-        <div class="card"><div class="row"><div><b>صندوق الرسائل</b><div class="muted" id="contactAdminCount">—</div></div><button class="smallbtn" id="contactAdminRefresh">تحديث</button></div></div></div>
+        <div class="card"><div class="row"><div><b>صندوق الرسائل</b><div class="muted" id="contactAdminCount">—</div></div><button class="smallbtn" id="contactAdminRefresh">تحديث</button></div></div>
         <div class="contact-admin-toolbar" id="contactAdminFilters" style="margin-top:10px"><button class="chip active" data-cfilter="all">الكل</button><button class="chip" data-cfilter="new">الجديدة</button><button class="chip" data-cfilter="read">المقروءة</button><button class="chip" data-cfilter="replied">تم الرد</button><button class="chip" data-cfilter="closed">المغلقة</button></div>
         <div id="contactAdminList"><div class="card contact-admin-empty">جاري تحميل الرسائل…</div></div>
       </div>`;main.appendChild(sec);
@@ -70,10 +60,9 @@
     const btn=$('werdContactSend');btn.disabled=true;btn.textContent='جاري الإرسال…';
     try{
       let userId=null;try{userId=(await sb.auth.getSession())?.data?.session?.user?.id||null}catch(_){}
-      const clientKey=await contactClientKey();
-      const {error}=await sb.from('werd_contact_messages').insert({user_id:userId,sender_name:name,sender_contact:contact,category,message,status:'new',admin_note:'',client_key:clientKey});
+      const {error}=await sb.from('werd_contact_messages').insert({user_id:userId,sender_name:name,sender_contact:contact,category,message,status:'new',admin_note:''});
       if(error)throw error;$('werdContactForm').reset();notify('تم إرسال رسالتك بنجاح ✓')
-    }catch(err){console.error('Werd contact send',err);const m=String(err?.message||'').toLowerCase();notify(m.includes('rate')||m.includes('too many')||m.includes('429')?'تم إرسال عدة رسائل مؤخرًا • حاول بعد قليل':'تعذر إرسال الرسالة الآن • حاول مرة أخرى')}
+    }catch(err){console.error('Werd contact send',err);notify('تعذر إرسال الرسالة الآن • حاول مرة أخرى')}
     finally{btn.disabled=false;btn.textContent='إرسال الرسالة'}
   }
 
