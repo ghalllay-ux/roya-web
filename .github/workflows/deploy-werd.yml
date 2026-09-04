@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate Werd files and JavaScript
         run: |
-          for f in index.html app.css app.js notifications.js features.js audio-engine.js reader.js listening.js listening-ios-fix.js prayer.js prayer-location-enhanced.js prayer-polish-v121.js prayer-scroll-stability.js more.js search.js iman.js hisn-proxy-fix.js home.js progress.js onboarding.js onboarding-skip-fix.js profile.js mushaf-core-v2.js mobile-mushaf-route-fix.js offline-mushaf.js offline-audio.js playlist.js memorization.js memorization-tracker.js memorization-test.js recitation-test.js weakness-analysis.js daily-memorization-plan.js weekly-memorization-plan.js long-term-memorization-goal.js monthly-memorization-dashboard.js achievement-report.js advanced-achievements.js memorization-journey.js desktop-layout.js premium-islamic-theme.js desktop-premium-home.js reference-sidebar.js mobile-layout-fix.js mobile-home-hub.js mobile-memorization-hub.js deep-link.js chrome-recitation-fallback.js recitation-direct-unlock.js recitation-guest-mode.js visitor-counter.js install-helper.js adhkar-enhanced.js manifest.webmanifest service-worker.js _worker.js; do test -f "werd/$f"; done
+          for f in index.html robots.txt sitemap.xml app.css app.js notifications.js features.js audio-engine.js reader.js listening.js listening-ios-fix.js prayer.js prayer-location-enhanced.js prayer-polish-v121.js prayer-scroll-stability.js more.js search.js iman.js hisn-proxy-fix.js home.js progress.js onboarding.js onboarding-skip-fix.js profile.js mushaf-core-v2.js mobile-mushaf-route-fix.js offline-mushaf.js offline-audio.js playlist.js memorization.js memorization-tracker.js memorization-test.js recitation-test.js weakness-analysis.js daily-memorization-plan.js weekly-memorization-plan.js long-term-memorization-goal.js monthly-memorization-dashboard.js achievement-report.js advanced-achievements.js memorization-journey.js desktop-layout.js premium-islamic-theme.js desktop-premium-home.js reference-sidebar.js mobile-layout-fix.js mobile-home-hub.js mobile-memorization-hub.js deep-link.js chrome-recitation-fallback.js recitation-direct-unlock.js recitation-guest-mode.js visitor-counter.js install-helper.js adhkar-enhanced.js manifest.webmanifest service-worker.js _worker.js; do test -f "werd/$f"; done
           grep -q "ward_user_state" werd/app.js
           for f in app.js notifications.js features.js audio-engine.js reader.js listening.js listening-ios-fix.js prayer.js prayer-location-enhanced.js prayer-polish-v121.js prayer-scroll-stability.js more.js search.js iman.js hisn-proxy-fix.js home.js progress.js onboarding.js onboarding-skip-fix.js profile.js mushaf-core-v2.js mobile-mushaf-route-fix.js offline-mushaf.js offline-audio.js playlist.js memorization.js memorization-tracker.js memorization-test.js recitation-test.js weakness-analysis.js daily-memorization-plan.js weekly-memorization-plan.js long-term-memorization-goal.js monthly-memorization-dashboard.js achievement-report.js advanced-achievements.js memorization-journey.js desktop-layout.js premium-islamic-theme.js desktop-premium-home.js reference-sidebar.js mobile-layout-fix.js mobile-home-hub.js mobile-memorization-hub.js deep-link.js chrome-recitation-fallback.js recitation-direct-unlock.js recitation-guest-mode.js visitor-counter.js install-helper.js adhkar-enhanced.js service-worker.js _worker.js; do node --check "werd/$f"; done
       - name: Prepare verified Hisn Muslim local data
@@ -43,12 +43,34 @@ jobs:
               raise SystemExit('Hisn IDs are incomplete')
           Path('werd/hisn-index.json').write_text(json.dumps({'total':132,'categories':index},ensure_ascii=False,separators=(',',':')),encoding='utf-8')
           PY
-      - name: Bundle Werd feature layers and core mobile Quran route
+      - name: Bundle Werd feature layers, SEO and core mobile Quran route
         run: |
           python3 - <<'PY'
           from pathlib import Path
           import re
           p=Path('werd/index.html');s=p.read_text(encoding='utf-8')
+          title='ورد | القرآن الكريم والأذكار ومواقيت الصلاة والقبلة'
+          s=re.sub(r'<title>.*?</title>',f'<title>{title}</title>',s,count=1,flags=re.S)
+          seo='''<meta name="description" content="ورد تطبيق إسلامي عربي للقرآن الكريم والأذكار وحصن المسلم ومواقيت الصلاة واتجاه القبلة والاستماع والتسميع والحفظ والورد اليومي.">
+<meta name="keywords" content="ورد, القرآن الكريم, قرآن, أذكار, أذكار الصباح, أذكار المساء, حصن المسلم, مواقيت الصلاة, القبلة, اتجاه القبلة, استماع القرآن, حفظ القرآن, تسميع القرآن">
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+<meta name="googlebot" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+<meta name="bingbot" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+<link rel="canonical" href="https://werd-7tn.pages.dev/">
+<link rel="alternate" hreflang="ar" href="https://werd-7tn.pages.dev/">
+<link rel="alternate" hreflang="x-default" href="https://werd-7tn.pages.dev/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ar_SA">
+<meta property="og:site_name" content="ورد">
+<meta property="og:title" content="ورد | القرآن الكريم والأذكار ومواقيت الصلاة والقبلة">
+<meta property="og:description" content="تطبيق إسلامي عربي يجمع القرآن والأذكار وحصن المسلم والصلاة والقبلة والاستماع والحفظ في تجربة واحدة.">
+<meta property="og:url" content="https://werd-7tn.pages.dev/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ورد | قرآن وأذكار">
+<meta name="twitter:description" content="القرآن الكريم والأذكار والصلاة والقبلة والاستماع والحفظ والورد اليومي.">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"ورد","alternateName":"Werd","url":"https://werd-7tn.pages.dev/","applicationCategory":"LifestyleApplication","operatingSystem":"Web","inLanguage":"ar","description":"تطبيق إسلامي عربي للقرآن الكريم والأذكار وحصن المسلم ومواقيت الصلاة واتجاه القبلة والاستماع والحفظ والتسميع والورد اليومي.","isAccessibleForFree":true}</script>'''
+          if 'name="description"' not in s:
+              s=s.replace('</head>',seo+'\n</head>',1)
           def has_script(name):
               return bool(re.search(r'<script\s+src=["\']\./'+re.escape(name)+r'(?:\?[^"\']*)?["\']\s*></script>',s))
           s=re.sub(r'<script\s+src=["\']\./hisn-proxy-fix\.js(?:\?[^"\']*)?["\']\s*></script>\s*','',s)
@@ -66,6 +88,7 @@ jobs:
               seen.add(base);return m.group(0)
           s=pattern.sub(dedupe,s)
           p.write_text(s,encoding='utf-8')
+          Path('werd/werd2026indexnow.txt').write_text('werd2026indexnow',encoding='utf-8')
           ap=Path('werd/app.js');a=ap.read_text(encoding='utf-8')
           old="function go(id){\n document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');\n document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===id));window.scrollTo({top:0,behavior:'smooth'});\n renderState();\n}"
           new="function go(id){\n if(id==='quran' && window.matchMedia && matchMedia('(max-width:959px)').matches && typeof window.openWerdMushafV2==='function'){window.openWerdMushafV2();return;}\n document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));const target=document.getElementById(id);if(target)target.classList.add('active');\n document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===id||(id==='mushafV2'&&n.dataset.page==='quran')));window.scrollTo({top:0,behavior:'smooth'});\n renderState();\n}"
@@ -75,6 +98,10 @@ jobs:
           PY
           node --check werd/app.js
           grep -q "openWerdMushafV2" werd/app.js
+          grep -q 'name="description"' werd/index.html
+          grep -q 'application/ld+json' werd/index.html
+          grep -q 'https://werd-7tn.pages.dev/' werd/sitemap.xml
+          test -f werd/werd2026indexnow.txt
           grep -q 'mushaf-core-v2.js' werd/index.html
           grep -q 'chrome-recitation-fallback.js' werd/index.html
           grep -q 'recitation-direct-unlock.js' werd/index.html
@@ -99,3 +126,7 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Notify IndexNow search engines
+        run: |
+          sleep 3
+          curl --fail --silent --show-error --retry 2 "https://api.indexnow.org/indexnow?url=https%3A%2F%2Fwerd-7tn.pages.dev%2F&key=werd2026indexnow&keyLocation=https%3A%2F%2Fwerd-7tn.pages.dev%2Fwerd2026indexnow.txt" || true
