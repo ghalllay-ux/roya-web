@@ -1,0 +1,16 @@
+name: Deploy Werd Verification
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  deploy-verification:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy verification file with Werd
+        run: npx --yes wrangler@3.90.0 pages deploy ./werd --project-name=werd --branch=main
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
