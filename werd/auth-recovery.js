@@ -84,3 +84,19 @@
   function install(){injectForgot();setInterval(injectForgot,1000);try{sb.auth.onAuthStateChange((event)=>{if(event==='PASSWORD_RECOVERY')setTimeout(openRecovery,0)})}catch(e){console.warn('Werd recovery listener',e)}}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
 })();
+
+// Bind every Web Push subscription to a private per-device ownership token.
+(function(){
+  const KEY='werd_push_client_token_v1';
+  function token(){
+    try{const old=localStorage.getItem(KEY);if(old&&old.length>=32)return old}catch(_){}
+    let v='';try{const a=new Uint8Array(32);crypto.getRandomValues(a);v=Array.from(a,b=>b.toString(16).padStart(2,'0')).join('')}catch(_){v=(crypto.randomUUID?.()||String(Date.now())+Math.random()).replace(/-/g,'')+(crypto.randomUUID?.()||Math.random().toString(36))}
+    try{localStorage.setItem(KEY,v)}catch(_){}return v;
+  }
+  function wrap(){
+    const base=window.postWerdPush; if(typeof base!=='function'||base.__werdSecurePush)return false;
+    async function secured(body){return base.call(this,{...(body||{}),client_token:token()})}
+    secured.__werdSecurePush=true;secured.__werdSecurePushBase=base;window.postWerdPush=secured;try{postWerdPush=secured}catch(_){}return true;
+  }
+  if(!wrap()){let n=0;const t=setInterval(()=>{n++;if(wrap()||n>40)clearInterval(t)},100)}
+})();
