@@ -10,8 +10,6 @@
   ['◔','الورد اليومي','هدفك وتقدمك','plan'],
   ['📗','الختمة','متابعة الختمة','khatma'],
   ['📿','المسبحة','التسبيح والعداد','tasbih'],
-  ['🕌','الصلاة','المواقيت اليومية','prayer'],
-  ['🕋','القبلة','اتجاه القبلة والبوصلة','qibla'],
   ['✦','أسماء الله الحسنى','الأسماء والمعاني','asma'],
   ['🔖','علامات القراءة','مواضعك المحفوظة','bookmarks'],
   ['♥️','المفضلة','الآيات والأذكار','favorites'],
@@ -27,16 +25,6 @@
   if(page==='memorizationHub'&&typeof window.openWerdMemorizationHub==='function'){window.openWerdMemorizationHub();return}
   if(page==='recitationTest'&&typeof window.openWerdRecitationTest==='function'){window.openWerdRecitationTest();return}
   if(page==='search'&&typeof window.openSearch==='function'){window.openSearch();return}
-  if(page==='qibla'){
-   callGo('prayer');
-   try{if(typeof window.loadPrayerData==='function')window.loadPrayerData(false)}catch(_){}
-   setTimeout(()=>{
-    const status=document.getElementById('qiblaStatus');
-    const title=status?.closest('.section-title');
-    (title||status)?.scrollIntoView?.({behavior:'smooth',block:'start'});
-   },180);
-   return;
-  }
   callGo(page);
  }
  function setupHeaderHome(){
