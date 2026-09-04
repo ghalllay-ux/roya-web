@@ -1,0 +1,30 @@
+/* Werd Mushaf font v87 — Quranic Naskh closer to Madinah mushaf appearance */
+@import url('https://fonts.googleapis.com/css2?family=Amiri+Quran&display=swap');
+
+#mushafV2 .mv2-text,
+#mushafV2 .mv2-surah {
+  font-family: 'Amiri Quran','KFGQPC Uthmanic Script HAFS','WerdUthmanicHafs','Traditional Arabic',serif !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  font-synthesis: none;
+}
+
+#mushafV2 .mv2-text {
+  font-size: 33px !important;
+  line-height: 2.02 !important;
+  word-spacing: 0 !important;
+  letter-spacing: 0 !important;
+  font-feature-settings: 'liga' 1,'calt' 1,'kern' 1 !important;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+#mushafV2 .mv2-surah {
+  font-size: 23px !important;
+  line-height: 1.7 !important;
+}
+
+@media(max-width:430px){
+  #mushafV2 .mv2-text{font-size:31px !important;line-height:2.04 !important}
+  #mushafV2 .mv2-surah{font-size:22px !important}
+}
