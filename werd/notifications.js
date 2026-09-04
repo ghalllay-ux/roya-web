@@ -1,7 +1,8 @@
-// Werd smart push notifications — guest-ready v112
+// Werd smart push notifications — guest-ready v113
 const WERD_VAPID_PUBLIC_KEY='BD4YQqbmbU_MGC1WZgAz_e4UD-B6LBEnHY7anbnMlKAvezo7yB_jbd_HrtZa2dRS_H3T5kivFDSjzv9fYRupJi0';
 const WERD_VAPID_VERSION=2;
 const WERD_PUSH_SUBSCRIPTION_URL='https://oajqczrxzurwvxjkbseq.supabase.co/functions/v1/werd-push-subscription';
+const WERD_PUSH_CLIENT_TOKEN_KEY='werd_push_client_token_v1';
 
 function werdNotifDefaults(){return{morning:{enabled:true,time:'06:30'},evening:{enabled:true,time:'18:00'},wird:{enabled:true,time:'20:00'},timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'Asia/Riyadh',pushEnabled:false,vapidVersion:0}}
 function ensureWerdNotifState(){const d=werdNotifDefaults();state.notifications={...d,...(state.notifications||{})};state.notifications.morning={...d.morning,...(state.notifications.morning||{})};state.notifications.evening={...d.evening,...(state.notifications.evening||{})};state.notifications.wird={...d.wird,...(state.notifications.wird||{})}}
@@ -10,6 +11,7 @@ function b64ToUint8(s){const padding='='.repeat((4-s.length%4)%4),base64=(s+padd
 function isWerdStandalone(){return !!(window.matchMedia?.('(display-mode: standalone)').matches||navigator.standalone===true)}
 function isWerdIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent||'')}
 function pushApiSupported(){return 'Notification'in window&&'serviceWorker'in navigator&&'PushManager'in window}
+function werdPushClientToken(){let t='';try{t=localStorage.getItem(WERD_PUSH_CLIENT_TOKEN_KEY)||''}catch(_){}if(t.length>=32)return t;try{t=crypto.randomUUID?`${crypto.randomUUID()}-${crypto.randomUUID()}`:`${Date.now()}-${Math.random()}-${Math.random()}`}catch(_){t=`${Date.now()}-${Math.random()}-${Math.random()}`}try{localStorage.setItem(WERD_PUSH_CLIENT_TOKEN_KEY,t)}catch(_){}return t}
 
 function injectWerdNotificationUI(){
  ensureWerdNotifState();if(el('werdNotificationsCard'))return;const auth=el('authCard');if(!auth)return;
@@ -23,14 +25,14 @@ async function saveWerdNotifPrefs(){if(!el('werdNotificationsCard'))return;ensur
 async function getWerdPushSubscription(){if(!('serviceWorker'in navigator)||!('PushManager'in window))return null;const reg=await navigator.serviceWorker.ready;return reg.pushManager.getSubscription()}
 async function makeWerdSubscription(){const reg=await navigator.serviceWorker.ready;return reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64ToUint8(WERD_VAPID_PUBLIC_KEY)})}
 async function werdPushHeaders(){const h={'Content-Type':'application/json','apikey':typeof SUPABASE_PUBLISHABLE_KEY!=='undefined'?SUPABASE_PUBLISHABLE_KEY:'sb_publishable_9LTupYVJR3kKTL4xqj3pdw_vA67W-o4'};try{if(typeof sb!=='undefined'){const{data}=await sb.auth.getSession();const token=data?.session?.access_token;if(token)h.Authorization='Bearer '+token}}catch(_){}return h}
-async function postWerdPush(body){const res=await fetch(WERD_PUSH_SUBSCRIPTION_URL,{method:'POST',headers:await werdPushHeaders(),body:JSON.stringify(body)});const data=await res.json().catch(()=>({}));if(!res.ok)throw new Error(data?.error||'PUSH_SAVE_FAILED');return data}
+async function postWerdPush(body){const res=await fetch(WERD_PUSH_SUBSCRIPTION_URL,{method:'POST',headers:await werdPushHeaders(),body:JSON.stringify({...body,client_token:werdPushClientToken()})});const data=await res.json().catch(()=>({}));if(!res.ok)throw new Error(data?.error||'PUSH_SAVE_FAILED');return data}
 async function syncWerdPushRecord(showToast=true){
- ensureWerdNotifState();let sub=await getWerdPushSubscription(),oldEndpoint=null;
+ ensureWerdNotifState();let sub=await getWerdPushSubscription(),oldEndpoint=null,oldJson=null;
  if(typeof Notification!=='undefined'&&Notification.permission==='granted'&&state.notifications.vapidVersion!==WERD_VAPID_VERSION){
-  try{if(sub){oldEndpoint=sub.endpoint;await sub.unsubscribe()}sub=await makeWerdSubscription();state.notifications.vapidVersion=WERD_VAPID_VERSION;state.notifications.pushEnabled=true;save()}catch(e){console.error('Push key migration',e);if(showToast)toast('تعذر تحديث اشتراك التنبيهات');return false}
+  try{if(sub){oldEndpoint=sub.endpoint;oldJson=sub.toJSON();await sub.unsubscribe()}sub=await makeWerdSubscription();state.notifications.vapidVersion=WERD_VAPID_VERSION;state.notifications.pushEnabled=true;save()}catch(e){console.error('Push key migration',e);if(showToast)toast('تعذر تحديث اشتراك التنبيهات');return false}
  }
  if(!sub)return false;
- const j=sub.toJSON();try{await postWerdPush({action:'upsert',endpoint:sub.endpoint,p256dh:j.keys?.p256dh||'',auth:j.keys?.auth||'',timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'Asia/Riyadh',preferences:currentWerdPrefs()});if(oldEndpoint&&oldEndpoint!==sub.endpoint){await postWerdPush({action:'delete',endpoint:oldEndpoint}).catch(()=>{})}}
+ const j=sub.toJSON();try{await postWerdPush({action:'upsert',endpoint:sub.endpoint,p256dh:j.keys?.p256dh||'',auth:j.keys?.auth||'',timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'Asia/Riyadh',preferences:currentWerdPrefs()});if(oldEndpoint&&oldEndpoint!==sub.endpoint){await postWerdPush({action:'delete',endpoint:oldEndpoint,p256dh:oldJson?.keys?.p256dh||'',auth:oldJson?.keys?.auth||''}).catch(()=>{})}}
  catch(error){console.error(error);if(showToast)toast('تعذر حفظ اشتراك التنبيهات');return false}
  state.notifications.pushEnabled=true;state.notifications.vapidVersion=WERD_VAPID_VERSION;save();refreshWerdNotifStatus();if(showToast)toast('تم تفعيل تنبيهات ورد ✓');return true;
 }
@@ -44,7 +46,7 @@ async function enableWerdPush(){
  let permission=Notification.permission;if(permission!=='granted')permission=await Notification.requestPermission();if(permission!=='granted'){toast(permission==='denied'?'التنبيهات محظورة من إعدادات الجهاز':'لم يتم السماح بالتنبيهات');refreshWerdNotifStatus();return}
  let sub=await getWerdPushSubscription();if(!sub||state.notifications?.vapidVersion!==WERD_VAPID_VERSION){if(sub)await sub.unsubscribe();sub=await makeWerdSubscription()}ensureWerdNotifState();state.notifications={...state.notifications,...currentWerdPrefs(),pushEnabled:true,vapidVersion:WERD_VAPID_VERSION,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'Asia/Riyadh'};save();await syncWerdPushRecord(true);
 }
-async function disableWerdPush(){const sub=await getWerdPushSubscription();if(sub){await postWerdPush({action:'delete',endpoint:sub.endpoint}).catch(()=>{});await sub.unsubscribe()}ensureWerdNotifState();state.notifications.pushEnabled=false;save();refreshWerdNotifStatus();toast('تم إيقاف التنبيهات')}
+async function disableWerdPush(){const sub=await getWerdPushSubscription();if(sub){const j=sub.toJSON();await postWerdPush({action:'delete',endpoint:sub.endpoint,p256dh:j.keys?.p256dh||'',auth:j.keys?.auth||''}).catch(()=>{});await sub.unsubscribe()}ensureWerdNotifState();state.notifications.pushEnabled=false;save();refreshWerdNotifStatus();toast('تم إيقاف التنبيهات')}
 async function testWerdNotification(){if(isWerdIOS()&&!isWerdStandalone()){openWerdInstallForNotifications();toast('التنبيه التجريبي يعمل بعد تثبيت ورد وفتحه من الشاشة الرئيسية');return}if(!pushApiSupported()){toast('التنبيهات غير متاحة في هذا المتصفح');return}if(Notification.permission!=='granted'){toast('فعّل التنبيهات أولًا');return}const reg=await navigator.serviceWorker.ready;await reg.showNotification('ورد 🌿',{body:'هذا تنبيه تجريبي. تنبيهاتك جاهزة.',icon:'./icon.svg',badge:'./icon.svg',dir:'rtl',lang:'ar',data:{url:'./'}})}
 async function refreshWerdNotifStatus(){
  const status=el('werdNotifStatus'),on=el('werdEnableNotif'),off=el('werdDisableNotif'),note=el('werdNotifNote'),test=el('werdTestNotif');if(!status)return;
