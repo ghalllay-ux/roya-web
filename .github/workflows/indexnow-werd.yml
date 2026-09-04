@@ -1,0 +1,25 @@
+name: Notify IndexNow for Werd
+
+on:
+  workflow_run:
+    workflows: ["Deploy Werd to Cloudflare Pages"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  notify-indexnow:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Submit Werd homepage to IndexNow
+        run: |
+          set -euo pipefail
+          curl --fail-with-body --silent --show-error --retry 3 --retry-delay 2 --get \
+            'https://api.indexnow.org/indexnow' \
+            --data-urlencode 'url=https://werd-7tn.pages.dev/' \
+            --data-urlencode 'key=e597401e9b7fc8522e561e6fca7b19a9' \
+            --data-urlencode 'keyLocation=https://werd-7tn.pages.dev/e597401e9b7fc8522e561e6fca7b19a9.txt'
+          echo 'IndexNow notification sent for https://werd-7tn.pages.dev/'
