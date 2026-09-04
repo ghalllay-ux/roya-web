@@ -10,6 +10,7 @@
   ['◔','الورد اليومي','هدفك وتقدمك','plan'],
   ['📗','الختمة','متابعة الختمة','khatma'],
   ['📿','المسبحة','التسبيح والعداد','tasbih'],
+  ['🕌','الصلاة والقبلة','المواقيت واتجاه القبلة','prayerQibla'],
   ['✦','أسماء الله الحسنى','الأسماء والمعاني','asma'],
   ['🔖','علامات القراءة','مواضعك المحفوظة','bookmarks'],
   ['♥️','المفضلة','الآيات والأذكار','favorites'],
@@ -25,6 +26,12 @@
   if(page==='memorizationHub'&&typeof window.openWerdMemorizationHub==='function'){window.openWerdMemorizationHub();return}
   if(page==='recitationTest'&&typeof window.openWerdRecitationTest==='function'){window.openWerdRecitationTest();return}
   if(page==='search'&&typeof window.openSearch==='function'){window.openSearch();return}
+  if(page==='prayerQibla'){
+   callGo('prayer');
+   try{if(typeof window.loadPrayerData==='function')window.loadPrayerData(false)}catch(_){}
+   setTimeout(()=>{try{document.querySelector('#prayer .section-title, #prayer')?.scrollIntoView?.({behavior:'smooth',block:'start'})}catch(_){}},120);
+   return;
+  }
   callGo(page);
  }
  function setupHeaderHome(){
@@ -52,6 +59,7 @@
    #${ID} .mhh-text small{display:none}
    #home>.grid,#home>.section-title:has(+ .grid){display:none!important}
    #smartDashboard .smart-head:has(+ .smart-quick),#smartDashboard .smart-quick{display:none!important}
+   #smartPrayerCard{display:none!important}
    body.dark #${ID} .mhh-item{background:linear-gradient(155deg,#20392f,#172c24);border-color:rgba(197,163,94,.34);box-shadow:0 10px 24px rgba(0,0,0,.16)}
    body.dark #${ID} .mhh-icon{background:radial-gradient(circle,#213b31 42%,#182f27 43% 46%,#213b31 47%);color:#e1c784}
    body.dark #${ID} .mhh-text b{color:#f0ddb0}
