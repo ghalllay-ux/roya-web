@@ -1,4 +1,4 @@
-// Self-contained guest voice recitation for Chrome on iPhone — v108
+// Self-contained guest voice recitation for Chrome on iPhone — v109
 (function(){
   if(!/CriOS/i.test(navigator.userAgent||''))return;
   const $=id=>document.getElementById(id);
@@ -9,7 +9,7 @@
   let cloudUnavailable=sessionStorage.getItem('werd_recitation_cloud_unavailable')==='1';
   let stats={scores:[],again:0,hard:0,good:0,easy:0,hints:0,exact:0,near:0,duration:0};
 
-  function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+  function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]))}
   function notify(m){try{typeof toast==='function'?toast(m):console.log(m)}catch(_){}}
   function dateKey(d=new Date()){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return`${y}-${m}-${day}`}
   function addDays(date,days){const d=new Date(`${date}T12:00:00`);d.setDate(d.getDate()+Number(days||0));return dateKey(d)}
@@ -37,20 +37,20 @@
     if(!navigator.mediaDevices?.getUserMedia&&!NativeRecognition){start.disabled=true;if(support)support.innerHTML='<span>⚠️</span><div><b>التسجيل الصوتي غير متاح في هذا المتصفح.</b><br>حدّث Chrome ثم أعد المحاولة.</div>';return}
     start.disabled=false;start.textContent='ابدأ جلسة التسميع';
     if(support){
-      if(cloudUnavailable&&NativeRecognition)support.innerHTML='<span>🎙️</span><div><b>جاهز بالتعرّف الصوتي المباشر ✓</b><br>الخدمة السحابية وصلت حد الحساب، لذلك سيستخدم «ورد» التعرّف المباشر من المتصفح.</div>';
-      else support.innerHTML='<span>🎙️</span><div><b>جاهز للتسميع مباشرة بدون تسجيل ✓</b><br>اختر الآية واضغط بدء الجلسة. التسجيل الصوتي مؤقت للتحويل فقط ولا يُحفظ.</div>'
+      if(cloudUnavailable&&NativeRecognition)support.innerHTML='<span>🎙️</span><div><b>جاهز بالتعرّف الصوتي المباشر ✓</b><br>سيستخدم «ورد» التعرّف المباشر من الجهاز حتى تعود خدمة التحويل السحابي.</div>';
+      else support.innerHTML='<span>🎙️</span><div><b>تحويل الصوت إلى كتابة جاهز ✓</b><br>اضغط الميكروفون، اقرأ الآية، ثم اضغط مرة أخرى. التسجيل مؤقت للتحويل فقط ولا يُحفظ.</div>'
     }
   }
   function stopTracks(){try{stream?.getTracks().forEach(t=>t.stop())}catch(_){}stream=null}
   function stopTimer(){if(startedAt)elapsed=Math.max(elapsed,Math.floor((Date.now()-startedAt)/1000));startedAt=0;clearInterval(timer);timer=null;if($('rtestTime'))$('rtestTime').textContent=fmt(elapsed)}
   function startTimer(){startedAt=Date.now();clearInterval(timer);timer=setInterval(()=>{elapsed=Math.max(elapsed,Math.floor((Date.now()-startedAt)/1000));if($('rtestTime'))$('rtestTime').textContent=fmt(elapsed)},400)}
-  function idleMic(ok=false){const m=$('rtestMic');if(m){m.classList.remove('live','starting');m.textContent='🎙';m.disabled=false}if($('rtestMicStatus'))$('rtestMicStatus').textContent=ok?'تم تحويل التسميع إلى نص ✓':'اضغط للبدء';if($('rtestRetry'))$('rtestRetry').disabled=!ok;if($('rtestAnalyze'))$('rtestAnalyze').disabled=!ok}
+  function idleMic(ok=false){const m=$('rtestMic');if(m){m.classList.remove('live','starting');m.textContent='🎙';m.disabled=false}if($('rtestMicStatus'))$('rtestMicStatus').textContent=ok?'تم تحويل الصوت إلى كتابة ✓':'اضغط للبدء';if($('rtestRetry'))$('rtestRetry').disabled=!ok;if($('rtestAnalyze'))$('rtestAnalyze').disabled=!ok}
   function resetQuestion(){
     stopRecording(true);try{nativeRecognition?.abort()}catch(_){}nativeRecognition=null;transcript='';analysis=null;rated=false;hintUsed=false;elapsed=0;if($('rtestTime'))$('rtestTime').textContent='00:00';if($('rtestLive'))$('rtestLive').innerHTML='<span class="muted">اضغط الميكروفون وابدأ التسميع.</span>';if($('rtestHint')){$('rtestHint').classList.remove('show');$('rtestHint').textContent=''}if($('rtestHintBtn')){$('rtestHintBtn').disabled=false;$('rtestHintBtn').textContent='💡 تلميح'}idleMic(false);document.querySelectorAll('[data-rrate]').forEach(b=>{b.disabled=false;b.classList.remove('recommended')});if($('rtestNext'))$('rtestNext').disabled=true
   }
   function showQuestion(){
     resetQuestion();const x=session[idx];if(!x)return finish();active=true;
-    if($('rtestHeroSmall'))$('rtestHeroSmall').textContent=cloudUnavailable&&NativeRecognition?'تسميع مباشر بدون تسجيل':'تسميع سحابي بدون تسجيل';if($('rtestHeroTitle'))$('rtestHeroTitle').textContent=`${x.surahName} • الآية ${x.ayah}`;if($('rtestPrompt'))$('rtestPrompt').textContent=`${x.surahName} — الآية ${x.ayah}`;if($('rtestCounter'))$('rtestCounter').textContent=`${idx+1} من ${session.length}`;if($('rtestProgress'))$('rtestProgress').style.width=`${Math.round(idx/session.length*100)}%`;
+    if($('rtestHeroSmall'))$('rtestHeroSmall').textContent=cloudUnavailable&&NativeRecognition?'تسميع مباشر من الجهاز':'تحويل صوت إلى كتابة';if($('rtestHeroTitle'))$('rtestHeroTitle').textContent=`${x.surahName} • الآية ${x.ayah}`;if($('rtestPrompt'))$('rtestPrompt').textContent=`${x.surahName} — الآية ${x.ayah}`;if($('rtestCounter'))$('rtestCounter').textContent=`${idx+1} من ${session.length}`;if($('rtestProgress'))$('rtestProgress').style.width=`${Math.round(idx/session.length*100)}%`;
     if($('rtestSetup'))$('rtestSetup').style.display='none';if($('rtestSession'))$('rtestSession').style.display='block';if($('rtestAnalysis'))$('rtestAnalysis').style.display='none';if($('rtestDone'))$('rtestDone').style.display='none';if($('rtestNext'))$('rtestNext').textContent=idx===session.length-1?'إنهاء الجلسة':'التالي';window.scrollTo({top:0,behavior:'smooth'})
   }
   function startSession(){
@@ -58,49 +58,65 @@
     const v=selected();session=[];for(let a=v.from;a<=v.to;a++)session.push({id:`${v.s}:${a}`,surah:v.s,ayah:a,surahName:v.name});idx=0;stats={scores:[],again:0,hard:0,good:0,easy:0,hints:0,exact:0,near:0,duration:0};showQuestion();return true
   }
   function chooseMime(){for(const m of ['audio/mp4','audio/webm;codecs=opus','audio/webm','audio/ogg']){try{if(MediaRecorder.isTypeSupported?.(m))return m}catch(_){}}return''}
+  function audioName(mime){const m=String(mime||'').toLowerCase();if(m.includes('webm'))return'werd-recitation.webm';if(m.includes('ogg'))return'werd-recitation.ogg';if(m.includes('wav'))return'werd-recitation.wav';if(m.includes('mpeg'))return'werd-recitation.mp3';return'werd-recitation.m4a'}
+  function offerNativeFallback(message){
+    if(!$('rtestLive'))return;
+    if(NativeRecognition)$('rtestLive').innerHTML=`<span class="muted">${esc(message)}</span><br><button class="primary" id="rtestNativeFallback" style="margin-top:12px;width:100%">🎙 تحويل مباشر من الجهاز</button>`;
+    else $('rtestLive').innerHTML=`<span class="muted">${esc(message)}</span>`
+  }
   function startNativeRecognition(){
     if(!NativeRecognition||busy||!active)return;
-    busy=true;transcript='';const mic=$('rtestMic');if(mic){mic.disabled=true;mic.classList.add('live');mic.textContent='■'}if($('rtestMicStatus'))$('rtestMicStatus').textContent='أستمع الآن…';if($('rtestLive'))$('rtestLive').innerHTML='<span class="muted">تكلّم الآن… يستخدم «ورد» التعرّف المباشر من المتصفح.</span>';
+    busy=true;transcript='';const mic=$('rtestMic');if(mic){mic.disabled=true;mic.classList.add('live');mic.textContent='■'}if($('rtestMicStatus'))$('rtestMicStatus').textContent='أستمع الآن…';if($('rtestLive'))$('rtestLive').innerHTML='<span class="muted">تكلّم الآن… سيتم تحويل الصوت مباشرة إلى كتابة.</span>';
     try{
       const rec=new NativeRecognition();nativeRecognition=rec;rec.lang='ar-SA';rec.continuous=false;rec.interimResults=true;rec.maxAlternatives=1;startTimer();
-      let finalText='',interim='';
-      rec.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++){const txt=e.results[i][0]?.transcript||'';if(e.results[i].isFinal)finalText+=txt+' ';else interim=txt}if($('rtestLive'))$('rtestLive').innerHTML=`<span>${esc(finalText)}</span>${interim?` <span class="interim">${esc(interim)}</span>`:''}`};
-      rec.onerror=e=>{console.warn('Werd native recognition',e?.error);notify(e?.error==='not-allowed'?'اسمح بالميكروفون من إعدادات Chrome':'تعذر التعرّف المباشر، حاول مرة أخرى')};
-      rec.onend=()=>{stopTimer();nativeRecognition=null;transcript=(finalText||interim||'').trim();busy=false;if($('rtestLive'))$('rtestLive').innerHTML=transcript?`<span>${esc(transcript)}</span>`:'<span class="muted">لم يُلتقط نص واضح. أعد المحاولة.</span>';idleMic(!!transcript);if(transcript)notify('تم التقاط التسميع ✓')};
+      let finalText='',interim='',lastError='';
+      rec.onresult=e=>{interim='';for(let i=e.resultIndex;i<e.results.length;i++){const txt=e.results[i][0]?.transcript||'';if(e.results[i].isFinal)finalText+=(finalText?' ':'')+txt.trim();else interim+=(interim?' ':'')+txt.trim()}if($('rtestLive'))$('rtestLive').innerHTML=`<span>${esc(finalText)}</span>${interim?` <span class="interim">${esc(interim)}</span>`:''}`};
+      rec.onerror=e=>{lastError=String(e?.error||'');console.warn('Werd native recognition',lastError);if(lastError==='not-allowed'||lastError==='service-not-allowed')notify('اسمح بالميكروفون من إعدادات Chrome')};
+      rec.onend=()=>{stopTimer();nativeRecognition=null;transcript=(finalText||interim||'').trim();busy=false;if($('rtestLive'))$('rtestLive').innerHTML=transcript?`<span>${esc(transcript)}</span>`:`<span class="muted">${lastError==='not-allowed'?'الميكروفون غير مسموح. فعّل الإذن ثم أعد المحاولة.':'لم يُلتقط نص واضح. أعد المحاولة.'}</span>`;idleMic(!!transcript);if(transcript)notify('تم تحويل الصوت إلى كتابة ✓')};
       rec.start()
     }catch(e){console.error('Werd native start',e);nativeRecognition=null;busy=false;stopTimer();idleMic(false);notify('تعذر تشغيل التعرّف الصوتي المباشر')}
   }
   async function startRecording(){
     if(busy||!active)return;if(cloudUnavailable&&NativeRecognition)return startNativeRecognition();busy=true;const mic=$('rtestMic');if(mic){mic.disabled=true;mic.classList.add('starting')}if($('rtestMicStatus'))$('rtestMicStatus').textContent='جاري تشغيل الميكروفون…';
-    try{stream=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];const mime=chooseMime();recorder=mime?new MediaRecorder(stream,{mimeType:mime}):new MediaRecorder(stream);recorder.ondataavailable=e=>{if(e.data?.size)chunks.push(e.data)};recorder.onstop=()=>processRecording(mime||recorder?.mimeType||'audio/mp4');recorder.start();startTimer();if(mic){mic.disabled=false;mic.classList.remove('starting');mic.classList.add('live');mic.textContent='■'}if($('rtestMicStatus'))$('rtestMicStatus').textContent='أسجّل الآن… اضغط للإيقاف';if($('rtestLive'))$('rtestLive').innerHTML='<span class="muted">يتم التسجيل الآن…</span>'}
-    catch(e){console.error('Werd mic',e);stopTracks();idleMic(false);busy=false;notify('تعذر الوصول إلى الميكروفون')}
+    try{
+      stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}});chunks=[];const mime=chooseMime();recorder=mime?new MediaRecorder(stream,{mimeType:mime}):new MediaRecorder(stream);const rec=recorder;rec.ondataavailable=e=>{if(e.data?.size)chunks.push(e.data)};rec.onerror=e=>console.warn('Werd MediaRecorder',e?.error||e);rec.onstop=()=>processRecording(mime||rec.mimeType||'audio/mp4');rec.start(300);startTimer();if(mic){mic.disabled=false;mic.classList.remove('starting');mic.classList.add('live');mic.textContent='■'}if($('rtestMicStatus'))$('rtestMicStatus').textContent='أسجّل الآن… اضغط للإيقاف والتحويل';if($('rtestLive'))$('rtestLive').innerHTML='<span class="muted">يتم التقاط الصوت الآن…</span>'
+    }catch(e){console.error('Werd mic',e);stopTracks();idleMic(false);busy=false;notify('تعذر الوصول إلى الميكروفون. تأكد من السماح لـ Chrome.')}
   }
-  function stopRecording(discard=false){if(nativeRecognition){try{discard?nativeRecognition.abort():nativeRecognition.stop()}catch(_){}return}if(!recorder)return;recorder.__discard=discard;try{if(recorder.state==='recording')recorder.stop()}catch(_){}stopTimer()}
+  function stopRecording(discard=false){
+    if(nativeRecognition){try{discard?nativeRecognition.abort():nativeRecognition.stop()}catch(_){}return}
+    if(!recorder)return;recorder.__discard=discard;
+    try{if(recorder.state==='recording'){try{recorder.requestData()}catch(_){}setTimeout(()=>{try{if(recorder?.state==='recording')recorder.stop()}catch(_){}},35)}}catch(_){}
+    stopTimer()
+  }
   async function toggleRecording(){if(nativeRecognition){try{nativeRecognition.stop()}catch(_){}return}if(recorder?.state==='recording'){stopRecording(false);return}await startRecording()}
   function cloudErrorMessage(code){
-    if(code==='OPENAI_QUOTA_OR_RATE_LIMIT')return 'خدمة التحويل السحابي وصلت حد الحساب';
-    if(code==='OPENAI_KEY_INVALID'||code==='OPENAI_KEY_MISSING')return 'إعداد خدمة التحويل يحتاج تحديث المفتاح';
-    if(code==='AUDIO_OR_REQUEST_REJECTED')return 'صيغة التسجيل لم تُقبل، أعد المحاولة';
-    return 'تعذر تحويل الصوت الآن، حاول مرة أخرى'
+    if(code==='OPENAI_QUOTA_OR_RATE_LIMIT')return 'خدمة التحويل السحابي وصلت حد الحساب مؤقتًا';
+    if(code==='OPENAI_KEY_INVALID'||code==='OPENAI_KEY_MISSING')return 'خدمة التحويل السحابي تحتاج تحديثًا';
+    if(code==='AUDIO_OR_REQUEST_REJECTED'||code==='AUDIO_TOO_SHORT')return 'لم يصل تسجيل صوتي صالح للتحويل';
+    if(code.startsWith('HTTP_'))return 'تعذر الاتصال بخدمة التحويل';
+    return 'تعذر تحويل الصوت سحابيًا الآن'
+  }
+  async function sendForTranscription(blob,mime){
+    const fd=new FormData();fd.append('audio',blob,audioName(mime));const headers={};try{if(typeof SUPABASE_PUBLISHABLE_KEY!=='undefined')headers.apikey=SUPABASE_PUBLISHABLE_KEY}catch(_){}
+    const ctrl=new AbortController(),timeout=setTimeout(()=>ctrl.abort(),28000);
+    try{const res=await fetch(ENDPOINT,{method:'POST',headers,body:fd,signal:ctrl.signal});const j=await res.json().catch(()=>({}));if(!res.ok||!j.text){const err=new Error(j.code||j.error||`HTTP_${res.status}`);err.code=j.code||'';err.diagnostic=j.diagnostic||[];throw err}return String(j.text).trim()}finally{clearTimeout(timeout)}
   }
   async function processRecording(mime){
     const r=recorder;recorder=null;stopTimer();stopTracks();if(r?.__discard){chunks=[];busy=false;return idleMic(false)}const blob=new Blob(chunks,{type:mime||'audio/mp4'});chunks=[];
-    if(blob.size<800){busy=false;idleMic(false);return notify('التسجيل قصير جدًا، حاول مرة أخرى')}
-    const mic=$('rtestMic');if(mic){mic.disabled=true;mic.classList.remove('live');mic.textContent='…'}if($('rtestMicStatus'))$('rtestMicStatus').textContent='جاري تحويل التسميع إلى نص…';if($('rtestLive'))$('rtestLive').innerHTML='<span class="muted">جاري التحويل السحابي…</span>';
+    if(blob.size<350){busy=false;idleMic(false);offerNativeFallback('التسجيل لم يلتقط صوتًا كافيًا. اضغط للتحويل المباشر من الجهاز أو أعد التسجيل.');return notify('لم يلتقط التسجيل صوتًا كافيًا')}
+    const mic=$('rtestMic');if(mic){mic.disabled=true;mic.classList.remove('live');mic.textContent='…'}if($('rtestMicStatus'))$('rtestMicStatus').textContent='جاري تحويل الصوت إلى كتابة…';if($('rtestLive'))$('rtestLive').innerHTML='<span class="muted">جاري تحويل التسميع إلى نص…</span>';
     try{
-      const fd=new FormData();fd.append('audio',blob,'werd-recitation.m4a');const headers={};try{if(typeof SUPABASE_PUBLISHABLE_KEY!=='undefined')headers.apikey=SUPABASE_PUBLISHABLE_KEY}catch(_){}
-      const res=await fetch(ENDPOINT,{method:'POST',headers,body:fd});const j=await res.json().catch(()=>({}));
-      if(!res.ok||!j.text){const err=new Error(j.code||j.error||`HTTP_${res.status}`);err.code=j.code||'';err.diagnostic=j.diagnostic||[];throw err}
-      transcript=String(j.text).trim();if($('rtestLive'))$('rtestLive').innerHTML=transcript?`<span>${esc(transcript)}</span>`:'<span class="muted">لم يُلتقط نص واضح.</span>';idleMic(!!transcript);if(transcript)notify('تم تحويل التسميع إلى نص ✓')
+      let text='';let lastErr=null;
+      for(let attempt=0;attempt<2&&!text;attempt++){
+        try{text=await sendForTranscription(blob,mime)}catch(e){lastErr=e;if(attempt===0)await new Promise(r=>setTimeout(r,450))}
+      }
+      if(!text)throw lastErr||new Error('NO_TEXT');
+      transcript=text;cloudUnavailable=false;try{sessionStorage.removeItem('werd_recitation_cloud_unavailable')}catch(_){}if($('rtestLive'))$('rtestLive').innerHTML=`<span>${esc(transcript)}</span>`;idleMic(true);notify('تم تحويل الصوت إلى كتابة ✓')
     }catch(e){
       console.error('Werd guest transcription',e);transcript='';const code=String(e?.code||e?.message||'');
-      if(code==='OPENAI_QUOTA_OR_RATE_LIMIT'){cloudUnavailable=true;sessionStorage.setItem('werd_recitation_cloud_unavailable','1')}
-      if($('rtestLive')){
-        if(code==='OPENAI_QUOTA_OR_RATE_LIMIT'&&NativeRecognition)$('rtestLive').innerHTML='<span class="muted">الخدمة السحابية وصلت حد الحساب. يمكنك المتابعة الآن بالتعرّف المباشر.</span><br><button class="primary" id="rtestNativeFallback" style="margin-top:12px;width:100%">🎙 استخدام التعرّف المباشر</button>';
-        else $('rtestLive').innerHTML=`<span class="muted">${esc(cloudErrorMessage(code))}.</span>`
-      }
-      idleMic(false);notify(code==='OPENAI_QUOTA_OR_RATE_LIMIT'?(NativeRecognition?'الخدمة السحابية وصلت حدها • استخدم التعرّف المباشر':'خدمة التحويل السحابي وصلت حد الحساب'):cloudErrorMessage(code))
-    }finally{busy=false}
+      if(code==='OPENAI_QUOTA_OR_RATE_LIMIT'||code==='OPENAI_KEY_INVALID'||code==='OPENAI_KEY_MISSING'){cloudUnavailable=true;try{sessionStorage.setItem('werd_recitation_cloud_unavailable','1')}catch(_){}}
+      const msg=cloudErrorMessage(code);offerNativeFallback(`${msg}. يمكنك المتابعة بالتحويل المباشر من الجهاز.`);idleMic(false);notify(NativeRecognition?`${msg} • استخدم التحويل المباشر`:`${msg} • أعد المحاولة`)
+    }finally{busy=false;setSupport()}
   }
   function norm(v){return String(v||'').normalize('NFKD').replace(/[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED]/g,'').replace(/ـ/g,'').replace(/[إأآٱ]/g,'ا').replace(/ؤ/g,'و').replace(/ئ/g,'ي').replace(/ى/g,'ي').replace(/[^\u0621-\u063A\u0641-\u064A0-9]/g,'').trim()}
   function toks(v){return String(v||'').split(/\s+/).map(raw=>({raw:raw.replace(/[۝۞﴿﴾]/g,''),norm:norm(raw)})).filter(x=>x.norm)}
@@ -132,7 +148,7 @@
   }
   function install(){
     const page=$('recitationTest');if(!page||!$('rtestStart')||!$('rtestDirectBtn'))return setTimeout(install,160);
-    if(document.documentElement.dataset.werdGuest108)return;document.documentElement.dataset.werdGuest108='1';
+    if(document.documentElement.dataset.werdGuest109)return;document.documentElement.dataset.werdGuest109='1';
     document.addEventListener('click',capture,true);document.addEventListener('pointerdown',e=>{if(e.target?.closest?.('#rtestStart,#rtestMic'))setTimeout(setSupport,0)},true);
     document.addEventListener('change',e=>{if(e.target?.closest?.('#rtestDirectSurah,#rtestDirectFrom,#rtestDirectTo'))setTimeout(setSupport,0)});
     setInterval(()=>{if(directActive()&&!active)setSupport()},500);setTimeout(setSupport,50)
