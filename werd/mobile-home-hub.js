@@ -26,7 +26,12 @@
   if(page==='mushaf'&&typeof window.openMushaf==='function'){window.openMushaf();return}
   if(page==='memorizationHub'&&typeof window.openWerdMemorizationHub==='function'){window.openWerdMemorizationHub();return}
   if(page==='recitationTest'&&typeof window.openWerdRecitationTest==='function'){window.openWerdRecitationTest();return}
-  if(page==='ruqyah'&&typeof window.openWerdRuqyah==='function'){window.openWerdRuqyah();return}
+  if(page==='ruqyah'){
+   if(typeof window.openWerdRuqyah==='function'){window.openWerdRuqyah();return}
+   let s=document.getElementById('werdRuqyahLoader');
+   if(!s){s=document.createElement('script');s.id='werdRuqyahLoader';s.src='./ruqyah.js?v=1';s.onload=()=>{try{window.openWerdRuqyah?.()}catch(_){}};document.head.appendChild(s)}
+   return;
+  }
   if(page==='search'&&typeof window.openSearch==='function'){window.openSearch();return}
   if(page==='prayerQibla'){
    callGo('prayer');
