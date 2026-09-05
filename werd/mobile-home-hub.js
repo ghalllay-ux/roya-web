@@ -7,6 +7,7 @@
   ['🎙️','التسميع بالصوت','سمّع واحصل على تحليل فوري','recitationTest'],
   ['🌿','الأذكار','الصباح والمساء','adhkar'],
   ['🤲','حصن المسلم','الأدعية والأذكار','hisn'],
+  ['🛡️','الرقية الشرعية','آيات وأدعية الرقية','ruqyah'],
   ['◔','الورد اليومي','هدفك وتقدمك','plan'],
   ['📗','الختمة','متابعة الختمة','khatma'],
   ['📿','المسبحة','التسبيح والعداد','tasbih'],
@@ -25,6 +26,7 @@
   if(page==='mushaf'&&typeof window.openMushaf==='function'){window.openMushaf();return}
   if(page==='memorizationHub'&&typeof window.openWerdMemorizationHub==='function'){window.openWerdMemorizationHub();return}
   if(page==='recitationTest'&&typeof window.openWerdRecitationTest==='function'){window.openWerdRecitationTest();return}
+  if(page==='ruqyah'&&typeof window.openWerdRuqyah==='function'){window.openWerdRuqyah();return}
   if(page==='search'&&typeof window.openSearch==='function'){window.openSearch();return}
   if(page==='prayerQibla'){
    callGo('prayer');
